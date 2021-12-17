@@ -118,6 +118,7 @@ class TabbedJFrame : JFrame() {
             /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
+//            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
             try {
                 for (info in UIManager.getInstalledLookAndFeels()) {
                     if ("Nimbus" == info.name) {
@@ -137,6 +138,7 @@ class TabbedJFrame : JFrame() {
             //</editor-fold>
 
             /* Create and display the form */EventQueue.invokeLater {
+
                 Catalog.initialize()
                 TabbedJFrame().isVisible = true
             }
