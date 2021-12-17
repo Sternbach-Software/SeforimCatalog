@@ -38,17 +38,7 @@ class FindSeferByNameJPanel : JPanel() {
             override fun keyReleased(e: KeyEvent?) {
 
                 val constraint = seferNameTextField!!.text
-                println("Key released, constraint=$constraint, list size: ${objects.size}")
-                val newList = Collections.synchronizedList(mutableListOf<CatalogEntry>())
-                Catalog
-                    .objects
-                    .parallelStream()
-                    .filter { it.seferName.contains(constraint) }
-                    .forEach { newList.add(it) }
-                objects.clear()
-                objects.addAll(newList)
-                (table!!.model as AbstractTableModel).fireTableDataChanged()
-                println("List updated, size: ${objects.size}")
+                filterList(constraint)
             }
         }
 
@@ -144,14 +134,28 @@ class FindSeferByNameJPanel : JPanel() {
         override fun isCellEditable(row: Int, col: Int): Boolean {
             return false
         }
-    }
+    }.also { tableModel = it }
 
     // Variables declaration - do not modify                     
     private var jLabel1: JLabel? = null
     private var jScrollPane1: JScrollPane? = null
-    private var seferNameTextField: JTextField? = null
-    private var table: JTable? = null // End of variables declaration                   
+    var seferNameTextField: JTextField? = null
+    var table: JTable? = null // End of variables declaration
+    var tableModel: AbstractTableModel? = null // End of variables declaration
 
+    fun filterList(constraint: String) {
+        println("Key released, constraint=$constraint, list size: ${objects.size}")
+        val newList = Collections.synchronizedList(mutableListOf<CatalogEntry>())
+        Catalog
+            .objects
+            .parallelStream()
+            .filter { it.seferName.contains(constraint) }
+            .forEach { newList.add(it) }
+        objects.clear()
+        objects.addAll(newList)
+        (table!!.model as AbstractTableModel).fireTableDataChanged()
+        println("List updated, size: ${objects.size}")
+    }
     /**
      * Creates new form FindSeferByName
      */

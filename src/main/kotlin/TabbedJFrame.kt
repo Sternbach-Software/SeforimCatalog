@@ -37,6 +37,8 @@ class TabbedJFrame : JFrame() {
 
         refreshDatabaseButton!!.addActionListener {
             Catalog.refreshObjects()
+//            findSeferByNameJPanel1!!.seferNameTextField!!.text = ""
+//            findSeferByNameJPanel1!!.tableModel!!.fireTableDataChanged()
         }
 
         val layout = GroupLayout(contentPane)
