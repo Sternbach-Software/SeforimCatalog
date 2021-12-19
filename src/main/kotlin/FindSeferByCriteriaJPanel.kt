@@ -10,6 +10,6 @@ class FindSeferByCriteriaJPanel(
         get() = Catalog.entries.also { println("New list requested") }
     override val listBeingDisplayed: MutableList<Any> = Catalog.entries.toMutableList()
     override val displayingCatalogEntry: Boolean = true
-    override val columns: List<String> = listOf("Shelf", "Name", "Author", "Publisher", "Volume", "Copies", "Category")
+    override val columns: List<String> = listOf("Shelf (מס' מדף)", "Name (שם הספר)", "Author (שם המחבר)", "Publisher (הוצאה)", "Volume (כרך)", "Copies (מס' עתי')", "Category (קטיגורי)")
     override fun getCriteria(entry: CatalogEntry): String = getCriteriaLambda(entry)
 }

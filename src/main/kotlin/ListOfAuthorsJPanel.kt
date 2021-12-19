@@ -1,4 +1,4 @@
-class ListOfAuthorsJPanel : SearchableTableJPanel("Enter name of author - $alternateSpellingInstructions") {
+class ListOfAuthorsJPanel : SearchableTableJPanel("Enter name of author:") {
     override val originalCollection: Collection<Any>
         get() = Catalog
             .entries

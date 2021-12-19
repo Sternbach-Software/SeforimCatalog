@@ -1,3 +1,4 @@
+import java.awt.Component
 import java.awt.Font
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
@@ -5,7 +6,9 @@ import java.util.*
 import javax.swing.*
 import javax.swing.table.AbstractTableModel
 import javax.swing.table.DefaultTableCellRenderer
+import javax.swing.table.TableCellRenderer
 import javax.swing.table.TableRowSorter
+
 
 abstract class SearchableTableJPanel(
     private val searchPhrase: String
@@ -57,6 +60,21 @@ abstract class SearchableTableJPanel(
         val rightToLeftAlignmentRenderer = DefaultTableCellRenderer()
         rightToLeftAlignmentRenderer.horizontalAlignment = JLabel.RIGHT
         table.columnModel.columns.asIterator().forEach { it.cellRenderer = rightToLeftAlignmentRenderer }
+        table.tableHeader.defaultRenderer = object : TableCellRenderer {
+            var renderer: DefaultTableCellRenderer = table.tableHeader.defaultRenderer as DefaultTableCellRenderer
+            override fun getTableCellRendererComponent(
+                table: JTable, value: Any, isSelected: Boolean,
+                hasFocus: Boolean, row: Int, col: Int
+            ): Component {
+                return renderer.getTableCellRendererComponent(
+                    table, value, isSelected, hasFocus, row, col
+                )
+            }
+
+            init {
+                renderer.horizontalAlignment = JLabel.RIGHT
+            }
+        }
         table.font = Font("Default", 0, 14)
         jScrollPane1.setViewportView(table)
         seferNameTextField.addKeyListener(object : KeyListener {

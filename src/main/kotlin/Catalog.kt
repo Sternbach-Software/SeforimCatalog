@@ -22,7 +22,7 @@ object Catalog {
                 )
             )
     init {
-        file = File("C:\\Users\\shmue\\Downloads\\Shmuel Sternbach's Copy of Catalog  - Catalog.tsv")
+        file = File(System.getProperty("user.dir")).walk().find { it.extension == "tsv" }!!
         refreshObjects()
     }
 
@@ -47,11 +47,14 @@ object Catalog {
                 split[11],
                 split[12]
             ).let {
-                if(it.seferName.isBlank() && it.everythingExceptNameIsBlank()) null else
-                    if(containsEnglish(it.seferName)) {
+                when {
+                    it.everythingIsBlank() -> null
+                    containsEnglish(it.seferName) -> {
                         listOfEnglishSeforim.add(it)
                         null
-                    } else it
+                    }
+                    else -> it
+                }
             }
         }.let {
             it + listOfEnglishSeforim

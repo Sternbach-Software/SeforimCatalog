@@ -31,16 +31,18 @@ data class CatalogEntry(
     val category: String,
     val shelfNum: String,
 ) {
-    fun everythingExceptNameIsBlank() = numberNotSure.isBlank() &&
-    miyunNum.isBlank() &&
-    author.isBlank() &&
-    publisher.isBlank() &&
-    volumeNum.isBlank() &&
-    numCopies.isBlank() &&
-    dateAdded.isBlank() &&
-    initials.isBlank() &&
-    needsBinding.isBlank() &&
-    comments.isBlank() &&
-    category.isBlank() &&
-    shelfNum.isBlank()
+    fun everythingIsBlank() =
+        seferName.isBlank() &&
+                numberNotSure.isBlank() &&
+                miyunNum.isBlank() &&
+                author.isBlank() &&
+                publisher.isBlank() &&
+                volumeNum.isBlank() &&
+                numCopies.isBlank() &&
+                dateAdded.isBlank() &&
+                initials.isBlank() &&
+                needsBinding.isBlank() &&
+                comments.isBlank() &&
+                category.isBlank() &&
+                shelfNum.isBlank()
 }
