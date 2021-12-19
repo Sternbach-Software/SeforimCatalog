@@ -28,7 +28,7 @@ object Catalog {
 
     fun refreshObjects() {
         val lines = Files.readAllLines(file.toPath()).toMutableList()
-        println("line removed: ${lines.removeAt(0)}")
+        lines.removeAt(0)
         val listOfEnglishSeforim = mutableListOf<CatalogEntry>()
         entries = lines.mapNotNull {
             val split = it.split("\t")

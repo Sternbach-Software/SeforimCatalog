@@ -190,9 +190,7 @@ abstract class SearchableTableJPanel(
     lateinit var table: JTable
     lateinit var tableModel: AbstractTableModel
     fun filterList(constraint: String) {
-        println("Key released, constraint=$constraint, list size: ${listBeingDisplayed.size}")
         if(constraint.isBlank()) {
-            println("Constraint is blank, resetting list.")
             updateList(originalCollection)
             return
         }
