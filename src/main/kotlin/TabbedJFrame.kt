@@ -7,13 +7,9 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import javax.swing.*
 
-/**
- *
- * @author shmue
- */
-class TabbedJFrame : JFrame() {
-    val s = "For support, contact ssternbach@torahdownloads.com"
+val alternateSpellingInstructions = "separate alternate search phrases/spellings with \"#\" (e.g. \"phrase1#phrase2\")"
 
+class TabbedJFrame : JFrame() {
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -22,23 +18,41 @@ class TabbedJFrame : JFrame() {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
     private fun initComponents() {
         jTabbedPane1 = JTabbedPane()
-        findSeferByNameJPanel1 = FindSeferByNameJPanel()
         refreshDatabaseButton = JButton()
         jLabel1 = JLabel()
         jLabel2 = JLabel()
         jLabel3 = JLabel()
         defaultCloseOperation = EXIT_ON_CLOSE
-        jTabbedPane1!!.addTab("Search by name", findSeferByNameJPanel1)
-        refreshDatabaseButton!!.text = "Refresh Database"
+        jTabbedPane1.addTab(
+            "Seforim by name",
+            (FindSeferByCriteriaJPanel("Enter name of sefer - $alternateSpellingInstructions:") { it.seferName }).initComponents()
+        )
+        jTabbedPane1.addTab(
+            "Seforim by author",
+            (FindSeferByCriteriaJPanel("Enter author of sefer - $alternateSpellingInstructions:") { it.author }).initComponents()
+        )
+        jTabbedPane1.addTab(
+            "Seforim by category",
+            (FindSeferByCriteriaJPanel("Enter category of sefer - $alternateSpellingInstructions:") { it.category }).initComponents()
+        )
+        jTabbedPane1.addTab(
+            "Authors",
+            ListOfAuthorsJPanel().initComponents()
+        )
+        jTabbedPane1.addTab(
+            "Categories",
+            ListOfCategoriesJPanel().initComponents()
+        )
+        refreshDatabaseButton.text = "Refresh Database"
         val programVersion = "1.0.0"
-        jLabel1!!.text = "Program version: $programVersion"
-        jLabel2!!.text = "Database last updated: ${Catalog.lastModificationDate()}"
-        jLabel3!!.text = "For support, please contact ssternbach@torahdownloads.com"
+        val getLastUpdateString = { "Database last updated: ${Catalog.lastModificationDate()}"}
+        jLabel1.text = "Program version: $programVersion"
+        jLabel2.text = getLastUpdateString()
+        jLabel3.text = "For tech support, please contact ssternbach@torahdownloads.com; for catalog support, please contact Asher Lewis"
 
-        refreshDatabaseButton!!.addActionListener {
+        refreshDatabaseButton.addActionListener {
             Catalog.refreshObjects()
-//            findSeferByNameJPanel1!!.seferNameTextField!!.text = ""
-//            findSeferByNameJPanel1!!.tableModel!!.fireTableDataChanged()
+            jLabel2.text = getLastUpdateString()
         }
 
         val layout = GroupLayout(contentPane)
@@ -99,13 +113,12 @@ class TabbedJFrame : JFrame() {
         pack()
     } // </editor-fold>                        
 
-    // Variables declaration - do not modify                     
-    private var findSeferByNameJPanel1: FindSeferByNameJPanel? = null
-    private var refreshDatabaseButton: JButton? = null
-    private var jLabel1: JLabel? = null
-    private var jLabel2: JLabel? = null
-    private var jLabel3: JLabel? = null
-    private var jTabbedPane1: JTabbedPane? = null // End of variables declaration
+    private lateinit var findSeferByNameJPanel: FindSeferByCriteriaJPanel
+    private lateinit var refreshDatabaseButton: JButton
+    private lateinit var jLabel1: JLabel
+    private lateinit var jLabel2: JLabel
+    private lateinit var jLabel3: JLabel
+    private lateinit var jTabbedPane1: JTabbedPane
 
     companion object {
         /**

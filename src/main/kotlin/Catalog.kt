@@ -1,14 +1,12 @@
 import java.io.File
 import java.nio.file.Files
 import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.*
 
 object Catalog {
-    lateinit var objects: List<CatalogEntry>
+    lateinit var entries: List<CatalogEntry>
     val file: File
     fun initialize(){}
     fun lastModificationDate() =
@@ -34,7 +32,7 @@ object Catalog {
         val lines = Files.readAllLines(file.toPath()).toMutableList()
         println("line removed: ${lines.removeAt(0)}")
         val listOfEnglishSeforim = mutableListOf<CatalogEntry>()
-        objects = lines.mapNotNull {
+        entries = lines.mapNotNull {
             val split = it.split("\t")
             CatalogEntry(
                 split[0],

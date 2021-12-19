@@ -31,11 +31,6 @@ data class CatalogEntry(
     val category: String,
     val shelfNum: String,
 ) {
-    val split = author.split(",\\s?".toRegex())
-    val authorFirstName: String
-        get() = split[0]
-    val authorLastName: String
-        get() = split[1]
     fun everythingExceptNameIsBlank() = numberNotSure.isBlank() &&
     miyunNum.isBlank() &&
     author.isBlank() &&
