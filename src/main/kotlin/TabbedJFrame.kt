@@ -67,7 +67,7 @@ class TabbedJFrame : JFrame() {
             "Categories",
             ListOfCategoriesJPanel().initComponents()
         )
-        refreshDatabaseButton.text = "Refresh Database"
+        refreshDatabaseButton.text = "Refresh Catalog"
         val programVersion = "1.0.0"
         val getLastUpdateString = { "Database last updated: ${Catalog.lastModificationDate()}"}
         jLabel1.text = "Program version: $programVersion"
