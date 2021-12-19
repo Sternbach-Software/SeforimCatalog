@@ -18,19 +18,28 @@ abstract class SearchableTableJPanel(
     var _constraint: Regex? = null //singleton pattern
     var _searchPhrase: String? = null
     /*only gets regex when the constraint hasn't changed, so that it doesn't create a new regex for every list item*/
-    fun getConstraint(constraint: String) =
-        (if(constraint == _searchPhrase /*already got regex*/) _constraint /*use "old" regex*/ else /*get new regex*/ null) ?: constraint
-            .replace("#", "|")
-            .toRegex(/*RegexOption.IGNORE_CASE*/)
-            .also {
-                _constraint = it
-                _searchPhrase = constraint
-                println("Pattern of constraint: $it")
-            }
+    private fun getConstraintRegex(constraint: String): Regex {
+        if(constraint == _searchPhrase /*already got regex*/) return _constraint!! /*use "old" regex*/
+        /*get new regex*/
+        lateinit var regex: Regex
+        val replaceHashWithOr = constraint.replace("#", "|")
+        regex = try {
+            replaceHashWithOr.toRegex(RegexOption.IGNORE_CASE) //if it is a valid regex, go for it
+        } catch (t: Throwable) { //probably invalid pattern
+            fun String.escapeRegexChars() =
+                listOf("\\","(",")","[","]","{","}","?","+","*")
+                    .fold(this){acc: String, b: String -> acc.replace(b, "\\$b") }
+            replaceHashWithOr.escapeRegexChars().toRegex(RegexOption.IGNORE_CASE)
+        }
+        _constraint = regex
+        _searchPhrase = constraint
+        println("Pattern of constraint: $regex")
+        return regex
+    }
 
     open fun getCriteria(entry: CatalogEntry): String = ""//has default implementation so that JPanels which don't contain CatalogEntrys (e.g. list of authors) don't need to implement it
-    open fun matchesConstraint(element: String, constraint: String) = element.contains(getConstraint(constraint)).also {/* println("matchesConstraint(element: String) called")*/ }
-    open fun matchesConstraint(element: CatalogEntry, constraint: String) = getCriteria(element).contains(getConstraint(constraint)).also { /*println("matchesConstraint(element: CatalogEntry) called")*/ }
+    open fun matchesConstraint(element: String, constraint: String) = element.contains(getConstraintRegex(constraint))
+    open fun matchesConstraint(element: CatalogEntry, constraint: String) = getCriteria(element).contains(getConstraintRegex(constraint))
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
