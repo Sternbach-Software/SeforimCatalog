@@ -43,6 +43,7 @@ abstract class SearchableTableJPanel(
         jScrollPane1 = JScrollPane()
         table = JTable()
         jLabel1.text = searchPhrase
+        jLabel2 = JLabel()
         table.model = catalogModel()
         val rightToLeftAlignmentRenderer = DefaultTableCellRenderer()
         rightToLeftAlignmentRenderer.horizontalAlignment = JLabel.RIGHT
@@ -73,6 +74,7 @@ abstract class SearchableTableJPanel(
         rowSorter.setComparator(columnIndexToSort, comparator)
         table.rowSorter = rowSorter
         rowSorter.sortKeys = listOf(RowSorter.SortKey(columnIndexToSort, SortOrder.ASCENDING))
+        jLabel2.text = "Results: ${listBeingDisplayed.size}"
 
         val layout = GroupLayout(this)
         setLayout(layout)
@@ -89,6 +91,11 @@ abstract class SearchableTableJPanel(
                                         .addComponent(jLabel1)
                                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(seferNameTextField)
+                                )
+                                .addGroup(
+                                    layout.createSequentialGroup()
+                                        .addComponent(jLabel2)
+                                        .addGap(0, 0, Short.MAX_VALUE.toInt())
                                 )
                         )
                         .addContainerGap()
@@ -109,6 +116,8 @@ abstract class SearchableTableJPanel(
                                     GroupLayout.PREFERRED_SIZE
                                 )
                         )
+                        .addGap(1, 1, 1)
+                        .addComponent(jLabel2)
                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane1, GroupLayout.DEFAULT_SIZE, 299, Short.MAX_VALUE.toInt())
                         .addContainerGap()
@@ -148,26 +157,20 @@ abstract class SearchableTableJPanel(
     }.also { tableModel = it }
 
     private lateinit var jLabel1: JLabel
+    private lateinit var jLabel2: JLabel
     private lateinit var jScrollPane1: JScrollPane
     lateinit var seferNameTextField: JTextField
     lateinit var table: JTable
     lateinit var tableModel: AbstractTableModel
-    var oldList = originalCollection
     fun filterList(constraint: String) {
         println("Key released, constraint=$constraint, list size: ${listBeingDisplayed.size}")
         if(constraint.isBlank()) {
             println("Constraint is blank, resetting list.")
-            listBeingDisplayed.clear()
-            listBeingDisplayed.addAll(originalCollection)
-            (table.model as AbstractTableModel).fireTableDataChanged()
+            updateList(originalCollection)
             return
         }
         val newList = Collections.synchronizedList(mutableListOf<Any>())
         originalCollection
-            .also { if(it != oldList) {
-                println("Original list changed: ${it.size}, ${oldList.size}")
-                oldList = it
-            } }
             .parallelStream()
             .filter {
                 when (it) {
@@ -180,9 +183,13 @@ abstract class SearchableTableJPanel(
 //                println("Item being added: $it")
                 newList.add(it)
             }
+        updateList(newList)
+    }
+
+    private fun updateList(newList: Collection<Any>) {
         listBeingDisplayed.clear()
         listBeingDisplayed.addAll(newList)
         (table.model as AbstractTableModel).fireTableDataChanged()
-        println("List updated, size: ${listBeingDisplayed.size}")
+        jLabel2.text = "Results: ${listBeingDisplayed.size}"
     }
 }

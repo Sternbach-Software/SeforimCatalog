@@ -17,9 +17,7 @@ object Catalog {
                     .ofEpochMilli(
                         file
                             .lastModified()
-                    ).also {
-                        println("Instant: $it")
-                    },
+                    ),
                     ZoneId.systemDefault()
                 )
             )
