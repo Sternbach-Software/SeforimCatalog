@@ -36,7 +36,7 @@ abstract class SearchableTableJPanel(
         }
         _constraint = regex
         _searchPhrase = constraint
-        println("Pattern of constraint: $regex")
+        //println("Pattern of constraint: $regex")
         return regex
     }
 
