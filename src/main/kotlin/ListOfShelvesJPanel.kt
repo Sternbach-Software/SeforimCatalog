@@ -1,4 +1,4 @@
-class ListOfCategoriesJPanel : SearchableTableJPanel("Enter name of category:") {
+class ListOfShelvesJPanel : SearchableTableJPanel("Enter number of shelf:") {
     override val originalCollection: Collection<Any>
         get() = Catalog
             .entries
