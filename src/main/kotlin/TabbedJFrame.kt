@@ -60,12 +60,28 @@ class TabbedJFrame : JFrame() {
             (FindSeferByCriteriaJPanel("Enter category of sefer:") { it.category }).initComponents()
         )
         jTabbedPane1.addTab(
+            "Seforim by publisher",
+            (FindSeferByCriteriaJPanel("Enter publisher of sefer:") { it.publisher }).initComponents()
+        )
+        jTabbedPane1.addTab(
+            "Seforim by shelf",
+            (FindSeferByCriteriaJPanel("Enter shelf of sefer:") { it.shelfNum }).initComponents()
+        )
+        jTabbedPane1.addTab(
             "Authors",
             ListOfAuthorsJPanel().initComponents()
         )
         jTabbedPane1.addTab(
             "Categories",
             ListOfCategoriesJPanel().initComponents()
+        )
+        jTabbedPane1.addTab(
+            "Publishers",
+            ListOfPublishersJPanel().initComponents()
+        )
+        jTabbedPane1.addTab(
+            "Shelves",
+            ListOfShelvesJPanel().initComponents()
         )
         refreshDatabaseButton.text = "Refresh Catalog"
         val programVersion = "1.0.0"
