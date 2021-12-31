@@ -19,6 +19,8 @@ class TabbedJFrame : JFrame() {
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
     private fun initComponents() {
+        //TODO add tab called "Tips"
+        //TODO when results are empty, add result CatalogEntry("No results","No results",...) and just string
         defaultCloseOperation = EXIT_ON_CLOSE
         jTabbedPane1 = JTabbedPane()
         refreshDatabaseButton = JButton()
