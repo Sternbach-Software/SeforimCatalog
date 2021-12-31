@@ -35,7 +35,7 @@ class TabbedJFrame : JFrame() {
         jTextArea1.lineWrap = true
         jTextArea1.rows = 3
         jTextArea1.text =
-            "For tech support, please contact ssternbach@torahdownloads.com; for catalog support, please contact Asher Lewis.\nTips: \n        1. Clicking on column headers once will sort the list by that criterion in ascending order, clicking again will sort in descending order. \n        2. Clicking on a cell (or dragging to select multiple cells) and clicking Ctrl+C will copy the cell's content to the clipboard (pressing Ctrl+V will paste the content). \n        3. Separating alternate search phrases or spellings with \"#\" (e.g. \"phrase1#phrase2\") will return results matching any of the phrases. \n        4. Dragging the right edge of a column header will resize the column."
+            "For tech support, please contact ssternbach@torahdownloads.com; for catalog support, please contact Asher Lewis.\nTips: \n        1. Clicking on column headers once will sort the list by that criterion in ascending order, clicking again will sort in descending order. \n        2. Clicking on a cell (or dragging to select multiple cells) and clicking Ctrl+C will copy the cell's content to the clipboard (pressing Ctrl+V will paste the content). \n        3. Separating alternate search phrases or spellings with \"#\" (e.g. \"phrase1#phrase2\") will return results matching any of the phrases. \n        4. Dragging the right edge of a column header will resize the column. \n        5. A quick way to find seforim by a specific author or category when you know the name of the author or category you are looking for is to search the list of authors to find the author's exact spelling in the catalog, click on the author's name to select the cell, press Ctrl+C to copy the name, then press Ctrl+V in the search bar in the \"Seforim by author\" tab to filter by author."
         jTextArea1.wrapStyleWord = true
         jTextArea1.border = BorderFactory.createEmptyBorder(8, 8, 8, 8)
         jTextArea1.highlighter = null
@@ -62,6 +62,14 @@ class TabbedJFrame : JFrame() {
             (FindSeferByCriteriaJPanel("Enter category of sefer:") { it.category }).initComponents()
         )
         jTabbedPane1.addTab(
+            "Seforim by publisher",
+            (FindSeferByCriteriaJPanel("Enter publisher of sefer:") { it.publisher }).initComponents()
+        )
+        jTabbedPane1.addTab(
+            "Seforim by shelf",
+            (FindSeferByCriteriaJPanel("Enter shelf of sefer:") { it.shelfNum }).initComponents()
+        )
+        jTabbedPane1.addTab(
             "Authors",
             ListOfAuthorsJPanel().initComponents()
         )
@@ -69,7 +77,15 @@ class TabbedJFrame : JFrame() {
             "Categories",
             ListOfCategoriesJPanel().initComponents()
         )
-        refreshDatabaseButton.text = "Refresh Database"
+        jTabbedPane1.addTab(
+            "Publishers",
+            ListOfPublishersJPanel().initComponents()
+        )
+        jTabbedPane1.addTab(
+            "Shelves",
+            ListOfShelvesJPanel().initComponents()
+        )
+        refreshDatabaseButton.text = "Refresh Catalog"
         val programVersion = "1.0.0"
         val getLastUpdateString = { "Database last updated: ${Catalog.lastModificationDate()}"}
         jLabel1.text = "Program version: $programVersion"
