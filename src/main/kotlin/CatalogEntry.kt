@@ -1,8 +1,3 @@
-import kotlin.Throws
-import java.io.IOException
-import kotlin.jvm.JvmStatic
-import java.io.File
-import java.nio.file.Files
 /*5319
 מס' מיון
 שם הספר

@@ -1,3 +1,6 @@
+import Catalog.containsEnglish
+import Catalog.containsHebrew
+import lemmatizer.hebmorph.tests.LemmatizerTest
 import java.awt.Component
 import java.awt.Font
 import java.awt.event.KeyEvent
@@ -40,9 +43,57 @@ abstract class SearchableTableJPanel(
         return regex
     }
 
+    val specialChars = "\\s.,-·;:'\"\\[\\]()!?<>&#\\d"
     open fun getCriteria(entry: CatalogEntry): String = ""//has default implementation so that JPanels which don't contain CatalogEntrys (e.g. list of authors) don't need to implement it
     open fun matchesConstraint(element: String, constraint: String) = element.contains(getConstraintRegex(constraint))
-    open fun matchesConstraint(element: CatalogEntry, constraint: String) = getCriteria(element).contains(getConstraintRegex(constraint))
+    open fun matchesConstraint(element: CatalogEntry, constraint: String): Boolean {
+        println("matchesConstraint(element: CatalogEntry, constraint: String")
+        if(constraint.isBlank()) return true
+        val criteria = getCriteria(element)
+        val criteriaContainsHebrew = criteria.containsHebrew()
+        println("Criteria is hebrew: $criteriaContainsHebrew")
+        val constraintContainsHebrew = constraint.containsHebrew()
+        println("Constraint is hebrew: $constraintContainsHebrew")
+        if(criteria.isBlank()) return false
+        //23.6	הקטן והלכותיו - חינוך · דינים · מנהגים -- א	רקובסקי, ברוך	הוצאת נתיב הברכה	א	1	הלכה - שונות
+        return if (constraintContainsHebrew || criteriaContainsHebrew) { //contains hebrew
+            val lemmatizedListConstraint = LemmatizerTest.getLemmatizedList(constraint, true, true)
+            val lemmatizedListCriteria = LemmatizerTest.getLemmatizedList(criteria, true, true)
+            println("Constraint: \n$constraint\nLematized constraint:${lemmatizedListConstraint}")
+            println("Criteria: \n$criteria\nLematized criteria:${lemmatizedListCriteria}")
+            lemmatizedListCriteria.any { it1 ->
+                lemmatizedListConstraint.any {
+                    //TODO make checkboxes:
+                    val onlyMatchWholeShoresh = true//matches: "לימד" with "מלמד", criteria.equals(lemma),
+                    val fuzzyMatch = true//matches: "יות" with "חרב פיפיות", criteria.startsWith(lemma) || criteria.endsWith(lemma
+                    val fuzzierMatch = true//criteria.contains(constraint)
+
+                    //Consider the following cases:
+                    //Case #1: "יות" as the constraint and criteria being "חרב פיפיות"
+                    //Case #2: "t" as the constraint and the criteria being	"טמוני חול - Chullin Illuminated"
+                    // ^ do we want the "t" to find illuminated?
+                    //Case #3: "מד" as the constraint and the criteria being	"במדבר chumash "
+                    //try to match lemmas, which won't work for either of the above cases
+                    var matches =
+                        (it.equals(it1)).also { isTrue -> if(isTrue) println("\"$it\".equals(\"$it1\")") } ||
+                                it1.equals(it).also { isTrue -> if(isTrue) println("\"$it1\".equlas(\"$it\")") }
+                    //if either contain english and it didn't match yet, try to see if it contains
+                    if(!matches && (it.containsEnglish() || it1.containsEnglish())) {
+                        matches = matches || (it.contains(it1)).also { isTrue -> if(isTrue) println("\"$it\".contains(\"$it1\")") } ||
+                                it1.contains(it).also { isTrue -> if(isTrue) println("\"$it1\".contains(\"$it\")") }
+                    }
+                    matches
+                }
+            }
+        } else {
+            println("Contains english english")
+            criteria.contains(getConstraintRegex(constraint))
+        }/*
+        else if((constraintIsHebrew && !criteriaIsHebrew) || (!constraintIsHebrew *//*implied && criteriaIsHebrew*//*)) {
+            println("They are different languages; returning false")
+            false
+        }*/
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -91,8 +142,8 @@ abstract class SearchableTableJPanel(
 //        table.autoCreateRowSorter = true
         val rowSorter = TableRowSorter(table.model as AbstractTableModel)
         val comparator = kotlin.Comparator<String> { o1, o2 ->
-            val o1ContainsEnglish = Catalog.containsEnglish(o1)
-            val o2ContainsEnglish = Catalog.containsEnglish(o2)
+            val o1ContainsEnglish = o1.containsEnglish()
+            val o2ContainsEnglish = o2.containsEnglish()
             if (o1ContainsEnglish && !o2ContainsEnglish) 1
             else if(!o1ContainsEnglish && o2ContainsEnglish) -1
             else o1.compareTo(o2)
@@ -196,12 +247,18 @@ abstract class SearchableTableJPanel(
         }
         val newList = Collections.synchronizedList(mutableListOf<Any>())
         originalCollection
-            .parallelStream()
+//            .parallelStream()
             .filter {
-                when (it) {
-                    is String -> matchesConstraint(it, constraint) //need to have seperate branches to guarantee the compiler of its type
-                    is CatalogEntry -> matchesConstraint(it, constraint)
-                    else -> TODO("This should never happen, it=$it, it.javaClass = ${it.javaClass}")
+                try {
+                    when (it) {
+                        is String -> matchesConstraint(it, constraint) //need to have seperate branches to guarantee the compiler of its type
+                        is CatalogEntry -> matchesConstraint(it, constraint)
+                        else -> TODO("This should never happen, it=$it, it.javaClass = ${it.javaClass}")
+                    }
+                } catch (t: Throwable) {
+                    t.printStackTrace()
+                    println("Threw error, entry=\"$it\", constraint=\"$constraint\"")
+                    false
                 }
             }
             .forEach {
