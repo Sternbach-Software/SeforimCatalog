@@ -25,7 +25,7 @@ abstract class SearchableTableJPanel(
     var _searchPhrase: String? = null
     /*only gets regex when the constraint hasn't changed, so that it doesn't create a new regex for every list item*/
     private fun getConstraintRegex(constraint: String): Regex {
-        if(constraint == _searchPhrase /*already got regex*/) return _constraint!! /*use "old" regex*/
+        if(constraint == _searchPhrase /*already got regex*/ || constraint.last() == '#'/*user has not typed alternate phrase, so don't search for whitespace (i.e. every entry)*/) return _constraint!! /*use "old" regex*/
         /*get new regex*/
         lateinit var regex: Regex
         val replaceHashWithOr = constraint.replace("#", "|")
