@@ -4,6 +4,7 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.regex.Pattern
 
 object Catalog {
     lateinit var entries: List<CatalogEntry>
@@ -49,7 +50,7 @@ object Catalog {
             ).let {
                 when {
                     it.everythingIsBlank() -> null
-                    containsEnglish(it.seferName) -> {
+                    it.seferName.containsEnglish() -> {
                         listOfEnglishSeforim.add(it)
                         null
                     }
@@ -57,12 +58,28 @@ object Catalog {
                 }
             }
         }.let {
-            it + listOfEnglishSeforim
+            println("Num english with hebrew: ${(it.filter { containsHebrewAndEnglish(it) } + listOfEnglishSeforim.filter { containsHebrewAndEnglish(it) }).map { it.seferName }}")
+            println()
+            println()
+            println()
+            it.shuffled().take(10) + listOfEnglishSeforim.shuffled().take(10).also { println("English seforim: $it") }
         }
     }
-    var _regex: Regex? = null
 
-    fun containsEnglish(string: String): Boolean {
-        return string.contains(_regex ?: "[a-zA-Z]".toRegex().also { _regex = it })
+    private fun containsHebrewAndEnglish(it: CatalogEntry) =
+        it.seferName.containsEnglish() && it.seferName.containsHebrew()
+
+    var _pattern: Pattern? = null
+
+    var hebrewPattern: Regex? = null
+    var englishPattern: Regex? = null
+    fun String.containsHebrew(): Boolean {
+      return contains(hebrewPattern ?: "\\p{InHebrew}".toRegex().also { hebrewPattern = it })
     }
+    fun String.containsEnglish(): Boolean {
+      return contains(englishPattern ?: "\\p{Alpha}".toRegex().also { englishPattern = it })
+    }
+//    fun containsEnglish(string: String): Boolean {
+//        return (_pattern ?: Pattern.compile("[a-zA-Z]").also { _pattern = it }).matcher(string).find()
+//    }
 }
