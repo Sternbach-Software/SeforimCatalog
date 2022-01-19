@@ -62,7 +62,7 @@ object Catalog {
             println()
             println()
             println()
-            it.shuffled().take(10) + listOfEnglishSeforim.shuffled().take(10).also { println("English seforim: $it") }
+            it + listOfEnglishSeforim
         }
     }
 
