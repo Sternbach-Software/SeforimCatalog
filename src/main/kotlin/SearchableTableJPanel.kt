@@ -65,6 +65,7 @@ abstract class SearchableTableJPanel(
         val rightToLeftAlignmentRenderer = DefaultTableCellRenderer()
         rightToLeftAlignmentRenderer.horizontalAlignment = JLabel.RIGHT
         table.columnModel.columns.asIterator().forEach { it.cellRenderer = rightToLeftAlignmentRenderer }
+        table.tableHeader.reorderingAllowed = false
         table.tableHeader.defaultRenderer = object : TableCellRenderer {
             var renderer: DefaultTableCellRenderer = table.tableHeader.defaultRenderer as DefaultTableCellRenderer
             override fun getTableCellRendererComponent(
