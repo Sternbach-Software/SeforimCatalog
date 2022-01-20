@@ -58,10 +58,6 @@ object Catalog {
                 }
             }
         }.let {
-            println("Num english with hebrew: ${(it.filter { containsHebrewAndEnglish(it) } + listOfEnglishSeforim.filter { containsHebrewAndEnglish(it) }).map { it.seferName }}")
-            println()
-            println()
-            println()
             it + listOfEnglishSeforim
         }
     }

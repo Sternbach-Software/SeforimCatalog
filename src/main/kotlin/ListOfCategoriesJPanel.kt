@@ -1,4 +1,4 @@
-class ListOfCategoriesJPanel : SearchableTableJPanel("Enter name of category:") {
+class ListOfCategoriesJPanel : SearchableTableJPanel("Enter name of category$alternatePhrases:") {
     override val originalCollection: Collection<Any>
         get() = Catalog.entries
             .mapTo(mutableSetOf()) { it.category }

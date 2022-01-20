@@ -1,4 +1,4 @@
-class ListOfShelvesJPanel : SearchableTableJPanel("Enter number of shelf:") {
+class ListOfShelvesJPanel : SearchableTableJPanel("Enter number of shelf$alternatePhrases:") {
     override val originalCollection: Collection<Any>
         get() = Catalog.entries
             .mapTo(mutableSetOf()) { it.shelfNum }

@@ -61,6 +61,7 @@ abstract class SearchableTableJPanel(
         jLabel1.text = searchPhrase
         jLabel2 = JLabel()
         table.model = catalogModel()
+        table.autoResizeMode = JTable.AUTO_RESIZE_LAST_COLUMN
         val rightToLeftAlignmentRenderer = DefaultTableCellRenderer()
         rightToLeftAlignmentRenderer.horizontalAlignment = JLabel.RIGHT
         table.columnModel.columns.asIterator().forEach { it.cellRenderer = rightToLeftAlignmentRenderer }
@@ -80,6 +81,8 @@ abstract class SearchableTableJPanel(
             }
         }
         table.font = Font("Default", 0, 14)
+//        table.showHorizontalLines = true
+        table.showVerticalLines = true
         jScrollPane1.setViewportView(table)
         seferNameTextField.addKeyListener(object : KeyListener {
             override fun keyTyped(e: KeyEvent?) {}
@@ -101,7 +104,7 @@ abstract class SearchableTableJPanel(
             else if(!o1ContainsEnglish && o2ContainsEnglish) -1
             else o1.compareTo(o2)
         }
-        val columnIndexToSort = minOf(columns.size - 1, 1)//if only 1 column (e.g. authors), index 0, else "name of sefer" column
+        val columnIndexToSort = if(columns.size - 1 != 0) columns.size - 1 else 0//if only 1 column (e.g. authors), index 0, else "name of sefer" column
         rowSorter.setComparator(columnIndexToSort, comparator)
         table.rowSorter = rowSorter
         rowSorter.sortKeys = listOf(RowSorter.SortKey(columnIndexToSort, SortOrder.ASCENDING))
@@ -170,13 +173,18 @@ abstract class SearchableTableJPanel(
                 if(!displayingCatalogEntry) it else {
                     it as CatalogEntry
                     when(col) {
-                        0 ->  it.shelfNum
-                        1 ->  it.seferName
-                        2 ->  it.author
-                        3 ->  it.publisher
-                        4 ->  it.volumeNum
-                        5 ->  it.numCopies
-                        6 ->  it.category
+                        /*Publisher (הוצאה)",
+Category (קטיגורי)",
+Volume (כרך)",
+Author (שם המחבר)",
+Shelf (מס' מדף)",
+Name (שם הספר)"*/
+                        0 ->  it.publisher
+                        1 ->  it.category
+                        2 ->  it.volumeNum
+                        3 ->  it.author
+                        4 ->  it.shelfNum
+                        5 ->  it.seferName
                         else -> TODO("This should not have happened: getValueAt($row:, $col)")
                     }
                 }

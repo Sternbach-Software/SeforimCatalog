@@ -7,7 +7,7 @@ import javax.swing.*
  *
  * @author shmuel
  */
-class TextJPanel : JPanel() {
+class TextJPanel(val text: String) : JPanel() {
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -22,8 +22,7 @@ class TextJPanel : JPanel() {
         jTextArea1!!.font = Font("Tahoma", 0, 14) // NOI18N
         jTextArea1!!.lineWrap = true
         jTextArea1!!.rows = 3
-        jTextArea1!!.text =
-            "For support, contact ssternbach@torahdownloads.com\n\nTips: \n        1. Clicking on column headers once will sort the list by that criterion in ascending order, clicking again will sort in descending order. \n        2. Clicking on a cell (or dragging to select multiple cells) and clicking Ctrl+C will copy the cell's content to the clipboard (pressing Ctrl+V will paste the content). \n        3. Separating alternate search phrases or spellings with \"#\" (e.g. \"phrase1#phrase2\") will return results matching any of the phrases.\n"
+        jTextArea1!!.text = text
         jTextArea1!!.wrapStyleWord = true
         jTextArea1!!.border = BorderFactory.createEmptyBorder(8, 8, 8, 8)
         jTextArea1!!.highlighter = null

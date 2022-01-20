@@ -1,4 +1,4 @@
-class ListOfPublishersJPanel : SearchableTableJPanel("Enter name of publisher:") {
+class ListOfPublishersJPanel : SearchableTableJPanel("Enter name of publisher$alternatePhrases:") {
     override val originalCollection: Collection<Any>
         get() = Catalog.entries
             .mapTo(mutableSetOf()) { it.publisher }
