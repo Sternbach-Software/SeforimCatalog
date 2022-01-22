@@ -1,6 +1,4 @@
 import Catalog.containsEnglish
-import Catalog.containsHebrew
-import lemmatizer.hebmorph.tests.LemmatizerTest
 import java.awt.Component
 import java.awt.Font
 import java.awt.event.KeyEvent
@@ -91,8 +89,7 @@ abstract class SearchableTableJPanel(
             override fun keyPressed(e: KeyEvent?) {}
 
             override fun keyReleased(e: KeyEvent?) {
-                val constraint = seferNameTextField.text
-                filterList(constraint)
+                filterList(seferNameTextField.text)
             }
         }
         )
