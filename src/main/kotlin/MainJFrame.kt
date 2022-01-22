@@ -46,7 +46,7 @@ class MainJFrame : JFrame() {
         jTabbedPane1!!.addTab("Seforim by name", findSeferByNameJPanel1)
         jTabbedPane1!!.addTab("Seforim by criteria", seforimByCriteriaTabJPanel)
         jTabbedPane1!!.addTab("Criteria", criteriaTabJPanel)
-        jTabbedPane1!!.addTab("Tips (6)", textJPanel1)
+        jTabbedPane1!!.addTab("Tips (5)", textJPanel1)
         jTabbedPane1!!.addTab("Help", textJPanel2)
         jButton1!!.text = "Refresh Database"
         jLabel1!!.text = "Database last updated: 12/13/14 12:40 PM"
