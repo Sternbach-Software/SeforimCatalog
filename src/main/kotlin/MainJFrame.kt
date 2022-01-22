@@ -39,7 +39,7 @@ class MainJFrame : JFrame() {
         )
         textJPanel1 = TextJPanel(TIPS)
         textJPanel2 = TextJPanel("For tech support, please contact ssternbach@torahdownloads.com; for catalog support, please contact Asher Lewis.")
-        jButton1 = JButton()
+        refreshDatabaseButton = JButton()
         jLabel1 = JLabel()
         jLabel2 = JLabel()
         defaultCloseOperation = EXIT_ON_CLOSE
@@ -48,9 +48,16 @@ class MainJFrame : JFrame() {
         jTabbedPane1!!.addTab("Criteria", criteriaTabJPanel)
         jTabbedPane1!!.addTab("Tips (5)", textJPanel1)
         jTabbedPane1!!.addTab("Help", textJPanel2)
-        jButton1!!.text = "Refresh Database"
-        jLabel1!!.text = "Database last updated: 12/13/14 12:40 PM"
+        refreshDatabaseButton!!.text = "Refresh Database"
+
+        val getLastUpdateString = { "Database last updated: ${Catalog.lastModificationDate()}"}
+        jLabel1!!.text = getLastUpdateString()
         jLabel2!!.text = "Program Version: 1.0.0"
+
+        refreshDatabaseButton!!.addActionListener {
+            Catalog.refreshObjects()
+            jLabel1!!.text = getLastUpdateString()
+        }
         val layout = GroupLayout(contentPane)
         contentPane.layout = layout
         layout.setHorizontalGroup(
@@ -63,7 +70,7 @@ class MainJFrame : JFrame() {
                                 .addComponent(jTabbedPane1)
                                 .addGroup(
                                     layout.createSequentialGroup()
-                                        .addComponent(jButton1)
+                                        .addComponent(refreshDatabaseButton)
                                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(jLabel1)
                                         .addPreferredGap(
@@ -86,7 +93,7 @@ class MainJFrame : JFrame() {
                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(
                             layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(jButton1)
+                                .addComponent(refreshDatabaseButton)
                                 .addComponent(jLabel1)
                                 .addComponent(jLabel2)
                         )
@@ -98,7 +105,7 @@ class MainJFrame : JFrame() {
 
     // Variables declaration - do not modify                     
     private var findSeferByNameJPanel1: FindSeferByCriteriaJPanel? = null
-    private var jButton1: JButton? = null
+    private var refreshDatabaseButton: JButton? = null
     private var jLabel1: JLabel? = null
     private var jLabel2: JLabel? = null
     private var jTabbedPane1: JTabbedPane? = null
@@ -143,7 +150,12 @@ class MainJFrame : JFrame() {
             }
             //</editor-fold>
 
-            /* Create and display the form */EventQueue.invokeLater { MainJFrame().isVisible = true }
+            /* Create and display the form */EventQueue.invokeLater {
+                MainJFrame().apply {
+                    title = "Seforim Finder"
+                    isVisible = true
+                }
+            }
         }
     }
 }
