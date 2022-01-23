@@ -47,7 +47,7 @@ class MainJFrame : JFrame() {
         jTabbedPane1!!.addTab("Seforim by criteria", seforimByCriteriaTabJPanel)
         jTabbedPane1!!.addTab("Criteria", criteriaTabJPanel)
         jTabbedPane1!!.addTab("Tips (6)", textJPanel1)
-        jTabbedPane1!!.addTab("Help", textJPanel2)
+        jTabbedPane1!!.addTab("Help", HelpJPanel())
         refreshDatabaseButton!!.text = "Refresh Database"
 
         val getLastUpdateString = { "Database last updated: ${Catalog.lastModificationDate()}"}
