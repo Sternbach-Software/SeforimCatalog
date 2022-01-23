@@ -41,13 +41,13 @@ object Catalog {
                 socket.connect(socketAddress, 3000)
                 return true
             }
-        } catch (unknownHost: UnknownHostException) {
+        } catch (t: Throwable) {
             return false
         }
     }
     fun refreshObjects() {
         if(isHostAvailable("github.com")) {
-            Runtime.getRuntime().exec("cd $catalogDirectory && git pull").waitFor()
+            Runtime.getRuntime().exec("git pull", arrayOf(), catalogDirectory).waitFor()
         }
         val lines = Files.readAllLines(file.toPath()).toMutableList()
         lines.removeAt(0) //remove line with column names
