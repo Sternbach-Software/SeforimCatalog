@@ -49,7 +49,7 @@ class MainJFrame : JFrame() {
         jTabbedPane1!!.addTab("Criteria", criteriaTabJPanel)
         jTabbedPane1!!.addTab("Tips (6)", textJPanel1)
         jTabbedPane1!!.addTab("Help", HelpJPanel())
-        refreshDatabaseButton!!.text = "Refresh Database"
+        refreshDatabaseButton!!.text = "Refresh Catalog"
 
         val getLastUpdateString = { "Database last updated: ${Catalog.lastModificationDate()}"}
         jLabel1!!.text = getLastUpdateString()
