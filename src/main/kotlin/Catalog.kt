@@ -1,4 +1,7 @@
 import java.io.File
+import java.net.InetSocketAddress
+import java.net.Socket
+import java.net.UnknownHostException
 import java.nio.file.Files
 import java.time.Instant
 import java.time.LocalDateTime
@@ -6,6 +9,8 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.regex.Pattern
 
+
+var catalogDirectory = File(System.getProperty("user.dir"))
 object Catalog {
     lateinit var entries: List<CatalogEntry>
     val file: File
@@ -23,11 +28,27 @@ object Catalog {
                 )
             )
     init {
-        file = File(System.getProperty("user.dir")).walk().find { it.extension == "tsv" }!!
+        file = catalogDirectory.walk().find { it.extension == "tsv" }!!
         refreshObjects()
     }
 
+
+    private fun isHostAvailable(hostName: String): Boolean {
+        try {
+            Socket().use { socket ->
+                val port = 80
+                val socketAddress = InetSocketAddress(hostName, port)
+                socket.connect(socketAddress, 3000)
+                return true
+            }
+        } catch (unknownHost: UnknownHostException) {
+            return false
+        }
+    }
     fun refreshObjects() {
+        if(isHostAvailable("github.com")) {
+            Runtime.getRuntime().exec("cd $catalogDirectory && git pull").waitFor()
+        }
         val lines = Files.readAllLines(file.toPath()).toMutableList()
         lines.removeAt(0) //remove line with column names
         val listOfEnglishSeforim = mutableListOf<CatalogEntry>()

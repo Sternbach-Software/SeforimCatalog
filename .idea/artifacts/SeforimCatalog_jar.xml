@@ -1,7 +1,7 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="SeforimCatalog:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/SeforimCatalog_jar</output-path>
-    <root id="archive" name="SeforimCatalog.jar">
+    <root id="archive" name="SeforimFinder.jar">
       <element id="module-output" name="SeforimCatalog" />
       <element id="extracted-dir" path="$KOTLIN_BUNDLED$/lib/kotlin-stdlib.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$KOTLIN_BUNDLED$/lib/kotlin-reflect.jar" path-in-jar="/" />
