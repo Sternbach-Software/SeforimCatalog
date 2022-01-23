@@ -100,7 +100,7 @@ abstract class SearchableTableJPanel(
             val o2ContainsEnglish = o2.containsEnglish()
             if (o1ContainsEnglish && !o2ContainsEnglish) 1
             else if(!o1ContainsEnglish && o2ContainsEnglish) -1
-            else o1.compareTo(o2)
+            else (o1.lowercase()).compareTo(o2.lowercase())
         }
         val columnIndexToSort = if(columns.size - 1 != 0) columns.size - 1 else 0//if only 1 column (e.g. authors), index 0, else "name of sefer" column
         rowSorter.setComparator(columnIndexToSort, comparator)
