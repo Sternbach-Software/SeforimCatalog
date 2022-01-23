@@ -1,3 +1,4 @@
+import java.awt.Color
 import java.awt.Font
 import java.awt.event.HierarchyBoundsListener
 import java.awt.event.HierarchyEvent
@@ -23,6 +24,9 @@ class TextJPanel(val text: String) : JPanel() {
         jTextArea1!!.lineWrap = true
         jTextArea1!!.rows = 3
         jTextArea1!!.text = text
+        jTextArea1!!.background = Color(215, 217, 223)
+        jTextArea1!!.border = null
+        jScrollPane2!!.border = null
         jTextArea1!!.wrapStyleWord = true
         jTextArea1!!.border = BorderFactory.createEmptyBorder(8, 8, 8, 8)
         jTextArea1!!.highlighter = null

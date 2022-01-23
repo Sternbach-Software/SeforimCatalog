@@ -21,9 +21,9 @@ class HelpJPanel : JPanel() {
         jButton2 = JButton()
         jLabel1!!.text =
             "If you need help regarding the structure or content of the catalog, please click \"Catalog inquiry\". Otherwise, click \"Tech support inquiry\"."
-        jButton1!!.text = "Catalog inquiries"
+        jButton1!!.text = "Catalog inquiry"
         jButton1!!.addActionListener { evt -> jButton1ActionPerformed(evt) }
-        jButton2!!.text = "Tech support inquiries"
+        jButton2!!.text = "Tech support inquiry"
         jButton2!!.addActionListener { evt -> jButton2ActionPerformed(evt) }
         val layout = GroupLayout(this)
         this.layout = layout
