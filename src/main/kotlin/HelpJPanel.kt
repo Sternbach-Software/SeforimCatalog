@@ -80,7 +80,7 @@ class HelpJPanel : JPanel() {
     }
 
     private fun jButton1ActionPerformed(evt: ActionEvent) {
-        openPage("https://forms.gle/RqhXc1d2x6CRYyyM7")
+        openPage("https://forms.gle/fykaDv4XQJWJLd5D8")
     }
 
     // Variables declaration - do not modify                     
