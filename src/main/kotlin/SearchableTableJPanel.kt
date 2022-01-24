@@ -211,13 +211,13 @@ Name (שם הספר)"*/
 val needsRegex = constraint.contains('#')
  val regex = if(needsRegex) getConstraintRegex(constraint) else null
 var predicate: (Any) -> Boolean = {}
- if(firstElement is String) 
-if(needsRegex) { predicate = { matchesConstraint((it as String), constraint, regex) } } 
+ if((firstElement is? String) == true) 
+if(needsRegex) { predicate = { matchesConstraint((it as String), constraint, regex!!) } } 
 else { predicate = { matchesConstraintNoRegex((it as String), constraint) } } 
-else if(needsRegex) { predicate = { matchesConstraint((it as CatalogEntry), constraint, regex) } } 
+else if(needsRegex) { predicate = { matchesConstraint((it as CatalogEntry), constraint, regex!!) } } 
 else { predicate = { matchesConstraintNoRegex((it as CatalogEntry), constraint) } } 
  originalCollection
-//            .parallelStream()
+            .parallelStream()
             .filter {
                 try {
                     predicate(it)
