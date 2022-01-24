@@ -17,7 +17,7 @@ val TIPS =
             "        4. Dragging the right edge of a column header will resize the column. \n" +
             "        5. English seforim come after hebrew in the sort order, so sort the \"name\" column by descending to see the English seforim displayed before the hebrew seforim.\n" +
             "        6. A quick way to find seforim by a specific author or category when you know the name of the author or category you are looking for is to search the list of authors to find the author's exact spelling in the catalog, click on the author's name to select the cell, press Ctrl+C to copy the name, then press Ctrl+V in the search bar in the \"Seforim by author\" tab to filter the list for seforim by that author."
-val alternatePhrases = " (combine searches using \"#\", e.g. \"fire#אור#אש\")"
+val alternatePhrases = " (combine searches using \"#\", e.g. \"fire#אור#אש\" or \"(מפרש#מפורש) (סידור#סדור)\")"
 
 class TabbedJFrame : JFrame() {
     /**
