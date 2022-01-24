@@ -47,7 +47,9 @@ object Catalog {
     }
     fun refreshObjects() {
         if(isHostAvailable("github.com")) {
-            Runtime.getRuntime().exec("git pull", arrayOf(), catalogDirectory).waitFor()
+            try {
+                Runtime.getRuntime().exec("git pull", arrayOf(), catalogDirectory).waitFor()
+            } catch (t: Throwable) { t.printStackTrace() }
         }
         val lines = Files.readAllLines(file.toPath()).toMutableList()
         lines.removeAt(0) //remove line with column names
