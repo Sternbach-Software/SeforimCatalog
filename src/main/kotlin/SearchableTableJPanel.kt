@@ -1,5 +1,6 @@
 import Catalog.containsEnglish
 import java.awt.Component
+import java.awt.ComponentOrientation
 import java.awt.Font
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
@@ -69,6 +70,8 @@ abstract class SearchableTableJPanel(
         table = JTable()
         jLabel1.text = searchPhrase
         jLabel2 = JLabel()
+        seferNameTextField.locale = Locale("he")
+        seferNameTextField.componentOrientation = ComponentOrientation.RIGHT_TO_LEFT
         table.model = catalogModel()
         table.autoResizeMode = JTable.AUTO_RESIZE_LAST_COLUMN
         val rightToLeftAlignmentRenderer = DefaultTableCellRenderer()

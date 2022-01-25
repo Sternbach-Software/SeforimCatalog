@@ -13,9 +13,11 @@ val TIPS =
     "Tips: \n" +
             "        1. Clicking on column headers once will sort the list by that criterion in ascending order, clicking again will sort in descending order. \n" +
             "        2. Clicking on a cell (or dragging to select multiple cells) and clicking Ctrl+C will copy the cell's content to the clipboard (pressing Ctrl+V will paste the content). \n" +
-            "        3. Separating alternate search phrases or spellings with \"#\" (e.g. \"phrase1#phrase2\") will return results matching any of the phrases. \n" +
-            "        4. Dragging the right edge of a column header will resize the column. \n" +
-            "        5. English seforim come after hebrew in the sort order, so sort the \"name\" column by descending to see the English seforim displayed before the hebrew seforim.\n" +
+            "        3. Dragging the right edge of a column header will resize the column. \n" +
+            "        4. English seforim come after hebrew in the sort order, so sort the \"name\" column by descending to see the English seforim displayed before the hebrew seforim.\n" +
+            "        \n" +
+            "        5. Separating alternate search phrases or spellings with \"#\" will return results for any of those phrases; for example, \"(מפרש#מפורש) (סידור#סדור)\" will search for all 4 possible variations of that phrase (viz. when the first is malei and the second isn't, vice versa, or when both or neither are malei). Make sure to group spellings in parentheses, because without parentheses \"סידור#סדור מפרש#מפורש\" will search for 3 phrases instead of 4: סידור, סדור מפרש, or מפורש.\n" +
+            "        \n" +
             "        6. A quick way to find seforim by a specific author or category when you know the name of the author or category you are looking for is to search the list of authors to find the author's exact spelling in the catalog, click on the author's name to select the cell, press Ctrl+C to copy the name, then press Ctrl+V in the search bar in the \"Seforim by author\" tab to filter the list for seforim by that author."
 val alternatePhrases = " (combine searches using \"#\", e.g. \"fire#אור#אש\" or \"(מפרש#מפורש) (סידור#סדור)\")"
 
@@ -161,7 +163,6 @@ class TabbedJFrame : JFrame() {
     private lateinit var refreshDatabaseButton: JButton
     private lateinit var jLabel1: JLabel
     private lateinit var jLabel2: JLabel
-    private lateinit var jLabel3: JLabel
     private lateinit var jTabbedPane1: JTabbedPane
     private lateinit var jScrollPane2: JScrollPane
     private lateinit var jTextArea1: JTextArea
