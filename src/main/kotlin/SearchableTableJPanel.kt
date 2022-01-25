@@ -103,7 +103,9 @@ abstract class SearchableTableJPanel(
             override fun keyPressed(e: KeyEvent?) {}
 
             override fun keyReleased(e: KeyEvent?) {
-                filterList(seferNameTextField.text)
+                val text = seferNameTextField.text
+                seferNameTextField.componentOrientation = if(text.firstOrNull()?.toString()?.containsEnglish() == true) ComponentOrientation.LEFT_TO_RIGHT else ComponentOrientation.RIGHT_TO_LEFT
+                filterList(text)
             }
         }
         )
