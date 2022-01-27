@@ -20,6 +20,9 @@ class MainJFrame : JFrame() {
      */
     // <editor-fold defaultstate="expanded" desc="Generated Code">
     private fun initComponents() {
+
+        extendedState = JFrame.MAXIMIZED_BOTH;
+        isUndecorated = false;
         jTabbedPane1 = JTabbedPane()
         findSeferByNameJPanel1 = (FindSeferByCriteriaJPanel("Enter name of sefer$alternatePhrases:") { it.seferName }).initComponents() as FindSeferByCriteriaJPanel
         seforimByCriteriaTabJPanel = TabJPanel(
