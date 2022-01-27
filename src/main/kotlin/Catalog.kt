@@ -15,6 +15,8 @@ var catalogDirectory = File(System.getProperty("user.dir"))
 object Catalog {
     lateinit var entries: List<CatalogEntry>
     val file: File
+    val tableSizes: List<Double>
+        get() = File(catalogDirectory, "sizes.txt").also { it.createNewFile() }.readText().split(",").map { it.toDouble() }
     fun initialize() {}
     fun lastModificationDate() =
         DateTimeFormatter

@@ -12,7 +12,6 @@ import javax.swing.table.AbstractTableModel
 import javax.swing.table.DefaultTableCellRenderer
 import javax.swing.table.TableCellRenderer
 import javax.swing.table.TableRowSorter
-import kotlin.math.roundToInt
 
 
 abstract class SearchableTableJPanel(
@@ -60,7 +59,7 @@ abstract class SearchableTableJPanel(
 
     open fun matchesConstraintNoRegex(element: String, constraint: String): Boolean = element.contains(constraint)
     open fun JTable.setJTableColumnsWidth(
-        vararg percentages: Double
+        percentages: List<Double>
     ) {
         val tablePreferredWidth = this.preferredSize.width
         var total = 0.0
@@ -100,17 +99,11 @@ abstract class SearchableTableJPanel(
         Publisher: 20 chars
         */
 //        repeat(table.columnModel.columnCount) { table.columnModel.getColumn(it).preferredWidth = listOfAverageLengths[it].roundToInt() }
+        val sizes = Catalog.tableSizes
         table.addHierarchyBoundsListener(object : HierarchyBoundsListener {
             override fun ancestorMoved(evt: HierarchyEvent) {}
             override fun ancestorResized(evt: HierarchyEvent) {
-                table.setJTableColumnsWidth(
-                    20.0,//publisher
-                    40.0,//category
-                    2.0,//volume
-                    50.0,//author
-                    1.0,//shelfNum
-                    50.0,//name
-                )
+                table.setJTableColumnsWidth(sizes)
             }
         })
         table.tableHeader.defaultRenderer = object : TableCellRenderer {
