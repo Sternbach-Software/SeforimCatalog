@@ -11,22 +11,25 @@ import java.util.regex.Pattern
 
 
 var catalogDirectory = File(System.getProperty("user.dir"))
+
 object Catalog {
     lateinit var entries: List<CatalogEntry>
     val file: File
-    fun initialize(){}
+    fun initialize() {}
     fun lastModificationDate() =
         DateTimeFormatter
             .ofPattern("MM/dd/yyyy hh:mm a")
             .format(
-                LocalDateTime.ofInstant(Instant
-                    .ofEpochMilli(
-                        file
-                            .lastModified()
-                    ),
+                LocalDateTime.ofInstant(
+                    Instant
+                        .ofEpochMilli(
+                            file
+                                .lastModified()
+                        ),
                     ZoneId.systemDefault()
                 )
             )
+
     init {
         file = catalogDirectory.walk().find { it.extension == "tsv" }!!
         refreshObjects()
@@ -45,11 +48,14 @@ object Catalog {
             return false
         }
     }
+
     fun refreshObjects() {
-        if(isHostAvailable("github.com")) {
+        if (isHostAvailable("github.com")) {
             try {
                 Runtime.getRuntime().exec("git pull", arrayOf(), catalogDirectory).waitFor()
-            } catch (t: Throwable) { t.printStackTrace() }
+            } catch (t: Throwable) {
+                t.printStackTrace()
+            }
         }
         val lines = Files.readAllLines(file.toPath()).toMutableList()
         lines.removeAt(0) //remove line with column names
@@ -69,14 +75,18 @@ object Catalog {
                 split[9],
                 split[10],
                 split[11],
-                split[12].let { 
-val indexOfDot = it.indexOf(".")
-var firstNum = it.substring(0, indexOfDot)
-var secondNum = it.substring(indexOfDot) //includes dot
-if(firstNum.size == 1) { firstNum = "0$firstNum" }
-if(secondNum.size == 2/*include dot*/) { secondNum = ".0$secondNum"
-firstNum + secondNum
-}
+                split[12].let {
+                    val indexOfDot = it.indexOf(".")
+                    var firstNum = it.substring(0, indexOfDot)
+                    var secondNum = it.substring(indexOfDot) //includes dot
+                    if (firstNum.length == 1) {
+                        firstNum = "0$firstNum"
+                    }
+                    if (secondNum.length == 2/*include dot*/) {
+                        secondNum = ".0$secondNum"
+                    }
+                    firstNum + secondNum
+                }
             ).let {
                 when {
                     it.everythingIsBlank() -> null
@@ -100,10 +110,11 @@ firstNum + secondNum
     var hebrewPattern: Regex? = null
     var englishPattern: Regex? = null
     fun String.containsHebrew(): Boolean {
-      return contains(hebrewPattern ?: "\\p{InHebrew}".toRegex().also { hebrewPattern = it })
+        return contains(hebrewPattern ?: "\\p{InHebrew}".toRegex().also { hebrewPattern = it })
     }
+
     fun String.containsEnglish(): Boolean {
-      return contains(englishPattern ?: "\\p{Alpha}".toRegex().also { englishPattern = it })
+        return contains(englishPattern ?: "\\p{Alpha}".toRegex().also { englishPattern = it })
     }
 //    fun containsEnglish(string: String): Boolean {
 //        return (_pattern ?: Pattern.compile("[a-zA-Z]").also { _pattern = it }).matcher(string).find()
