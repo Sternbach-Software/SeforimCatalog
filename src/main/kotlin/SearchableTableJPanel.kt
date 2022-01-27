@@ -26,7 +26,7 @@ abstract class SearchableTableJPanel(
 
     /*only gets regex when the constraint hasn't changed, so that it doesn't create a new regex for every list item*/
     private fun getConstraintRegex(constraint: String): Regex {
-        if (constraint == _searchPhrase /*already got regex*/ || constraint.last() == '#'/*user has not typed alternate phrase, so don't search for whitespace (i.e. every entry)*/) return _constraint!! /*use "old" regex*/
+        if (constraint == _searchPhrase /*already got regex*/ || constraint.lastOrNull() == '#'/*user has not typed alternate phrase, so don't search for whitespace (i.e. every entry)*/) return _constraint!! /*use "old" regex*/
         /*get new regex*/
         lateinit var regex: Regex
         val replaceHashWithOr = constraint.replace("#", "|")
@@ -103,12 +103,12 @@ abstract class SearchableTableJPanel(
             override fun keyPressed(e: KeyEvent?) {}
 
             override fun keyReleased(e: KeyEvent?) {
-                val text = seferNameTextField.text
+                var text = seferNameTextField.text
                 seferNameTextField.componentOrientation =
                     if(text
                             .firstOrNull()
                             ?.toString()
-                            ?.containsEnglish() == true
+                            ?.let { it.containsEnglish() || /*if regex*/ it == "~" } == true
                     ) ComponentOrientation.LEFT_TO_RIGHT
                     else ComponentOrientation.RIGHT_TO_LEFT
                 filterList(text)
@@ -222,14 +222,15 @@ Name (שם הספר)"*/
     lateinit var seferNameTextField: JTextField
     lateinit var table: JTable
     lateinit var tableModel: AbstractTableModel
-    fun filterList(constraint: String) {
+    fun filterList(_constraint: String) {
+        var constraint = _constraint
         if (constraint.isBlank()) {
             updateList(originalCollection)
             return
         }
         val newList = Collections.synchronizedList(mutableListOf<Any>())
         val firstElement = originalCollection.firstOrNull()
-        val needsRegex = constraint.contains('#')
+        val needsRegex = constraint.contains('#') || constraint.startsWith('~').also { if(it) constraint = constraint.removePrefix("~")}
         val regex = if (needsRegex) getConstraintRegex(constraint) else null
         val predicate: (Any) -> Boolean =
             if (firstElement is String)
