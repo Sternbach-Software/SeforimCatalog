@@ -69,7 +69,14 @@ object Catalog {
                 split[9],
                 split[10],
                 split[11],
-                split[12]
+                split[12].let { 
+val indexOfDot = it.indexOf(".")
+var firstNum = it.substring(0, indexOfDot)
+var secondNum = it.substring(indexOfDot) //includes dot
+if(firstNum.size == 1) { firstNum = "0$firstNum" }
+if(secondNum.size == 2/*include dot*/) { secondNum = ".0$secondNum"
+firstNum + secondNum
+}
             ).let {
                 when {
                     it.everythingIsBlank() -> null
