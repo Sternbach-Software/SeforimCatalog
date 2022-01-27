@@ -83,6 +83,11 @@ object Catalog {
         }.let {
             it + listOfEnglishSeforim
         }
+        //for getting length stats
+        //entries.map { it.publisher.length }.let { File("publisher.csv").writeText(it.joinToString(",")) }
+        //entries.map { it.category.length }.let { File("category.csv").writeText(it.joinToString(",")) }
+        //entries.map { it.author.length }.let { File("author.csv").writeText(it.joinToString(",")) }
+        //entries.map { it.seferName.length }.let { File("seferName.csv").writeText(it.joinToString(",")) }
     }
 
     private fun containsHebrewAndEnglish(it: CatalogEntry) =

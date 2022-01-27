@@ -2,6 +2,8 @@ import Catalog.containsEnglish
 import java.awt.Component
 import java.awt.ComponentOrientation
 import java.awt.Font
+import java.awt.event.HierarchyBoundsListener
+import java.awt.event.HierarchyEvent
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
 import java.util.*
@@ -91,23 +93,26 @@ abstract class SearchableTableJPanel(
         rightToLeftAlignmentRenderer.horizontalAlignment = JLabel.RIGHT
         table.columnModel.columns.asIterator().forEach { it.cellRenderer = rightToLeftAlignmentRenderer }
         table.tableHeader.reorderingAllowed = false
-//        val listOfAverageLengths = listOf(
-//            Catalog.entries.map { it.publisher.length }.average(),
-//            Catalog.entries.map { it.category.length }.average(),
-//            1.0,//volumes
-//            Catalog.entries.map { it.author.length }.average(),
-//            Catalog.entries.map { it.shelfNum.length }.average(),
-//            1.0
-//        )
+        /*
+        Category: 40 chars
+        Author: 50 chars
+        Name: 50 chars
+        Publisher: 20 chars
+        */
 //        repeat(table.columnModel.columnCount) { table.columnModel.getColumn(it).preferredWidth = listOfAverageLengths[it].roundToInt() }
-        table.setJTableColumnsWidth(
-            10.0,
-            5.0,
-            1.0,
-            5.0,
-            1.0,
-            78.0,
-        )
+        table.addHierarchyBoundsListener(object : HierarchyBoundsListener {
+            override fun ancestorMoved(evt: HierarchyEvent) {}
+            override fun ancestorResized(evt: HierarchyEvent) {
+                table.setJTableColumnsWidth(
+                    20.0,//publisher
+                    40.0,//category
+                    2.0,//volume
+                    50.0,//author
+                    1.0,//shelfNum
+                    50.0,//name
+                )
+            }
+        })
         table.tableHeader.defaultRenderer = object : TableCellRenderer {
             var renderer: DefaultTableCellRenderer = table.tableHeader.defaultRenderer as DefaultTableCellRenderer
             override fun getTableCellRendererComponent(
