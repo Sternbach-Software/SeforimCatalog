@@ -10,6 +10,7 @@ import javax.swing.table.AbstractTableModel
 import javax.swing.table.DefaultTableCellRenderer
 import javax.swing.table.TableCellRenderer
 import javax.swing.table.TableRowSorter
+import kotlin.math.roundToInt
 
 
 abstract class SearchableTableJPanel(
@@ -56,7 +57,19 @@ abstract class SearchableTableJPanel(
         getCriteria(element).contains(constraint)
 
     open fun matchesConstraintNoRegex(element: String, constraint: String): Boolean = element.contains(constraint)
-
+    open fun JTable.setJTableColumnsWidth(
+        vararg percentages: Double
+    ) {
+        val tablePreferredWidth = this.preferredSize.width
+        var total = 0.0
+        for (i in 0 until columnModel.columnCount) {
+            total += percentages[i]
+        }
+        for (i in 0 until columnModel.columnCount) {
+            val column = columnModel.getColumn(i)
+            column.preferredWidth = (tablePreferredWidth * (percentages[i] / total)).toInt()
+        }
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -78,6 +91,23 @@ abstract class SearchableTableJPanel(
         rightToLeftAlignmentRenderer.horizontalAlignment = JLabel.RIGHT
         table.columnModel.columns.asIterator().forEach { it.cellRenderer = rightToLeftAlignmentRenderer }
         table.tableHeader.reorderingAllowed = false
+//        val listOfAverageLengths = listOf(
+//            Catalog.entries.map { it.publisher.length }.average(),
+//            Catalog.entries.map { it.category.length }.average(),
+//            1.0,//volumes
+//            Catalog.entries.map { it.author.length }.average(),
+//            Catalog.entries.map { it.shelfNum.length }.average(),
+//            1.0
+//        )
+//        repeat(table.columnModel.columnCount) { table.columnModel.getColumn(it).preferredWidth = listOfAverageLengths[it].roundToInt() }
+        table.setJTableColumnsWidth(
+            10.0,
+            5.0,
+            1.0,
+            5.0,
+            1.0,
+            78.0,
+        )
         table.tableHeader.defaultRenderer = object : TableCellRenderer {
             var renderer: DefaultTableCellRenderer = table.tableHeader.defaultRenderer as DefaultTableCellRenderer
             override fun getTableCellRendererComponent(
@@ -116,13 +146,18 @@ abstract class SearchableTableJPanel(
         }
         )
 //        table.autoCreateRowSorter = true
+        val shelfNumRegex = "\\d+\\.\\d+".toRegex()
         val rowSorter = TableRowSorter(table.model as AbstractTableModel)
         val comparator = kotlin.Comparator<String> { o1, o2 ->
-            val o1ContainsEnglish = o1.containsEnglish()
-            val o2ContainsEnglish = o2.containsEnglish()
-            if (o1ContainsEnglish && !o2ContainsEnglish) 1
-            else if (!o1ContainsEnglish && o2ContainsEnglish) -1
-            else (o1.lowercase()).compareTo(o2.lowercase())
+//            if(/*is shelf number*/o1.firstOrNull()?.isDigit()?.and(o2?.lastOrNull()?.isDigit() == true) == true){ //TODO for correcting sort order on shelf nums
+//
+//            } else {
+                val o1ContainsEnglish = o1.containsEnglish()
+                val o2ContainsEnglish = o2.containsEnglish()
+                if (o1ContainsEnglish && !o2ContainsEnglish) 1
+                else if (!o1ContainsEnglish && o2ContainsEnglish) -1
+                else (o1.lowercase()).compareTo(o2.lowercase())
+//            }
         }
         val columnIndexToSort =
             if (columns.size - 1 != 0) columns.size - 1 else 0//if only 1 column (e.g. authors), index 0, else "name of sefer" column
@@ -140,7 +175,7 @@ abstract class SearchableTableJPanel(
                         .addContainerGap()
                         .addGroup(
                             layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                .addComponent(jScrollPane1, GroupLayout.DEFAULT_SIZE, 547, Short.MAX_VALUE.toInt())
+                                .addComponent(jScrollPane1, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
                                 .addGroup(
                                     layout.createSequentialGroup()
                                         .addComponent(jLabel1)
@@ -174,7 +209,7 @@ abstract class SearchableTableJPanel(
                         .addGap(1, 1, 1)
                         .addComponent(jLabel2)
                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, GroupLayout.DEFAULT_SIZE, 299, Short.MAX_VALUE.toInt())
+                        .addComponent(jScrollPane1, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
                         .addContainerGap()
                 )
         )
