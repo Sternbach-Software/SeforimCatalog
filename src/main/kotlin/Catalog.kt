@@ -76,16 +76,18 @@ object Catalog {
                 split[10],
                 split[11],
                 split[12].let {
-                    val indexOfDot = it.indexOf(".")
-                    var firstNum = it.substring(0, indexOfDot)
-                    var secondNum = it.substring(indexOfDot) //includes dot
-                    if (firstNum.length == 1) {
-                        firstNum = "0$firstNum"
+                    if(it.isEmpty()) it else {
+                        val indexOfDot = it.indexOf(".")
+                        var firstNum = it.substring(0, indexOfDot)
+                        var secondNum = it.substring(indexOfDot) //includes dot
+                        if (firstNum.length == 1) {
+                            firstNum = "0$firstNum"
+                        }
+                        if (secondNum.length == 2/*include dot*/) {
+                            secondNum = ".0${secondNum.last()}"
+                        }
+                        firstNum + secondNum
                     }
-                    if (secondNum.length == 2/*include dot*/) {
-                        secondNum = ".0$secondNum"
-                    }
-                    firstNum + secondNum
                 }
             ).let {
                 when {
