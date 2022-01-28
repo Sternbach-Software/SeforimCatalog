@@ -54,7 +54,7 @@ class MainJFrame : JFrame() {
         jTabbedPane1!!.addTab("Help", HelpJPanel())
         refreshDatabaseButton!!.text = "Refresh Catalog"
 
-        val getLastUpdateString = { "Database last updated: ${Catalog.lastModificationDate()}"}
+        val getLastUpdateString = { "Catalog last updated: ${Catalog.lastModificationDate()}"}
         jLabel1!!.text = getLastUpdateString()
         jLabel2!!.text = "Program Version: 1.0.0"
 

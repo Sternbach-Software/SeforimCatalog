@@ -97,7 +97,7 @@ class TabbedJFrame : JFrame() {
         )
         refreshDatabaseButton.text = "Refresh Catalog"
         val programVersion = "1.0.0"
-        val getLastUpdateString = { "Database last updated: ${Catalog.lastModificationDate()}"}
+        val getLastUpdateString = { "Catalog last updated: ${Catalog.lastModificationDate()}"}
         jLabel2.text = getLastUpdateString()
         jLabel1.text = "Program version: $programVersion"
 //        jLabel3.text = "For tech support, please contact ssternbach@torahdownloads.com; for catalog support, please contact Asher Lewis"
