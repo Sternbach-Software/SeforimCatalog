@@ -147,21 +147,46 @@ abstract class SearchableTableJPanel(
         val shelfNumRegex = "\\d+\\.\\d+".toRegex()
         val rowSorter = TableRowSorter(table.model as AbstractTableModel)
         val comparator = kotlin.Comparator<String> { o1, o2 ->
-//            if(/*is shelf number*/o1.firstOrNull()?.isDigit()?.and(o2?.lastOrNull()?.isDigit() == true) == true){ //TODO for correcting sort order on shelf nums
-//
-//            } else {
                 val o1ContainsEnglish = o1.containsEnglish()
                 val o2ContainsEnglish = o2.containsEnglish()
                 if (o1ContainsEnglish && !o2ContainsEnglish) 1
                 else if (!o1ContainsEnglish && o2ContainsEnglish) -1
                 else (o1.lowercase()).compareTo(o2.lowercase())
-//            }
         }
-        val columnIndexToSort =
+        val seferNameColumnIndex =
             if (columns.size - 1 != 0) columns.size - 1 else 0//if only 1 column (e.g. authors), index 0, else "name of sefer" column
-        rowSorter.setComparator(columnIndexToSort, comparator)
+        rowSorter.setComparator(seferNameColumnIndex, comparator)
+        if (seferNameColumnIndex != 0) rowSorter.setComparator(
+            seferNameColumnIndex - 1,
+            kotlin.Comparator<String> { o1, o2 ->
+                val indexOfDot1 = o1.indexOf(".")
+                val firstNum1 = o1.substring(0, indexOfDot1)
+                val secondNum1 = o1.substring(indexOfDot1 + 1)
+
+                val indexOfDot2 = o2.indexOf(".")
+                val firstNum2 = o2.substring(0, indexOfDot2)
+                val secondNum2 = o2.substring(indexOfDot2 + 1)
+
+                // First check size of strings: if one number has more digits than the other,
+                // then it is certainly bigger. Otherwise, check which is bigger.
+                // If they are the same number, do the previous operations for the second number.
+                if (firstNum1.length > firstNum2.length) 1
+                else if (firstNum1.length < firstNum2.length) -1
+                else { //check if same num; if yes, check second num
+                    val firstNumComparison = firstNum1.compareTo(firstNum2)
+                    if (firstNumComparison != 0) firstNumComparison
+                    else {
+                        if (secondNum1.length > secondNum2.length) 1
+                        else if (secondNum1.length < secondNum2.length) -1
+                        else {
+                            secondNum1.compareTo(secondNum2)
+                        }
+                    }
+                }
+            }
+        )
         table.rowSorter = rowSorter
-        rowSorter.sortKeys = listOf(RowSorter.SortKey(columnIndexToSort, SortOrder.ASCENDING))
+        rowSorter.sortKeys = listOf(RowSorter.SortKey(seferNameColumnIndex, SortOrder.ASCENDING))
         jLabel2.text = "Results: ${listBeingDisplayed.size}"
 
         val layout = GroupLayout(this)
