@@ -131,7 +131,7 @@ abstract class SearchableTableJPanel(
             override fun keyPressed(e: KeyEvent?) {}
 
             override fun keyReleased(e: KeyEvent?) {
-                var text = seferNameTextField.text
+                val text = seferNameTextField.text.trim()
                 seferNameTextField.componentOrientation =
                     if(text
                             .firstOrNull()
