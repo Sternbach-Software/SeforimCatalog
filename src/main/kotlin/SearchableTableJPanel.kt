@@ -1,7 +1,5 @@
 import Catalog.containsEnglish
-import java.awt.Component
-import java.awt.ComponentOrientation
-import java.awt.Font
+import java.awt.*
 import java.awt.event.HierarchyBoundsListener
 import java.awt.event.HierarchyEvent
 import java.awt.event.KeyEvent
@@ -78,12 +76,18 @@ abstract class SearchableTableJPanel(
      */
     // <editor-fold defaultstate="expanded" desc="Generated Code">
     fun initComponents(): SearchableTableJPanel {
+        buttonGroup1 = ButtonGroup()
         jLabel1 = JLabel()
         seferNameTextField = JTextField()
         jScrollPane1 = JScrollPane()
         table = JTable()
         jLabel1.text = searchPhrase
         jLabel2 = JLabel()
+        searchModeExplanation = JPanel()
+        jLabel6 = JLabel()
+        exactSearchRadioButton = JRadioButton()
+        rootWordSearchRadioButton = JRadioButton()
+        similaritySearchRadioButton = JRadioButton()
         seferNameTextField.locale = Locale("he")
         seferNameTextField.componentOrientation = ComponentOrientation.RIGHT_TO_LEFT
         table.model = catalogModel()
@@ -139,6 +143,20 @@ abstract class SearchableTableJPanel(
                             ?.let { it.containsEnglish() || /*if regex*/ it == "~" } == true
                     ) ComponentOrientation.LEFT_TO_RIGHT
                     else ComponentOrientation.RIGHT_TO_LEFT
+//                מדד מודד מדדו למדוד למודד מדדו ימודדו ימודד
+//                the above list of words generates the lemmas דד and מדד. When using שרש search, consider adding hei to end of
+//                two letter shoresh.
+//                Related Shoresh transformations: TODO
+//                1. related letters get switched (אהחע, בומפ, זשסרצ, דנטלת, גיכק)
+//                2. double letters turn into letter+hei
+//                3. words which end in hei get replaced with first letter + vav + second letter (רמה into רום)
+//                4. words which end in hei get second letter doubles (רמה into רמם)
+
+//                Explanation of shoresh search:
+//                שרש search
+//                (looks for matches by comparing the root words contained in the search query with the root words in each catalog entry,
+//                preserving nouns in their full form (e.g. וממאמריהם -> מאמר) and reducing verbs and adjectives* to their root word)
+//                *Except for participles in בנין נפעל (e.g. נאזר) - see tip #7
                 filterList(text)
             }
         }
@@ -189,6 +207,46 @@ abstract class SearchableTableJPanel(
         rowSorter.sortKeys = listOf(RowSorter.SortKey(seferNameColumnIndex, SortOrder.ASCENDING))
         jLabel2.text = "Results: ${listBeingDisplayed.size}"
 
+        jLabel6!!.text = "Search mode:"
+        val exactSearchName = "Exact search"
+        val rootSearchName = "Root word search"
+        val similaritySearchName = "Similarity search"
+        val rootWordSearchJPanel = RootWordSearchJPanel()
+        val similaritySearchJPanel = SimilaritySearchJPanel()
+        val exactMatchJPanel = ExactMatchJPanel()
+        val explanationPanelTitledBorder = BorderFactory.createTitledBorder(exactSearchName/*start with exact*/)
+        searchModeExplanation!!.border = explanationPanelTitledBorder
+        searchModeExplanation!!.layout = GridLayout()
+        exactSearchRadioButton!!.text = exactSearchName
+        rootWordSearchRadioButton!!.text = rootSearchName
+        similaritySearchRadioButton!!.text = similaritySearchName
+        exactSearchRadioButton!!.addActionListener {
+            searchModeExplanation!!.removeAll()
+            searchModeExplanation!!.add(exactMatchJPanel)
+            searchModeExplanation!!.revalidate()
+            searchModeExplanation!!.repaint()
+            explanationPanelTitledBorder.title = exactSearchName
+        }
+        rootWordSearchRadioButton!!.addActionListener {
+            searchModeExplanation!!.removeAll()
+            searchModeExplanation!!.add(rootWordSearchJPanel)
+            searchModeExplanation!!.revalidate()
+            searchModeExplanation!!.repaint()
+            explanationPanelTitledBorder.title = rootSearchName
+        }
+        similaritySearchRadioButton!!.addActionListener {
+            searchModeExplanation!!.removeAll()
+            searchModeExplanation!!.add(similaritySearchJPanel)
+            searchModeExplanation!!.revalidate()
+            searchModeExplanation!!.repaint()
+            explanationPanelTitledBorder.title = similaritySearchName
+        }
+        buttonGroup1!!.add(exactSearchRadioButton)
+        buttonGroup1!!.add(rootWordSearchRadioButton)
+        buttonGroup1!!.add(similaritySearchRadioButton)
+
+        exactSearchRadioButton!!.doClick()
+
         val layout = GroupLayout(this)
         setLayout(layout)
         layout.setHorizontalGroup(
@@ -198,7 +256,25 @@ abstract class SearchableTableJPanel(
                         .addContainerGap()
                         .addGroup(
                             layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                .addComponent(jScrollPane1, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
+                                .addGroup(
+                                    layout.createSequentialGroup()
+                                        .addComponent(
+                                            searchModeExplanation,
+                                            GroupLayout.DEFAULT_SIZE,
+                                            GroupLayout.DEFAULT_SIZE,
+                                            Short.MAX_VALUE.toInt()
+                                        )
+                                        .addContainerGap()
+                                )
+                                .addGroup(
+                                    layout.createSequentialGroup()
+                                        .addComponent(jScrollPane1)
+                                        .addContainerGap()
+                                )
+                                .addGroup(
+                                    layout.createSequentialGroup()
+                                        .addGroup(
+                                            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                 .addGroup(
                                     layout.createSequentialGroup()
                                         .addComponent(jLabel1)
@@ -211,7 +287,20 @@ abstract class SearchableTableJPanel(
                                         .addGap(0, 0, Short.MAX_VALUE.toInt())
                                 )
                         )
-                        .addContainerGap()
+                                        .addGap(6, 6, 6)
+                                )
+                                .addGroup(
+                                    layout.createSequentialGroup()
+                                        .addComponent(jLabel6)
+                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(exactSearchRadioButton)
+                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(rootWordSearchRadioButton)
+                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(similaritySearchRadioButton)
+                                        .addGap(0, 0, Short.MAX_VALUE.toInt())
+                                )
+                        )
                 )
         )
         layout.setVerticalGroup(
@@ -219,6 +308,16 @@ abstract class SearchableTableJPanel(
                 .addGroup(
                     layout.createSequentialGroup()
                         .addContainerGap()
+                        .addGroup(
+                            layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel6)
+                                .addComponent(exactSearchRadioButton)
+                                .addComponent(rootWordSearchRadioButton)
+                                .addComponent(similaritySearchRadioButton)
+                        )
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(searchModeExplanation, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE.toInt())
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(
                             layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(jLabel1)
@@ -232,7 +331,7 @@ abstract class SearchableTableJPanel(
                         .addGap(1, 1, 1)
                         .addComponent(jLabel2)
                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE.toInt(), Short.MAX_VALUE.toInt())
+                        .addComponent(jScrollPane1, GroupLayout.DEFAULT_SIZE, 492, Short.MAX_VALUE.toInt())
                         .addContainerGap()
                 )
         )
@@ -280,6 +379,13 @@ Name (שם הספר)"*/
     lateinit var seferNameTextField: JTextField
     lateinit var table: JTable
     lateinit var tableModel: AbstractTableModel
+    private var rootWordSearchRadioButton: JRadioButton? = null
+    private var searchModeExplanation: JPanel? = null
+    private var similaritySearchRadioButton: JRadioButton? = null
+    private var buttonGroup1: ButtonGroup? = null
+    private var exactSearchRadioButton: JRadioButton? = null
+    private var jLabel6: JLabel? = null
+
     fun filterList(_constraint: String) {
         var constraint = _constraint
         if (constraint.isBlank()) {

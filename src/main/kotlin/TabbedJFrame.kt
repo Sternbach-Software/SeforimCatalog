@@ -19,7 +19,7 @@ val TIPS =
             "        5. Separating alternate search phrases or spellings with \"#\" will return results for any of those phrases; for example, \"(מפרש#מפורש) (סידור#סדור)\" will search for all 4 possible variations of that phrase (viz. when the first is malei and the second isn't, vice versa, or when both or neither are malei). Make sure to group spellings in parentheses, because without parentheses \"סידור#סדור מפרש#מפורש\" will search for 3 phrases instead of 4: סידור, סדור מפרש, or מפורש.\n" +
             "        \n" +
             "        6. A quick way to find seforim by a specific author or category when you know the name of the author or category you are looking for is to search the list of authors to find the author's exact spelling in the catalog, click on the author's name to select the cell, press Ctrl+C to copy the name, then press Ctrl+V in the search bar in the \"Seforim by author\" tab to filter the list for seforim by that author."
-val alternatePhrases = " (combine searches using \"#\", e.g. \"fire#אור#אש\" or \"(מפרש#מפורש) (סידור#סדור)\")"
+val alternatePhrases = " (can combine searches using \"#\", e.g. \"fire#אור#אש\" or \"(מפרש#מפורש) (סידור#סדור)\")"
 
 class TabbedJFrame : JFrame() {
     /**
@@ -158,7 +158,8 @@ class TabbedJFrame : JFrame() {
         pack()
     } // </editor-fold>                        
     private fun jTextArea1AncestorResized(evt: HierarchyEvent) {
-        jTextArea1.preferredSize = null
+        jTextArea1.
+        preferredSize = null
     }
     private lateinit var refreshDatabaseButton: JButton
     private lateinit var jLabel1: JLabel

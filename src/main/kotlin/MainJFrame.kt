@@ -1,3 +1,4 @@
+import org.apache.commons.text.similarity.LevenshteinDistance
 import java.awt.EventQueue
 import java.io.File
 import kotlin.jvm.JvmStatic
@@ -61,6 +62,14 @@ class MainJFrame : JFrame() {
         refreshDatabaseButton!!.addActionListener {
             Catalog.refreshObjects()
             jLabel1!!.text = getLastUpdateString()
+            //LevenshteinDistance()
+            (0..jTabbedPane1!!.tabCount).map { jTabbedPane1!!.getTabComponentAt(it) }.forEach {
+                if(it is SearchableTableJPanel) {
+                    try {
+                        it.filterList(it.seferNameTextField.text.trim())
+                    } catch (t: Throwable) { t.printStackTrace() }
+                }
+            }
         }
         val layout = GroupLayout(contentPane)
         contentPane.layout = layout
