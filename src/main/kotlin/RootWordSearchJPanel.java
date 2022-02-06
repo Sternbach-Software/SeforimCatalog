@@ -3,8 +3,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
 
-import javax.swing.*;
-
 /**
  *
  * @author shmuel
@@ -27,171 +25,151 @@ public class RootWordSearchJPanel extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">
     private void initComponents() {
 
-        jRadioButton2 = new JLabel();
-        jCheckBox1 = new javax.swing.JCheckBox();
-        jPanel4 = new javax.swing.JPanel();
-        jRadioButton4 = new javax.swing.JRadioButton();
-        jRadioButton5 = new javax.swing.JRadioButton();
-        jPanel8 = new javax.swing.JPanel();
-        jRadioButton10 = new javax.swing.JRadioButton();
-        jRadioButton11 = new javax.swing.JRadioButton();
+        jPanel9 = new javax.swing.JPanel();
+        jRadioButton12 = new javax.swing.JRadioButton();
+        jRadioButton13 = new javax.swing.JRadioButton();
+        jCheckBox2 = new javax.swing.JCheckBox();
+        jPanel5 = new javax.swing.JPanel();
+        jRadioButton6 = new javax.swing.JRadioButton();
+        jRadioButton7 = new javax.swing.JRadioButton();
+        jLabel1 = new javax.swing.JLabel();
 
-        jRadioButton2.setText("<html><body style='width: %1spx'>Root word search: determines matching entries by comparing the root words contained in the search phrase with the root words in each catalog entry. Nouns are preserved in their full form (e.g. <font size=5> וּמִמַּאַמְרֵיהֶם</font> is reduced to <font size=5>מַאֲמָר</font> and not אמר), whereas verbs and adjectives* are reduced to their root word. *Except for participles in בנין נפעל (e.g. נאזר) - see tip #7</body>as opposed to אמר");
+        jPanel9.setBorder(javax.swing.BorderFactory.createTitledBorder("Search strictness"));
 
-        jCheckBox1.setText("Substitute similar shorashim (e.g. עול & אול, רמה & רמם & רום)");
-
-        jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Search phrase interpretation"));
-
-        jRadioButton4.setText("<html><body style='width: %1spx'>Unordered/Keywords: disregard the order that the words in the search phrase appear in, and return results which contain the shorashim that are in the search phrase, regardless of the order in which they appear in the result");
-        jRadioButton4.addActionListener(new java.awt.event.ActionListener() {
+        jRadioButton12.setText("<html><body style='width: %1spx'>Match all: only return results which contain all of the shorashim contained in the search phrase");
+        jRadioButton12.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButton4ActionPerformed(evt);
+                jRadioButton12ActionPerformed(evt);
             }
         });
 
-        jRadioButton5.setText("<html><body style='width: %1spx'>Ordered/Sequential: respect the order that the words in the search phrase appear in, and only return results in which the shorashim appear in the same order as the order in which they appear in the search phrase");
-        jRadioButton5.addActionListener(new java.awt.event.ActionListener() {
+        jRadioButton13.setText("<html><body style='width: %1spx'>Match any: return results which contain any (even one) of the shorashim in the search phrase");
+        jRadioButton13.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButton5ActionPerformed(evt);
+                jRadioButton13ActionPerformed(evt);
             }
         });
 
-        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
-        jPanel4.setLayout(jPanel4Layout);
-        jPanel4Layout.setHorizontalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jRadioButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(jRadioButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                .addContainerGap())
+        javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
+        jPanel9.setLayout(jPanel9Layout);
+        jPanel9Layout.setHorizontalGroup(
+                jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel9Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jRadioButton12, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                                        .addComponent(jRadioButton13, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                                .addContainerGap())
         );
-        jPanel4Layout.setVerticalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jRadioButton4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jRadioButton5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+        jPanel9Layout.setVerticalGroup(
+                jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel9Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(jRadioButton12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jRadioButton13, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap())
         );
 
-        jPanel8.setBorder(javax.swing.BorderFactory.createTitledBorder("Search strictness"));
+        jCheckBox2.setText("Substitute similar shorashim (e.g. עול & אול, רמה & רמם & רום)");
 
-        jRadioButton10.setText("<html><body style='width: %1spx'>Match all: only return results which contain all of the shorashim contained in the search phrase");
-        jRadioButton10.addActionListener(new java.awt.event.ActionListener() {
+        jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder("Search phrase interpretation"));
+
+        jRadioButton6.setText("<html><body style='width: %1spx'>Unordered/Keywords: disregard the order that the words in the search phrase appear in, and return results which contain the shorashim that are in the search phrase, regardless of the order in which they appear in the result");
+        jRadioButton6.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButton10ActionPerformed(evt);
+                jRadioButton6ActionPerformed(evt);
             }
         });
 
-        jRadioButton11.setText("<html><body style='width: %1spx'>Match any: return results which contain any (even one) of the shorashim in the search phrase");
-        jRadioButton11.addActionListener(new java.awt.event.ActionListener() {
+        jRadioButton7.setText("<html><body style='width: %1spx'>Ordered/Sequential: respect the order that the words in the search phrase appear in, and only return results in which the shorashim appear in the same order as the order in which they appear in the search phrase");
+        jRadioButton7.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButton11ActionPerformed(evt);
+                jRadioButton7ActionPerformed(evt);
             }
         });
 
-        javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
-        jPanel8.setLayout(jPanel8Layout);
-        jPanel8Layout.setHorizontalGroup(
-            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel8Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jRadioButton10, javax.swing.GroupLayout.DEFAULT_SIZE, 1021, Short.MAX_VALUE)
-                    .addComponent(jRadioButton11))
-                .addContainerGap())
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+                jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel5Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jRadioButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                                        .addComponent(jRadioButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                                .addContainerGap())
         );
-        jPanel8Layout.setVerticalGroup(
-            jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel8Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jRadioButton10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jRadioButton11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(this);
-        this.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jRadioButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(35, 35, 35)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jPanel8, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jCheckBox1)
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                .addContainerGap())
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jRadioButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jCheckBox1)
-                .addContainerGap())
+        jPanel5Layout.setVerticalGroup(
+                jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel5Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(jRadioButton6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jRadioButton7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addContainerGap())
         );
 
-     /*   javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+        jLabel1.setText("<html><body style='width: %1spx'>Root word search determines matching entries by comparing the root words contained in the search phrase with the root words in each catalog entry. Nouns are preserved in their full form (e.g. <font size=5> וּמִמַּאַמְרֵיהֶם</font> is reduced to <font size=5>מַאֲמָר</font> and not אמר), whereas verbs and adjectives* are reduced to their root word. *Except for participles in בנין נפעל (e.g. נאזר) - see tip #7</body>as opposed to אמר");
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1102, Short.MAX_VALUE)
-            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(layout.createSequentialGroup()
-                    .addContainerGap()
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addContainerGap()))
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                                        .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addComponent(jCheckBox2)
+                                                .addGap(0, 148, Short.MAX_VALUE))
+                                        .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addContainerGap())
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 326, Short.MAX_VALUE)
-            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(layout.createSequentialGroup()
-                    .addGap(7, 7, 7)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addContainerGap()))
-        );*/
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addGap(48, 48, 48)
+                                                .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(jCheckBox2))
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addContainerGap()
+                                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
     }// </editor-fold>
 
-    private void jRadioButton4ActionPerformed(java.awt.event.ActionEvent evt) {
+    private void jRadioButton12ActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
     }
 
-    private void jRadioButton5ActionPerformed(java.awt.event.ActionEvent evt) {
+    private void jRadioButton13ActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
     }
 
-    private void jRadioButton10ActionPerformed(java.awt.event.ActionEvent evt) {
+    private void jRadioButton6ActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
     }
 
-    private void jRadioButton11ActionPerformed(java.awt.event.ActionEvent evt) {
+    private void jRadioButton7ActionPerformed(java.awt.event.ActionEvent evt) {
         // TODO add your handling code here:
     }
 
 
     // Variables declaration - do not modify
-    private javax.swing.JCheckBox jCheckBox1;
-    private javax.swing.JPanel jPanel4;
-    private javax.swing.JPanel jPanel8;
-    private javax.swing.JRadioButton jRadioButton10;
-    private javax.swing.JRadioButton jRadioButton11;
-    private JLabel jRadioButton2;
-    private javax.swing.JRadioButton jRadioButton4;
-    private javax.swing.JRadioButton jRadioButton5;
+    private javax.swing.JCheckBox jCheckBox2;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel9;
+    private javax.swing.JRadioButton jRadioButton12;
+    private javax.swing.JRadioButton jRadioButton13;
+    private javax.swing.JRadioButton jRadioButton6;
+    private javax.swing.JRadioButton jRadioButton7;
     // End of variables declaration                   
 }

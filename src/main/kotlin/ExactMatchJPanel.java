@@ -3,6 +3,8 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
 
+import javax.swing.*;
+
 /**
  *
  * @author shmuel
@@ -29,7 +31,7 @@ public class ExactMatchJPanel extends javax.swing.JPanel {
 
 //        setBorder(javax.swing.BorderFactory.createTitledBorder(""));
 
-        jLabel1.setText("<html><body style='width: %1spx'>Exact search: determines matching entries based on whether the entry contains the exact search phrase entered. Searches can be combined using \"#\", e.g. \"fire#אור#אש\" or \"(מפרש#מפורש) (סידור#סדור)\" - see tip #5 for more information</body>");
+        jLabel1.setText("<html><body style='width: %1spx'>Exact search determines matching entries based on whether the entry contains the exact search phrase entered. Searches can be combined using \"#\", e.g. \"fire#אור#אש\" or \"(מפרש#מפורש) (סידור#סדור)\" - see tip #5 for more information</body>");
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(this);
         setLayout(jPanel5Layout);
@@ -37,14 +39,14 @@ public class ExactMatchJPanel extends javax.swing.JPanel {
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 766, Short.MAX_VALUE)
+                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel5Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 36, Short.MAX_VALUE)
+                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
 /*

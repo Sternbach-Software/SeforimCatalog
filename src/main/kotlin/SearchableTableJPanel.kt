@@ -316,7 +316,12 @@ abstract class SearchableTableJPanel(
                                 .addComponent(similaritySearchRadioButton)
                         )
                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(searchModeExplanation, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE.toInt())
+                        .addComponent(
+                            searchModeExplanation,
+                            GroupLayout.PREFERRED_SIZE,
+                            GroupLayout.DEFAULT_SIZE,
+                            GroupLayout.PREFERRED_SIZE
+                        )
                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(
                             layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
@@ -331,7 +336,7 @@ abstract class SearchableTableJPanel(
                         .addGap(1, 1, 1)
                         .addComponent(jLabel2)
                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, GroupLayout.DEFAULT_SIZE, 492, Short.MAX_VALUE.toInt())
+                        .addComponent(jScrollPane1)
                         .addContainerGap()
                 )
         )
