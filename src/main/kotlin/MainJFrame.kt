@@ -143,13 +143,9 @@ class MainJFrame : JFrame() {
          */
         @JvmStatic
         fun main(args: Array<String>) {
-            /* Set the Nimbus look and feel */
-            //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-            /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
+            // Set the Nimbus look and feel
+            // For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
             UIManager.setLookAndFeel(UIManager.getInstalledLookAndFeels().find { it.name == "Nimbus" }?.className)
-            //</editor-fold>
             args.getOrNull(0)?.let {
                 catalogDirectory = File(it)
                 logFile = File(catalogDirectory,"logs.txt")
