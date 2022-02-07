@@ -14,7 +14,7 @@ import javax.swing.*
  *
  * @author shmuel
  */
-val logFile = File("logs.txt")
+lateinit var logFile: File
 val scope = CoroutineScope(SupervisorJob())
 class MainJFrame : JFrame() {
     /**
@@ -165,7 +165,10 @@ class MainJFrame : JFrame() {
                 Logger.getLogger(MainJFrame::class.java.name).log(Level.SEVERE, null, ex)
             }
             //</editor-fold>
-            args.getOrNull(0)?.let { catalogDirectory = File(it) }
+            args.getOrNull(0)?.let {
+                catalogDirectory = File(it)
+                logFile = File(catalogDirectory,"logs.txt")
+            }
             /* Create and display the form */EventQueue.invokeLater {
                 MainJFrame().apply {
                     title = "Seforim Finder"

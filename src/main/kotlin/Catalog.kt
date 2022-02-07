@@ -100,7 +100,7 @@ object Catalog {
                     } catch (t: Throwable) {
                         t.printStackTrace()
                     }
-                }
+                } else println("Cloud unavailable")
                 refreshObjects(false)
             }
         }
