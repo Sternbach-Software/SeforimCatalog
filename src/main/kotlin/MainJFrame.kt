@@ -153,8 +153,8 @@ class MainJFrame : JFrame() {
             /* Create and display the form */EventQueue.invokeLater {
                 MainJFrame().apply {
                     title = "Seforim Finder"
-                    isVisible = true
                     args.getOrNull(1)?.let { iconImage = ImageIcon(it).image }
+                    isVisible = true
                 }
             }
         }
