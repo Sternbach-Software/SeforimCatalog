@@ -148,22 +148,7 @@ class MainJFrame : JFrame() {
             /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
-            try {
-                for (info in UIManager.getInstalledLookAndFeels()) {
-                    if ("Nimbus" == info.name) {
-                        UIManager.setLookAndFeel(info.className)
-                        break
-                    }
-                }
-            } catch (ex: ClassNotFoundException) {
-                Logger.getLogger(MainJFrame::class.java.name).log(Level.SEVERE, null, ex)
-            } catch (ex: InstantiationException) {
-                Logger.getLogger(MainJFrame::class.java.name).log(Level.SEVERE, null, ex)
-            } catch (ex: IllegalAccessException) {
-                Logger.getLogger(MainJFrame::class.java.name).log(Level.SEVERE, null, ex)
-            } catch (ex: UnsupportedLookAndFeelException) {
-                Logger.getLogger(MainJFrame::class.java.name).log(Level.SEVERE, null, ex)
-            }
+            UIManager.setLookAndFeel(UIManager.getInstalledLookAndFeels().find { it.name == "Nimbus" }?.className)
             //</editor-fold>
             args.getOrNull(0)?.let {
                 catalogDirectory = File(it)
