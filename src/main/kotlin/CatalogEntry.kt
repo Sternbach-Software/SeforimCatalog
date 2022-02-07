@@ -28,16 +28,16 @@ data class CatalogEntry(
 ) {
     fun everythingIsBlank() =
         seferName.isBlank() &&
-                numberNotSure.isBlank() &&
-                miyunNum.isBlank() &&
+//                numberNotSure.isBlank() &&
+//                miyunNum.isBlank() &&
                 author.isBlank() &&
                 publisher.isBlank() &&
                 volumeNum.isBlank() &&
-                numCopies.isBlank() &&
-                dateAdded.isBlank() &&
-                initials.isBlank() &&
-                needsBinding.isBlank() &&
-                comments.isBlank() &&
+//                numCopies.isBlank() &&
+//                dateAdded.isBlank() &&
+//                initials.isBlank() &&
+//                needsBinding.isBlank() &&
+//                comments.isBlank() &&
                 category.isBlank() &&
                 shelfNum.isBlank()
 }
