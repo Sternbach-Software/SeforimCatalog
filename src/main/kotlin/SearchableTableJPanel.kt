@@ -1,4 +1,8 @@
 import Catalog.containsEnglish
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import lemmatizer.hebmorph.tests.LemmatizerTest
+import org.apache.commons.text.similarity.LevenshteinDistance
 import java.awt.*
 import java.awt.event.HierarchyBoundsListener
 import java.awt.event.HierarchyEvent
@@ -137,7 +141,12 @@ abstract class SearchableTableJPanel(
             override fun keyReleased(e: KeyEvent?) {
                 val text = seferNameTextField.text.trim()
                 seferNameTextField.componentOrientation =
-                    if(text
+                    if(seferNameTextField.text.trim()
+                            .also {
+                                scope.launch(Dispatchers.IO) {
+                                    logFile.appendText(it + "\n")
+                                }
+                            }
                             .firstOrNull()
                             ?.toString()
                             ?.let { it.containsEnglish() || /*if regex*/ it == "~" } == true

@@ -1,4 +1,5 @@
-import org.apache.commons.text.similarity.LevenshteinDistance
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import java.awt.EventQueue
 import java.io.File
 import kotlin.jvm.JvmStatic
@@ -13,6 +14,8 @@ import javax.swing.*
  *
  * @author shmuel
  */
+val logFile = File("logs.txt")
+val scope = CoroutineScope(SupervisorJob())
 class MainJFrame : JFrame() {
     /**
      * This method is called from within the constructor to initialize the form.
