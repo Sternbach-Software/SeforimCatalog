@@ -1,7 +1,8 @@
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 import java.net.InetSocketAddress
 import java.net.Socket
-import java.net.UnknownHostException
 import java.nio.file.Files
 import java.time.Instant
 import java.time.LocalDateTime
@@ -51,14 +52,7 @@ object Catalog {
         }
     }
 
-    fun refreshObjects() {
-        if (isHostAvailable("github.com")) {
-            try {
-                Runtime.getRuntime().exec("git pull", arrayOf(), catalogDirectory).waitFor()
-            } catch (t: Throwable) {
-                t.printStackTrace()
-            }
-        }
+    fun refreshObjects(checkCloud: Boolean = true) {
         val lines = Files.readAllLines(file.toPath()).toMutableList()
         lines.removeAt(0) //remove line with column names
         val listOfEnglishSeforim = mutableListOf<CatalogEntry>()
@@ -96,6 +90,20 @@ object Catalog {
         //entries.map { it.category.length }.let { File("category.csv").writeText(it.joinToString(",")) }
         //entries.map { it.author.length }.let { File("author.csv").writeText(it.joinToString(",")) }
         //entries.map { it.seferName.length }.let { File("seferName.csv").writeText(it.joinToString(",")) }
+        if(checkCloud) {
+            println("Checking cloud")
+            scope.launch(Dispatchers.IO) {
+                if (isHostAvailable("github.com")) {
+                    try {
+                        Runtime.getRuntime().exec("git pull", arrayOf(), catalogDirectory).waitFor()
+                        println("Updated from cloud")
+                    } catch (t: Throwable) {
+                        t.printStackTrace()
+                    }
+                }
+                refreshObjects(false)
+            }
+        }
     }
 
     private fun containsHebrewAndEnglish(it: CatalogEntry) =

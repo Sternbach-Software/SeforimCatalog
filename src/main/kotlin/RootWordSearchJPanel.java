@@ -110,7 +110,7 @@ public class RootWordSearchJPanel extends javax.swing.JPanel {
                                 .addContainerGap())
         );
 
-        jLabel1.setText("<html><body style='width: %1spx'>Root word search determines matching entries by comparing the root words contained in the search phrase with the root words in each catalog entry. Nouns are preserved in their full form (e.g. <font size=5> וּמִמַּאַמְרֵיהֶם</font> is reduced to <font size=5>מַאֲמָר</font> and not אמר), whereas verbs and adjectives* are reduced to their root word. *Except for participles in בנין נפעל (e.g. נאזר) - see tip #7</body>as opposed to אמר");
+        jLabel1.setText("<html><body style='width: %1spx'>Root word search determines matching entries by comparing the root words contained in the search phrase with the root words in each catalog entry. Nouns are preserved in their full form (e.g. <font size=5> וּמִמַּאַמְרֵיהֶם</font> is reduced to <font size=5>מַאֲמָר</font> and not אמר), whereas verbs and adjectives* are reduced to their root word. However, although the search engine may generally understand dikduk, that does not make it a Talmid Chacham. For example, מאמרי can be read as <font size=5> מַאֲמָרֵי </font>or <font size=5>מֵאִמְרֵי</font>. The first reduces to מאמר and the second reduces to אמר.  *Except for participles in בנין נפעל (e.g. נאזר) - see tip #7</body>");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);

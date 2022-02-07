@@ -66,10 +66,10 @@ class MainJFrame : JFrame() {
             Catalog.refreshObjects()
             jLabel1!!.text = getLastUpdateString()
             //LevenshteinDistance()
-            (0..jTabbedPane1!!.tabCount).map { jTabbedPane1!!.getTabComponentAt(it) }.forEach {
+            (0 until jTabbedPane1!!.tabCount).map { jTabbedPane1!!.getTabComponentAt(it) }.forEach {
                 if(it is SearchableTableJPanel) {
                     try {
-                        it.filterList(it.seferNameTextField.text.trim())
+                        it.filterList()
                     } catch (t: Throwable) { t.printStackTrace() }
                 }
             }

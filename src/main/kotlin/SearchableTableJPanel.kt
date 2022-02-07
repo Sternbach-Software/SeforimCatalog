@@ -16,6 +16,10 @@ import javax.swing.table.TableCellRenderer
 import javax.swing.table.TableRowSorter
 
 
+private const val FILTER_EXACT = 0
+private const val FILTER_ROOT = 1
+private const val FILTER_SIMILARITY = 3
+
 abstract class SearchableTableJPanel(
     private val searchPhrase: String
 ) : JPanel() {
@@ -87,11 +91,11 @@ abstract class SearchableTableJPanel(
         table = JTable()
         jLabel1.text = searchPhrase
         jLabel2 = JLabel()
-        searchModeExplanation = JPanel()
-        jLabel6 = JLabel()
-        exactSearchRadioButton = JRadioButton()
-        rootWordSearchRadioButton = JRadioButton()
-        similaritySearchRadioButton = JRadioButton()
+        searchModeExplanation = JPanel().also { it.isVisible = false }
+        jLabel6 = JLabel().also { it.isVisible = false }
+        exactSearchRadioButton = JRadioButton().also { it.isVisible = false }
+        rootWordSearchRadioButton = JRadioButton().also { it.isVisible = false }
+        similaritySearchRadioButton = JRadioButton().also { it.isVisible = false }
         seferNameTextField.locale = Locale("he")
         seferNameTextField.componentOrientation = ComponentOrientation.RIGHT_TO_LEFT
         table.model = catalogModel()
@@ -139,7 +143,6 @@ abstract class SearchableTableJPanel(
             override fun keyPressed(e: KeyEvent?) {}
 
             override fun keyReleased(e: KeyEvent?) {
-                val text = seferNameTextField.text.trim()
                 seferNameTextField.componentOrientation =
                     if(seferNameTextField.text.trim()
                             .also {
@@ -166,7 +169,7 @@ abstract class SearchableTableJPanel(
 //                (looks for matches by comparing the root words contained in the search query with the root words in each catalog entry,
 //                preserving nouns in their full form (e.g. וממאמריהם -> מאמר) and reducing verbs and adjectives* to their root word)
 //                *Except for participles in בנין נפעל (e.g. נאזר) - see tip #7
-                filterList(text)
+                filterList()
             }
         }
         )
@@ -220,8 +223,8 @@ abstract class SearchableTableJPanel(
         val exactSearchName = "Exact search"
         val rootSearchName = "Root word search"
         val similaritySearchName = "Similarity search"
-        val rootWordSearchJPanel = RootWordSearchJPanel()
-        val similaritySearchJPanel = SimilaritySearchJPanel()
+        rootWordSearchJPanel = RootWordSearchJPanel()
+        similaritySearchJPanel = SimilaritySearchJPanel()
         val exactMatchJPanel = ExactMatchJPanel()
         val explanationPanelTitledBorder = BorderFactory.createTitledBorder(exactSearchName/*start with exact*/)
         searchModeExplanation!!.border = explanationPanelTitledBorder
@@ -235,6 +238,7 @@ abstract class SearchableTableJPanel(
             searchModeExplanation!!.revalidate()
             searchModeExplanation!!.repaint()
             explanationPanelTitledBorder.title = exactSearchName
+            filterList(FILTER_EXACT)//update list to reflect new search mode
         }
         rootWordSearchRadioButton!!.addActionListener {
             searchModeExplanation!!.removeAll()
@@ -242,6 +246,7 @@ abstract class SearchableTableJPanel(
             searchModeExplanation!!.revalidate()
             searchModeExplanation!!.repaint()
             explanationPanelTitledBorder.title = rootSearchName
+            filterList(FILTER_ROOT)//update list to reflect new search mode
         }
         similaritySearchRadioButton!!.addActionListener {
             searchModeExplanation!!.removeAll()
@@ -249,12 +254,20 @@ abstract class SearchableTableJPanel(
             searchModeExplanation!!.revalidate()
             searchModeExplanation!!.repaint()
             explanationPanelTitledBorder.title = similaritySearchName
+            filterList(FILTER_SIMILARITY, similaritySearchJPanel.ld)//update list to reflect new search mode
         }
         buttonGroup1!!.add(exactSearchRadioButton)
         buttonGroup1!!.add(rootWordSearchRadioButton)
         buttonGroup1!!.add(similaritySearchRadioButton)
 
         exactSearchRadioButton!!.doClick()
+
+        similaritySearchJPanel.filterCallback = object : Function1<LevenshteinDistance, Unit> {
+            override fun invoke(p1: LevenshteinDistance) {
+                println("Edit distance updated: ${p1.threshold}")
+                filterList(FILTER_SIMILARITY, p1)
+            }
+        }
 
         val layout = GroupLayout(this)
         setLayout(layout)
@@ -393,14 +406,111 @@ Name (שם הספר)"*/
     lateinit var seferNameTextField: JTextField
     lateinit var table: JTable
     lateinit var tableModel: AbstractTableModel
-    private var rootWordSearchRadioButton: JRadioButton? = null
-    private var searchModeExplanation: JPanel? = null
-    private var similaritySearchRadioButton: JRadioButton? = null
-    private var buttonGroup1: ButtonGroup? = null
-    private var exactSearchRadioButton: JRadioButton? = null
-    private var jLabel6: JLabel? = null
+    lateinit var rootWordSearchRadioButton: JRadioButton
+    lateinit var searchModeExplanation: JPanel
+    lateinit var similaritySearchRadioButton: JRadioButton
+    lateinit var buttonGroup1: ButtonGroup
+    lateinit var exactSearchRadioButton: JRadioButton
+    lateinit var jLabel6: JLabel
+    lateinit var rootWordSearchJPanel: RootWordSearchJPanel
+    lateinit var similaritySearchJPanel: SimilaritySearchJPanel
+    fun filterList(){
+        val mode = if (exactSearchRadioButton.isSelected) FILTER_EXACT
+        else if (rootWordSearchRadioButton.isSelected) FILTER_ROOT
+        else FILTER_SIMILARITY
+        filterList(
+            mode,
+            if(mode == FILTER_SIMILARITY) similaritySearchJPanel.ld!! else null
+        )
+    }
+    fun filterList(mode: Int, ld: LevenshteinDistance? = null) {
+        val _constraint1 = seferNameTextField.text.trim() //TODO consider making this a computed field
+        if (_constraint1.isBlank()) {
+            updateList(originalCollection)
+            return
+        }
+        when(mode) {
+            FILTER_EXACT -> filterListExactMatch(_constraint1)
+            FILTER_ROOT -> filterListRootSearch(_constraint1)
+            FILTER_SIMILARITY -> filterListSimilaritySearch(_constraint1, ld!!)
+        }
+    }
+    fun filterListRootSearch(constraint: String) {
+        val shorashim = LemmatizerTest.getLemmatizedList(
+            constraint,
+            false,
+            false,
+            true,
+            false
+        )
+        println("Shorashim: $shorashim")
+        filterWithPredicate({
+            LemmatizerTest
+                .getLemmatizedList(
+                    it,
+                    false,
+                    false,
+                    true,
+                    false
+                )
+                .any{ shorashim.any { it1 -> it == it1 } }
+        }) {
 
-    fun filterList(_constraint: String) {
+            LemmatizerTest
+                .getLemmatizedList(
+                    getCriteria(it),
+                    false,
+                    false,
+                    true,
+                    false
+                )
+                .any{ shorashim.any { it1 -> it == it1 } }
+        }
+    }
+    fun filterListSimilaritySearch(constraint: String, levenshteinDistance: LevenshteinDistance) {
+        filterWithPredicate({
+            val distance = levenshteinDistance.apply(constraint, it)
+            println("Distance between $constraint and $it: $distance")
+            distance != -1 && distance <= levenshteinDistance.threshold
+        }) {
+            val criteria = getCriteria(it)
+            val distance = levenshteinDistance.apply(constraint, criteria)
+            println("Distance between $constraint and $criteria: $distance")
+            distance != -1 && distance <= levenshteinDistance.threshold
+        }
+    }
+
+    private fun filterWithPredicate(
+        predicateIfString: (String) -> Boolean,
+        predicateIfCatalogEntry: (CatalogEntry) -> Boolean,
+    ) {
+        val firstOrNull = originalCollection.firstOrNull()
+        if (firstOrNull is String) {
+            val list = Collections.synchronizedList(mutableListOf<String>())
+            (originalCollection as Collection<String>)
+                .parallelStream()
+                .filter { predicateIfString(it) }
+                .forEach { list.add(it) }
+            updateList(list)
+        } else {
+            val list = Collections.synchronizedList(mutableListOf<CatalogEntry>())
+            (originalCollection as Collection<CatalogEntry>)
+                .parallelStream()
+                .filter {
+                    try {
+                        predicateIfCatalogEntry(it)
+                    } catch (t: Throwable) {
+                        t.printStackTrace()
+                        println("filterWithPredicate threw error, entry=\"$it\"")
+                        false
+                    }
+                }
+                .forEach { list.add(it) }
+            updateList(list)
+        }
+    }
+
+    fun filterListExactMatch(_constraint: String) {
         var constraint = _constraint
         if (constraint.isBlank()) {
             updateList(originalCollection)

@@ -3,12 +3,21 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
+import org.apache.commons.text.similarity.LevenshteinDistance;
+
+import javax.swing.*;
+
 /**
  *
  * @author shmuel
  */
 public class SimilaritySearchJPanel extends javax.swing.JPanel {
 
+    private final int defaultFuzziness = 5;
+    LevenshteinDistance ld = new LevenshteinDistance(defaultFuzziness);
+    Function1<LevenshteinDistance, Unit> filterCallback;
     /**
      * Creates new form SimilaritySearchJPanel
      */
@@ -41,9 +50,19 @@ public class SimilaritySearchJPanel extends javax.swing.JPanel {
         jSlider2.setPaintLabels(true);
         jSlider2.setPaintTicks(true);
         jSlider2.setToolTipText("Number of edits allowed between the search phrase and the catalog entry to be considered matching");
-        jSlider2.setValue(5);
-
-        jLabel7.setText("Edit distance: 0");
+        jSlider2.setValue(defaultFuzziness);
+        final int[] value = {jSlider2.getValue()};//needed for lambda stuff
+        jSlider2.addChangeListener(e -> {
+            JSlider source = (JSlider) e.getSource();
+            int sourceValue = source.getValue();
+            if(sourceValue != value[0]) {
+                value[0] = sourceValue;
+                ld = new LevenshteinDistance(value[0]);
+                jLabel7.setText("Edit distance: " + value[0]);
+                filterCallback.invoke(ld);
+            }
+        });
+        jLabel7.setText("Edit distance: " + defaultFuzziness);
 
         jLabel8.setText("Fuzzy");
 

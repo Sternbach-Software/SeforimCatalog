@@ -39,7 +39,7 @@ class LemmatizerTest : TestBase() {
         //StringReader reader = new StringReader("להישרדות בהישרדות ההישרדות מהישרדות ניסיון הניסיון הביטוח  בביטוח לביטוח שביטוח מביטוחים");
         var expectedNumberOfNonHebrewWords = 0
         val reader = StringReader(text)
-        m_lemmatizer = StreamLemmatizer(reader, getDictionary())
+        val m_lemmatizer = StreamLemmatizer(reader, getDictionary())
         val word = ""
         val tokens: List<Token> = ArrayList()
         while (m_lemmatizer!!.getLemmatizeNextToken(Reference(word), tokens) > 0) {
@@ -114,7 +114,7 @@ class LemmatizerTest : TestBase() {
         //StringReader reader = new StringReader("להישרדות בהישרדות ההישרדות מהישרדות ניסיון הניסיון הביטוח  בביטוח לביטוח שביטוח מביטוחים");
         var expectedNumberOfNonHebrewWords = 0
         val reader = StringReader(text)
-        m_lemmatizer = StreamLemmatizer(reader, getDictionary())
+        val m_lemmatizer = StreamLemmatizer(reader, getDictionary())
         val word = ""
         val tokens: List<Token> = ArrayList()
         while (m_lemmatizer!!.getLemmatizeNextToken(Reference(word), tokens) > 0) {
@@ -155,7 +155,6 @@ class LemmatizerTest : TestBase() {
     }
 
     companion object {
-        private var m_lemmatizer: StreamLemmatizer? = null
         fun <T> Iterable<T>.toFrequencyMap(): Map<T, Int> {
             val frequencies: MutableMap<T, Int> = mutableMapOf()
             this.forEach { frequencies[it] = frequencies.getOrDefault(it, 0) + 1 }
@@ -186,11 +185,10 @@ class LemmatizerTest : TestBase() {
 //            lemmatizedList.addAll(Arrays.asList(text.split("[\\s,\"?!&.;:()]")));//split by words
 //            return lemmatizedList;
 //        }
-            val reader = StringReader(text)
-            m_lemmatizer = StreamLemmatizer(reader, getDictionary())
+            val m_lemmatizer = StreamLemmatizer(StringReader(text), getDictionary())
             val word = ""
             val tokens: List<Token> = ArrayList()
-            while (m_lemmatizer!!.getLemmatizeNextToken(Reference(word), tokens) > 0) {
+            while (m_lemmatizer.getLemmatizeNextToken(Reference(word), tokens) > 0) {
                 /*if(*/ /*IsBlankChecker.*/ /*isBlank(word)) {
                 System.out.println("was blank");
                 continue;
@@ -217,7 +215,7 @@ class LemmatizerTest : TestBase() {
                     if (curPrefix != ht.prefixLength.toInt() || curWord != ht.text || curLemma != ht.lemma) {
                         curPrefix = ht.prefixLength.toInt()
                         curWord = ht.text
-                        curLemma = ht.lemma
+                        ht.lemma?.let { curLemma = it }
                         if (curPrefix == 0) {
                             if (printLogs) println(String.format("Legal word: %s (score: %f)", ht.text, ht.score))
                         } else {
@@ -242,11 +240,11 @@ class LemmatizerTest : TestBase() {
                         }
                         var lemma = ht.lemma
                         if (removeVavsAndYudsFromLemma) {
-                            println("Lemma before sanitization: $lemma")
+                            if(printLogs) println("Lemma before sanitization: $lemma")
                             lemma = ht.lemma?.replace("[וי]".toRegex(), "")
-                            println("Lemma after sanitization: $lemma")
+                            if(printLogs) println("Lemma after sanitization: $lemma")
                         }
-                        if (lemma != null && !lemma.isBlank()) {
+                        if (lemma?.isBlank() == false) {
                             lemmatizedSet.add(lemma)
                             lemmatizedList.add(lemma)
                         }
@@ -284,7 +282,7 @@ class LemmatizerTest : TestBase() {
                     }
                 }
             }*/
-            println("Frequency map: ${lemmatizedList.toFrequencyMap()}")
+            if(printLogs) println("Frequency map: ${lemmatizedList.toFrequencyMap()}")
             return if (addExactWords) exactSet + lemmatizedSet else lemmatizedSet
         }
     }
