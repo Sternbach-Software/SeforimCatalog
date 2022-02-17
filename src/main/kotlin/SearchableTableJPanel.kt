@@ -61,9 +61,9 @@ abstract class SearchableTableJPanel(
         getCriteria(element).contains(regex)
 
     open fun matchesConstraintNoRegex(element: CatalogEntry, constraint: String): Boolean =
-        getCriteria(element).contains(constraint)
+        getCriteria(element).contains(constraint, ignoreCase = true)
 
-    open fun matchesConstraintNoRegex(element: String, constraint: String): Boolean = element.contains(constraint)
+    open fun matchesConstraintNoRegex(element: String, constraint: String): Boolean = element.contains(constraint, ignoreCase = true)
     open fun JTable.setJTableColumnsWidth(
         percentages: List<Double>
     ) {
