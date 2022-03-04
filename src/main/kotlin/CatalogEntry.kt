@@ -11,7 +11,7 @@ Needs binding
 Comments
 קטיגורי
 מס' מדף*/
-data class CatalogEntry(
+open class CatalogEntry(
     val numberNotSure: String,
     val miyunNum: String,
     val seferName: String,
@@ -24,8 +24,11 @@ data class CatalogEntry(
     val needsBinding: String,
     val comments: String,
     val category: String,
-    val shelfNum: String,
+    val shelfNum: String
 ) {
+    override fun toString(): String {
+        return "CatalogEntry(seferName=$seferName, author=$author, publisher=$publisher, volumeNum=$volumeNum, category=$category, shelfNum=$shelfNum)"
+    }
     fun everythingIsBlank() =
         seferName.isBlank() &&
 //                numberNotSure.isBlank() &&

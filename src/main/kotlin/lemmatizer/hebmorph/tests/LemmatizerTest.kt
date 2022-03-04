@@ -175,11 +175,13 @@ class LemmatizerTest : TestBase() {
             ignorePrefixes: Boolean,
             printLogs: Boolean,
             removeVavsAndYudsFromLemma: Boolean = true,
-            addExactWords: Boolean = true
-        ): Set<String> {
+            addExactWords: Boolean = true,
+            reduceNifalParticiple: Boolean = true
+        ): Set<Set<String>> {
             //StringReader reader = new StringReader("להישרדות בהישרדות ההישרדות מהישרדות ניסיון הניסיון הביטוח  בביטוח לביטוח שביטוח מביטוחים");
-            val lemmatizedSet: MutableSet<String> = HashSet()
-            val exactSet: MutableSet<String> = HashSet()
+            val lemmatizedSetOfSets: MutableSet<Set<String>> = mutableSetOf()
+            val lemmatizedSet: MutableSet<String> = mutableSetOf()
+            val exactSet: MutableSet<String> = mutableSetOf()
             val lemmatizedList = mutableListOf<String>()
             //        if(IsBlankChecker.containsLatin(text)) {
 //            lemmatizedList.addAll(Arrays.asList(text.split("[\\s,\"?!&.;:()]")));//split by words
@@ -244,10 +246,13 @@ class LemmatizerTest : TestBase() {
                             lemma = ht.lemma?.replace("[וי]".toRegex(), "")
                             if(printLogs) println("Lemma after sanitization: $lemma")
                         }
-                        if (lemma?.isBlank() == false) {
+                        if(reduceNifalParticiple) {
+                            if(lemma?.length == 4 && lemma.first() == 'נ') lemma = lemma.substring(1)
+                        }
+                        if (lemma?.isNotBlank() == true) {
                             lemmatizedSet.add(lemma)
                             lemmatizedList.add(lemma)
-                        }
+                        } else if(lemma == null) lemmatizedSet.add(ht.text)/*nouns don't have lemmas*/
                         if (addExactWords && !ht.text.isBlank()) {
                             exactSet.add(ht.text /*add actual word for exact search*/)
                         }
@@ -259,6 +264,18 @@ class LemmatizerTest : TestBase() {
                         )
                     }
                 }
+                //new word:
+                if(printLogs) {
+                    println("Starting new word; adding hashset")
+                    println("lemmatizedSetOfSets=$lemmatizedSetOfSets, lemmatizedSet=$lemmatizedSet")
+                }
+                if(lemmatizedSet.isNotEmpty()) lemmatizedSetOfSets.add(lemmatizedSet.toSet())
+                if(printLogs){
+                    println("lemmatizedSetOfSets=$lemmatizedSetOfSets")
+                    println("Clearing set")
+                }
+                lemmatizedSet.clear()
+                if(printLogs) println("lemmatizedSetOfSets=$lemmatizedSetOfSets")
             }
 
             //if list contains אמר and מאמר, remove the latter, but if it contains מד and למד, dont remove the latter
@@ -283,7 +300,7 @@ class LemmatizerTest : TestBase() {
                 }
             }*/
             if(printLogs) println("Frequency map: ${lemmatizedList.toFrequencyMap()}")
-            return if (addExactWords) exactSet + lemmatizedSet else lemmatizedSet
+            return lemmatizedSetOfSets.also { if (addExactWords) it.addAll(listOf(exactSet)) }
         }
     }
 

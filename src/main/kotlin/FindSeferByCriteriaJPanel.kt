@@ -8,6 +8,8 @@ class FindSeferByCriteriaJPanel(
 ) : SearchableTableJPanel(searchPhrase) {
     override val originalCollection: Collection<Any>
         get() = Catalog.entries
+    override val originalCollectionLemmatized: List<LemmatizedCatalogEntry>
+        get() = Catalog.entriesLemmatized
     override val listBeingDisplayed: MutableList<Any> = Catalog.entries.toMutableList()
     override val displayingCatalogEntry: Boolean = true
     override val columns: List<String> = listOf(

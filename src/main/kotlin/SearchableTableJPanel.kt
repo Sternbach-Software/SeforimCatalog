@@ -24,6 +24,7 @@ abstract class SearchableTableJPanel(
     private val searchPhrase: String
 ) : JPanel() {
     open val originalCollection: Collection<Any> = emptyList()
+    open val originalCollectionLemmatized: List<LemmatizedCatalogEntry> = emptyList()
     open val listBeingDisplayed: MutableList<Any> = mutableListOf()
     open val displayingCatalogEntry: Boolean =
         false //if false, return listBeingDisplayed[rowNum] in table model, otherwise return value depending on columnNum
@@ -63,7 +64,9 @@ abstract class SearchableTableJPanel(
     open fun matchesConstraintNoRegex(element: CatalogEntry, constraint: String): Boolean =
         getCriteria(element).contains(constraint, ignoreCase = true)
 
-    open fun matchesConstraintNoRegex(element: String, constraint: String): Boolean = element.contains(constraint, ignoreCase = true)
+    open fun matchesConstraintNoRegex(element: String, constraint: String): Boolean =
+        element.contains(constraint, ignoreCase = true)
+
     open fun JTable.setJTableColumnsWidth(
         percentages: List<Double>
     ) {
@@ -77,6 +80,7 @@ abstract class SearchableTableJPanel(
             column.preferredWidth = (tablePreferredWidth * (percentages[i] / total)).toInt()
         }
     }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -92,10 +96,10 @@ abstract class SearchableTableJPanel(
         jLabel1.text = searchPhrase
         jLabel2 = JLabel()
         searchModeExplanation = JPanel().also { it.isVisible = false }
-        jLabel6 = JLabel().also { it.isVisible = false }
-        exactSearchRadioButton = JRadioButton().also { it.isVisible = false }
-        rootWordSearchRadioButton = JRadioButton().also { it.isVisible = false }
-        similaritySearchRadioButton = JRadioButton().also { it.isVisible = false }
+        jLabel6 = JLabel()/*.also { it.isVisible = false }*/
+        exactSearchRadioButton = JRadioButton()/*.also { it.isVisible = false }*/
+        rootWordSearchRadioButton = JRadioButton()/*.also { it.isVisible = false }*/
+        similaritySearchRadioButton = JRadioButton()/*.also { it.isVisible = false }*/
         seferNameTextField.locale = Locale("he")
         seferNameTextField.componentOrientation = ComponentOrientation.RIGHT_TO_LEFT
         table.model = catalogModel()
@@ -144,10 +148,10 @@ abstract class SearchableTableJPanel(
 
             override fun keyReleased(e: KeyEvent?) {
                 seferNameTextField.componentOrientation =
-                    if(seferNameTextField.text.trim()
+                    if (seferNameTextField.text.trim()
                             .also {
                                 scope.launch(Dispatchers.IO) {
-                                    logFile.appendText(it + "\n")
+                                    kotlin.runCatching { logFile.appendText(it + "\n") }
                                 }
                             }
                             .firstOrNull()
@@ -177,11 +181,11 @@ abstract class SearchableTableJPanel(
         val shelfNumRegex = "\\d+\\.\\d+".toRegex()
         val rowSorter = TableRowSorter(table.model as AbstractTableModel)
         val comparator = kotlin.Comparator<String> { o1, o2 ->
-                val o1ContainsEnglish = o1.containsEnglish()
-                val o2ContainsEnglish = o2.containsEnglish()
-                if (o1ContainsEnglish && !o2ContainsEnglish) 1
-                else if (!o1ContainsEnglish && o2ContainsEnglish) -1
-                else (o1.lowercase()).compareTo(o2.lowercase())
+            val o1ContainsEnglish = o1.containsEnglish()
+            val o2ContainsEnglish = o2.containsEnglish()
+            if (o1ContainsEnglish && !o2ContainsEnglish) 1
+            else if (!o1ContainsEnglish && o2ContainsEnglish) -1
+            else (o1.lowercase()).compareTo(o2.lowercase())
         }
         val seferNameColumnIndex =
             if (columns.size - 1 != 0) columns.size - 1 else 0//if only 1 column (e.g. authors), index 0, else "name of sefer" column
@@ -297,18 +301,18 @@ abstract class SearchableTableJPanel(
                                     layout.createSequentialGroup()
                                         .addGroup(
                                             layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                .addGroup(
-                                    layout.createSequentialGroup()
-                                        .addComponent(jLabel1)
-                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(seferNameTextField)
-                                )
-                                .addGroup(
-                                    layout.createSequentialGroup()
-                                        .addComponent(jLabel2)
-                                        .addGap(0, 0, Short.MAX_VALUE.toInt())
-                                )
-                        )
+                                                .addGroup(
+                                                    layout.createSequentialGroup()
+                                                        .addComponent(jLabel1)
+                                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                                        .addComponent(seferNameTextField)
+                                                )
+                                                .addGroup(
+                                                    layout.createSequentialGroup()
+                                                        .addComponent(jLabel2)
+                                                        .addGap(0, 0, Short.MAX_VALUE.toInt())
+                                                )
+                                        )
                                         .addGap(6, 6, 6)
                                 )
                                 .addGroup(
@@ -414,61 +418,71 @@ Name (שם הספר)"*/
     lateinit var jLabel6: JLabel
     lateinit var rootWordSearchJPanel: RootWordSearchJPanel
     lateinit var similaritySearchJPanel: SimilaritySearchJPanel
-    fun filterList(){
+    fun filterList() {
         val mode = if (exactSearchRadioButton.isSelected) FILTER_EXACT
         else if (rootWordSearchRadioButton.isSelected) FILTER_ROOT
         else FILTER_SIMILARITY
         filterList(
             mode,
-            if(mode == FILTER_SIMILARITY) similaritySearchJPanel.ld!! else null
+            if (mode == FILTER_SIMILARITY) similaritySearchJPanel.ld!! else null
         )
     }
+
     fun filterList(mode: Int, ld: LevenshteinDistance? = null) {
         val _constraint1 = seferNameTextField.text.trim() //TODO consider making this a computed field
         if (_constraint1.isBlank()) {
             updateList(originalCollection)
             return
         }
-        when(mode) {
+        when (mode) {
             FILTER_EXACT -> filterListExactMatch(_constraint1)
             FILTER_ROOT -> filterListRootSearch(_constraint1)
             FILTER_SIMILARITY -> filterListSimilaritySearch(_constraint1, ld!!)
         }
     }
+
     fun filterListRootSearch(constraint: String) {
-        val shorashim = LemmatizerTest.getLemmatizedList(
+        val queryShorashim = LemmatizerTest.getLemmatizedList(
             constraint,
             false,
-            false,
+            true,
             true,
             false
-        )
-        println("Shorashim: $shorashim")
-        filterWithPredicate({
-            LemmatizerTest
-                .getLemmatizedList(
-                    it,
-                    false,
-                    false,
-                    true,
-                    false
-                )
-                .any{ shorashim.any { it1 -> it == it1 } }
+        ).toList()
+        println("Shorashim: $queryShorashim")
+        filterWithPredicate(true, {
+            false //root search not available on columns whose lemmas weren't indexed
         }) {
-
-            LemmatizerTest
-                .getLemmatizedList(
-                    getCriteria(it),
-                    false,
-                    false,
-                    true,
-                    false
-                )
-                .any{ shorashim.any { it1 -> it == it1 } }
+            var matches = true
+            val entryShorashim = (it as LemmatizedCatalogEntry)
+                ._seferName
+                .second
+                .toList()
+            matches = queryShorashim.all { it: Set<String> ->
+                it.any { it1: String ->
+                    entryShorashim.any { it2: Set<String> ->
+                        it2.any { it3: String ->
+                            it1 == it3
+                        }
+                    }
+                }
+            }
+            /*if(index != -1) {
+                if(queryShorashim.size != index +1)
+                for(i in index+1 until queryShorashim.size) {
+                    entryShorashim.getOrNull(i)?.let {
+                        if(queryShorashim.getOrNull(i)?.none { it1 -> it1 in it } == true) {
+                            matches = false
+                        }
+                    }
+                }
+            } else matches = false*/
+            matches
         }
     }
+
     fun filterListSimilaritySearch(constraint: String, levenshteinDistance: LevenshteinDistance) {
-        filterWithPredicate({
+        filterWithPredicate(false, {
             val distance = levenshteinDistance.apply(constraint, it)
             println("Distance between $constraint and $it: $distance")
             distance != -1 && distance <= levenshteinDistance.threshold
@@ -481,20 +495,13 @@ Name (שם הספר)"*/
     }
 
     private fun filterWithPredicate(
+        useLemmatizedList: Boolean,
         predicateIfString: (String) -> Boolean,
-        predicateIfCatalogEntry: (CatalogEntry) -> Boolean,
+        predicateIfCatalogEntry: (CatalogEntry) -> Boolean
     ) {
-        val firstOrNull = originalCollection.firstOrNull()
-        if (firstOrNull is String) {
-            val list = Collections.synchronizedList(mutableListOf<String>())
-            (originalCollection as Collection<String>)
-                .parallelStream()
-                .filter { predicateIfString(it) }
-                .forEach { list.add(it) }
-            updateList(list)
-        } else {
+        if (useLemmatizedList) {
             val list = Collections.synchronizedList(mutableListOf<CatalogEntry>())
-            (originalCollection as Collection<CatalogEntry>)
+            (originalCollectionLemmatized as Collection<LemmatizedCatalogEntry>)
                 .parallelStream()
                 .filter {
                     try {
@@ -507,6 +514,31 @@ Name (שם הספר)"*/
                 }
                 .forEach { list.add(it) }
             updateList(list)
+        } else {
+            val firstOrNull = originalCollection.firstOrNull()
+            if (firstOrNull is String) {
+                val list = Collections.synchronizedList(mutableListOf<String>())
+                (originalCollection as Collection<String>)
+                    .parallelStream()
+                    .filter { predicateIfString(it) }
+                    .forEach { list.add(it) }
+                updateList(list)
+            } else {
+                val list = Collections.synchronizedList(mutableListOf<CatalogEntry>())
+                (originalCollection as Collection<CatalogEntry>)
+                    .parallelStream()
+                    .filter {
+                        try {
+                            predicateIfCatalogEntry(it)
+                        } catch (t: Throwable) {
+                            t.printStackTrace()
+                            println("filterWithPredicate threw error, entry=\"$it\"")
+                            false
+                        }
+                    }
+                    .forEach { list.add(it) }
+                updateList(list)
+            }
         }
     }
 
@@ -518,7 +550,8 @@ Name (שם הספר)"*/
         }
         val newList = Collections.synchronizedList(mutableListOf<Any>())
         val firstElement = originalCollection.firstOrNull()
-        val needsRegex = constraint.contains('#') || constraint.startsWith('~').also { if(it) constraint = constraint.removePrefix("~")}
+        val needsRegex = constraint.contains('#') || constraint.startsWith('~')
+            .also { if (it) constraint = constraint.removePrefix("~") }
         val regex = if (needsRegex) getConstraintRegex(constraint) else null
         val predicate: (Any) -> Boolean =
             if (firstElement is String)
