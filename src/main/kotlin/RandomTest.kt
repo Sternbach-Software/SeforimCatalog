@@ -121,7 +121,16 @@ fun main() {
     println(result2)
     println("Madad: " + LemmatizerTest.getLemmatizedList(" מודדים מודדו מודדות מדד מודד מדדו למדוד למודד מדדו ימודדו ימודד", false, true,))
     println("mamar: " + LemmatizerTest.getLemmatizedList("מאמר וממאמר וממאמרי וממאמרים ומאמרותיהם וממאמריהם וממאמרותהם", true, true,))
-    println("mamar: " + LemmatizerTest.getLemmatizedList(" ילמדינו ילמדנו", true, true,))//TODO fails
-    println("adjectives: " + LemmatizerTest.getLemmatizedList(" יפיפיה מפואר נהדר מדהים נאזר עטוף אדום כחול אדיר אמור", true, true,))//TODO fails
+    println("lamad: " + LemmatizerTest.getLemmatizedList(" ילמדינו ילמדנו", true, true,))//TODO fails
+    println("atar: " + LemmatizerTest.getLemmatizedList(" עיטור", true, true,))
+    println("hatar: " + LemmatizerTest.getLemmatizedList(" העטרה ", true, true,))
+    println("batar: " + LemmatizerTest.getLemmatizedList(" בעטר", true, true,))
+    println("batar: " + LemmatizerTest.getLemmatizedList(" מעטר", true, true,))
+    println("batar: " + LemmatizerTest.getLemmatizedList("א. מחברת מנחם / ב. תשובות דונש / ג. תשובות תלמידי מנחם / ד. תשובות דונש על רס״ג", true, true,))
+    println("---------------------")
+    println("batar: " + LemmatizerTest.getLemmatizedList("בגבורה", true, true,))
+    println("---------------------")
+    println("batar: " + LemmatizerTest.getLemmatizedList("בגבורתו", true, true,))
+//    println("adjectives: " + LemmatizerTest.getLemmatizedList(" יפיפיה מפואר נהדר מדהים נאזר עטוף אדום כחול אדיר אמור", true, true,))//TODO fails
 }
 //after sanitization: (?!(למד|אמר|עקר))

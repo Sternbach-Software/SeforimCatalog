@@ -246,9 +246,15 @@ class LemmatizerTest : TestBase() {
                             lemma = ht.lemma?.replace("[וי]".toRegex(), "")
                             if(printLogs) println("Lemma after sanitization: $lemma")
                         }
-                        if(reduceNifalParticiple) {
-                            if(lemma?.length == 4 && lemma.first() == 'נ') lemma = lemma.substring(1)
+                        if(printLogs) {
+                            println("First: ${lemma?.firstOrNull()}")
+                            println("Last: ${lemma?.lastOrNull()}")
                         }
+                        if(reduceNifalParticiple) {//e.g. נאזר
+                            if(lemma?.length == 4 && lemma.firstOrNull() == 'נ') lemma = lemma.substring(1)
+                        }
+                        if(/*lemma is העטר*/lemma?.length == 4 && lemma.firstOrNull() == 'ה') lemma = lemma.substring(1)
+                        if(/*lemma is עטרה*/lemma?.length == 4 && lemma.lastOrNull() == 'ה') lemma = lemma.dropLast(1)
                         if (lemma?.isNotBlank() == true) {
                             lemmatizedSet.add(lemma)
                             lemmatizedList.add(lemma)
