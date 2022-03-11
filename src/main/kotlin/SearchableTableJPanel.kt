@@ -4,12 +4,11 @@ import kotlinx.coroutines.launch
 import lemmatizer.hebmorph.tests.LemmatizerTest
 import org.apache.commons.text.similarity.LevenshteinDistance
 import java.awt.*
-import java.awt.event.HierarchyBoundsListener
-import java.awt.event.HierarchyEvent
-import java.awt.event.KeyEvent
-import java.awt.event.KeyListener
+import java.awt.event.*
 import java.util.*
 import javax.swing.*
+import javax.swing.event.DocumentEvent
+import javax.swing.event.DocumentListener
 import javax.swing.table.AbstractTableModel
 import javax.swing.table.DefaultTableCellRenderer
 import javax.swing.table.TableCellRenderer
@@ -21,7 +20,8 @@ private const val FILTER_ROOT = 1
 private const val FILTER_SIMILARITY = 3
 
 abstract class SearchableTableJPanel(
-    private val searchPhrase: String
+    private val searchPhrase: String,
+    private val getLemmatizedCriteriaLambda: ((LemmatizedCatalogEntry) -> Set<Set<String>>)? = null
 ) : JPanel() {
     open val originalCollection: Collection<Any> = emptyList()
     open val originalCollectionLemmatized: List<LemmatizedCatalogEntry> = emptyList()
@@ -95,7 +95,7 @@ abstract class SearchableTableJPanel(
         table = JTable()
         jLabel1.text = searchPhrase
         jLabel2 = JLabel()
-        searchModeExplanation = JPanel().also { it.isVisible = false }
+        searchModeExplanation = JPanel().also { it.isVisible = true }
         jLabel6 = JLabel()/*.also { it.isVisible = false }*/
         exactSearchRadioButton = JRadioButton()/*.also { it.isVisible = false }*/
         rootWordSearchRadioButton = JRadioButton()/*.also { it.isVisible = false }*/
@@ -141,44 +141,54 @@ abstract class SearchableTableJPanel(
 //        table.showHorizontalLines = true
         table.showVerticalLines = true
         jScrollPane1.setViewportView(table)
+        seferNameTextField.document.addDocumentListener(object : DocumentListener {
+            override fun insertUpdate(e: DocumentEvent?) = updateTextFieldAndFilter()
+            override fun removeUpdate(e: DocumentEvent?) = updateTextFieldAndFilter()
+            override fun changedUpdate(e: DocumentEvent?) = updateTextFieldAndFilter()
+
+            private fun updateTextFieldAndFilter() {
+                EventQueue.invokeLater {
+                    seferNameTextField.componentOrientation =
+                        if (seferNameTextField.text.trim()
+                                .also {
+                                    scope.launch(Dispatchers.IO) {
+                                        kotlin.runCatching { logFile.appendText(it + "\n") }
+                                    }
+                                }
+                                .firstOrNull()
+                                ?.toString()
+                                ?.let { it.containsEnglish() || /*if regex*/ it == "~" } == true
+                        ) ComponentOrientation.LEFT_TO_RIGHT
+                        else ComponentOrientation.RIGHT_TO_LEFT
+                }
+                //                מדד מודד מדדו למדוד למודד מדדו ימודדו ימודד
+                //                the above list of words generates the lemmas דד and מדד. When using שרש search, consider adding hei to end of
+                //                two letter shoresh.
+                //                Related Shoresh transformations: TODO
+                //                1. related letters get switched (אהחע, בומפ, זשסרצ, דנטלת, גיכק)
+                //                2. double letters turn into letter+hei
+                //                3. words which end in hei get replaced with first letter + vav + second letter (רמה into רום)
+                //                4. words which end in hei get second letter doubles (רמה into רמם)
+
+                //                Explanation of shoresh search:
+                //                שרש search
+                //                (looks for matches by comparing the root words contained in the search query with the root words in each catalog entry,
+                //                preserving nouns in their full form (e.g. וממאמריהם -> מאמר) and reducing verbs and adjectives* to their root word)
+                //                *Except for participles in בנין נפעל (e.g. נאזר) - see tip #7
+                filterList()
+            }
+        })
         seferNameTextField.addKeyListener(object : KeyListener {
             override fun keyTyped(e: KeyEvent?) {}
 
             override fun keyPressed(e: KeyEvent?) {}
 
             override fun keyReleased(e: KeyEvent?) {
-                seferNameTextField.componentOrientation =
-                    if (seferNameTextField.text.trim()
-                            .also {
-                                scope.launch(Dispatchers.IO) {
-                                    kotlin.runCatching { logFile.appendText(it + "\n") }
-                                }
-                            }
-                            .firstOrNull()
-                            ?.toString()
-                            ?.let { it.containsEnglish() || /*if regex*/ it == "~" } == true
-                    ) ComponentOrientation.LEFT_TO_RIGHT
-                    else ComponentOrientation.RIGHT_TO_LEFT
-//                מדד מודד מדדו למדוד למודד מדדו ימודדו ימודד
-//                the above list of words generates the lemmas דד and מדד. When using שרש search, consider adding hei to end of
-//                two letter shoresh.
-//                Related Shoresh transformations: TODO
-//                1. related letters get switched (אהחע, בומפ, זשסרצ, דנטלת, גיכק)
-//                2. double letters turn into letter+hei
-//                3. words which end in hei get replaced with first letter + vav + second letter (רמה into רום)
-//                4. words which end in hei get second letter doubles (רמה into רמם)
 
-//                Explanation of shoresh search:
-//                שרש search
-//                (looks for matches by comparing the root words contained in the search query with the root words in each catalog entry,
-//                preserving nouns in their full form (e.g. וממאמריהם -> מאמר) and reducing verbs and adjectives* to their root word)
-//                *Except for participles in בנין נפעל (e.g. נאזר) - see tip #7
-                filterList()
             }
         }
         )
 //        table.autoCreateRowSorter = true
-        val shelfNumRegex = "\\d+\\.\\d+".toRegex()
         val rowSorter = TableRowSorter(table.model as AbstractTableModel)
         val comparator = kotlin.Comparator<String> { o1, o2 ->
             val o1ContainsEnglish = o1.containsEnglish()
@@ -227,7 +237,7 @@ abstract class SearchableTableJPanel(
         val exactSearchName = "Exact search"
         val rootSearchName = "Root word search"
         val similaritySearchName = "Similarity search"
-        rootWordSearchJPanel = RootWordSearchJPanel()
+        rootWordSearchJPanel = RootWordSearchExplanationJPanel(this)
         similaritySearchJPanel = SimilaritySearchJPanel()
         val exactMatchJPanel = ExactMatchJPanel()
         val explanationPanelTitledBorder = BorderFactory.createTitledBorder(exactSearchName/*start with exact*/)
@@ -416,7 +426,7 @@ Name (שם הספר)"*/
     lateinit var buttonGroup1: ButtonGroup
     lateinit var exactSearchRadioButton: JRadioButton
     lateinit var jLabel6: JLabel
-    lateinit var rootWordSearchJPanel: RootWordSearchJPanel
+    lateinit var rootWordSearchJPanel: RootWordSearchExplanationJPanel
     lateinit var similaritySearchJPanel: SimilaritySearchJPanel
     fun filterList() {
         val mode = if (exactSearchRadioButton.isSelected) FILTER_EXACT
@@ -424,7 +434,7 @@ Name (שם הספר)"*/
         else FILTER_SIMILARITY
         filterList(
             mode,
-            if (mode == FILTER_SIMILARITY) similaritySearchJPanel.ld!! else null
+            null//if (mode != FILTER_SIMILARITY) null else similaritySearchJPanel.ld!!
         )
     }
 
@@ -432,6 +442,7 @@ Name (שם הספר)"*/
         val _constraint1 = seferNameTextField.text.trim() //TODO consider making this a computed field
         if (_constraint1.isBlank()) {
             updateList(originalCollection)
+            rootWordSearchJPanel.setShorashim(listOf())
             return
         }
         when (mode) {
@@ -444,40 +455,34 @@ Name (שם הספר)"*/
     fun filterListRootSearch(constraint: String) {
         val queryShorashim = LemmatizerTest.getLemmatizedList(
             constraint,
+            true,
             false,
             true,
-            true,
             false
-        ).toList()
-        println("Shorashim: $queryShorashim")
+        )
+//            .reversed()//the text field puts the words backwards
+            .toList()
+        rootWordSearchJPanel.setShorashim(queryShorashim.flatten())
+//        println("Query shorashim: $queryShorashim")
         filterWithPredicate(true, {
             false //root search not available on columns whose lemmas weren't indexed
-        }) {
-            var matches = true
-            val entryShorashim = (it as LemmatizedCatalogEntry)
-                ._seferName
-                .second
-                .toList()
-            matches = queryShorashim.all { it: Set<String> ->
-                it.any { it1: String ->
-                    entryShorashim.any { it2: Set<String> ->
-                        it2.any { it3: String ->
-                            it1 == it3
-                        }
-                    }
+        }) { entry ->
+            val listOfChecks = mutableListOf<Pair<String, String>>()
+            val entryShorashim = getLemmatizedCriteriaLambda!!(entry as LemmatizedCatalogEntry).toList()
+            //return:
+            /* if (entryShorashim.isEmpty()) false
+             else {*/
+            (
+                    if (rootSearchShouldMatchAll)
+                        if (rootSearchShouldMatchSequential)
+                            matchesAllOrdered(queryShorashim, entryShorashim, listOfChecks)
+                        else matchesAllUnordered(queryShorashim, entryShorashim, listOfChecks)
+                    else matchesAny(queryShorashim, entryShorashim, listOfChecks)
+                    )
+                .also {//ספר עקר
+                    if(it) println("Sefer: ${entry.seferName}, Entry shorashim: $entryShorashim, checks: $listOfChecks")
                 }
-            }
-            /*if(index != -1) {
-                if(queryShorashim.size != index +1)
-                for(i in index+1 until queryShorashim.size) {
-                    entryShorashim.getOrNull(i)?.let {
-                        if(queryShorashim.getOrNull(i)?.none { it1 -> it1 in it } == true) {
-                            matches = false
-                        }
-                    }
-                }
-            } else matches = false*/
-            matches
+//            }
         }
     }
 
@@ -589,5 +594,59 @@ Name (שם הספר)"*/
         listBeingDisplayed.addAll(newList)
         (table.model as AbstractTableModel).fireTableDataChanged()
         jLabel2.text = "Results: ${listBeingDisplayed.size}"
+    }
+
+    companion object {
+        fun matchesAllUnordered(
+            queryShorashim: List<Set<String>>,
+            entryShorashim: List<Set<String>>,
+            listOfChecks: MutableList<Pair<String, String>>
+        ): Boolean {
+            return queryShorashim.all { shorashim: Set<String> ->
+                shorashim.any { shoresh: String ->
+                    entryShorashim.any {
+                        it.any {
+                            listOfChecks.add(shoresh to it)
+                            it == shoresh
+                        }
+                    }
+                }
+            }
+        }
+
+        fun matchesAny(
+            queryShorashim: List<Set<String>>,
+            entryShorashim: List<Set<String>>,
+            listOfChecks: MutableList<Pair<String, String>>
+        ) = queryShorashim.any {
+            it.any { queryShoresh ->
+                entryShorashim.any {
+                    it.any { entryShoresh ->
+                        listOfChecks.add(queryShoresh to entryShoresh)
+                        entryShoresh == queryShoresh
+                    }
+                }
+            }
+        }
+
+        fun matchesAllOrdered(
+            queryShorashim: List<Set<String>>,
+            entryShorashim: List<Set<String>>,
+            listOfChecks: MutableList<Pair<String, String>>
+        ): Boolean {
+            if (entryShorashim.isEmpty()) return false
+            return kotlin.runCatching {
+                queryShorashim.withIndex().all { (index, shorashim: Set<String>) ->
+                    shorashim.any { shoresh: String ->
+                        entryShorashim[index]/*, entryShorashim.size)*/.any {
+//                            it.any {
+                                listOfChecks.add("shoresh=$shoresh" to "entry=$it")
+                                it == shoresh
+//                            }
+                        }
+                    }
+                }
+            }.let { if (it.isSuccess) it.getOrNull()!! else false }
+        }
     }
 }

@@ -17,6 +17,7 @@
 </itamar> */
 package lemmatizer.hebmorph.tests
 
+import Catalog.containsEnglish
 import com.code972.hebmorph.HebrewToken
 import com.code972.hebmorph.Reference
 import com.code972.hebmorph.StreamLemmatizer
@@ -26,7 +27,6 @@ import java.io.IOException
 import java.awt.EventQueue
 import java.io.StringReader
 import java.util.ArrayList
-import java.util.HashSet
 
 class LemmatizerTest : TestBase() {
     @Throws(IOException::class)
@@ -97,7 +97,7 @@ class LemmatizerTest : TestBase() {
 //                isVisible = true
 //            }
         }
-        val lemmatizedList = getLemmatizedList(text, true, true)
+        val lemmatizedList = getLemmatizedList(text, true, false)
         println(lemmatizedList)
         for (entry in lemmatizedList) println("\"" + entry + "\"")
         println()
@@ -175,8 +175,9 @@ class LemmatizerTest : TestBase() {
             ignorePrefixes: Boolean,
             printLogs: Boolean,
             removeVavsAndYudsFromLemma: Boolean = true,
-            addExactWords: Boolean = true,
-            reduceNifalParticiple: Boolean = true
+            addExactWords: Boolean = false,
+            reduceNifalParticiple: Boolean = true,
+            includeEnglishInExactSet: Boolean = false
         ): Set<Set<String>> {
             //StringReader reader = new StringReader("להישרדות בהישרדות ההישרדות מהישרדות ניסיון הניסיון הביטוח  בביטוח לביטוח שביטוח מביטוחים");
             val lemmatizedSetOfSets: MutableSet<Set<String>> = mutableSetOf()
@@ -197,9 +198,12 @@ class LemmatizerTest : TestBase() {
             }*/
                 if (tokens.isEmpty() || (tokens.size == 1 && tokens[0] !is HebrewToken)) {
                     val wordWhichFailed = if (tokens.isNotEmpty()) tokens[0].text else word
-                    if (printLogs) System.out.printf("%s Not a Hebrew word", wordWhichFailed)
-                    if (!wordWhichFailed.isBlank()) {
-                        exactSet.add(wordWhichFailed)
+                    if (printLogs) println("$wordWhichFailed Not a Hebrew word")
+                    if (wordWhichFailed.isNotBlank()) {
+                        val containsEnglish = wordWhichFailed.containsEnglish()
+                        if (!containsEnglish || includeEnglishInExactSet) {
+                            exactSet.add(wordWhichFailed)
+                        }
                     }
                     continue
                 }
@@ -242,24 +246,28 @@ class LemmatizerTest : TestBase() {
                         }
                         var lemma = ht.lemma
                         if (removeVavsAndYudsFromLemma) {
-                            if(printLogs) println("Lemma before sanitization: $lemma")
+                            if (printLogs) println("Lemma before sanitization: $lemma")
                             lemma = ht.lemma?.replace("[וי]".toRegex(), "")
-                            if(printLogs) println("Lemma after sanitization: $lemma")
+                            if (printLogs) println("Lemma after sanitization: $lemma")
                         }
-                        if(printLogs) {
+                        if (printLogs) {
                             println("First: ${lemma?.firstOrNull()}")
                             println("Last: ${lemma?.lastOrNull()}")
                         }
-                        if(reduceNifalParticiple) {//e.g. נאזר
-                            if(lemma?.length == 4 && lemma.firstOrNull() == 'נ') lemma = lemma.substring(1)
+                        if (reduceNifalParticiple) {//e.g. נאזר
+                            if (lemma?.length == 4 && lemma.firstOrNull() == 'נ') lemma = lemma.substring(1)
                         }
-                        if(/*lemma is העטר*/lemma?.length == 4 && lemma.firstOrNull() == 'ה') lemma = lemma.substring(1)
-                        if(/*lemma is עטרה*/lemma?.length == 4 && lemma.lastOrNull() == 'ה') lemma = lemma.dropLast(1)
+                        if (lemma?.startsWith("הת") == true) lemma = lemma.removePrefix("הת")
+                        if (/*lemma is העטר*/lemma?.length == 4 && lemma.firstOrNull() == 'ה') lemma =
+                            lemma.substring(1)
+                        if (/*lemma is עטרה*/lemma?.length == 4 && lemma.lastOrNull() == 'ה') lemma =
+                            lemma.dropLast(1)
+
                         if (lemma?.isNotBlank() == true) {
                             lemmatizedSet.add(lemma)
                             lemmatizedList.add(lemma)
-                        } else if(lemma == null) lemmatizedSet.add(ht.text)/*nouns don't have lemmas*/
-                        if (addExactWords && !ht.text.isBlank()) {
+                        } else if (lemma == null) lemmatizedSet.add(ht.text)/*nouns don't have lemmas*/
+                        if (addExactWords && !ht.text.isBlank() && !ht.text.containsEnglish()) {
                             exactSet.add(ht.text /*add actual word for exact search*/)
                         }
                         if (printLogs) println(
@@ -271,17 +279,17 @@ class LemmatizerTest : TestBase() {
                     }
                 }
                 //new word:
-                if(printLogs) {
+                if (printLogs) {
                     println("Starting new word; adding hashset")
                     println("lemmatizedSetOfSets=$lemmatizedSetOfSets, lemmatizedSet=$lemmatizedSet")
                 }
-                if(lemmatizedSet.isNotEmpty()) lemmatizedSetOfSets.add(lemmatizedSet.toSet())
-                if(printLogs){
+                if (lemmatizedSet.isNotEmpty()) lemmatizedSetOfSets.add(lemmatizedSet.toSet())
+                if (printLogs) {
                     println("lemmatizedSetOfSets=$lemmatizedSetOfSets")
                     println("Clearing set")
                 }
                 lemmatizedSet.clear()
-                if(printLogs) println("lemmatizedSetOfSets=$lemmatizedSetOfSets")
+                if (printLogs) println("lemmatizedSetOfSets=$lemmatizedSetOfSets")
             }
 
             //if list contains אמר and מאמר, remove the latter, but if it contains מד and למד, dont remove the latter
@@ -305,8 +313,8 @@ class LemmatizerTest : TestBase() {
                     }
                 }
             }*/
-            if(printLogs) println("Frequency map: ${lemmatizedList.toFrequencyMap()}")
-            return lemmatizedSetOfSets.also { if (addExactWords) it.addAll(listOf(exactSet)) }
+            if (printLogs) println("Frequency map: ${lemmatizedList.toFrequencyMap()}")
+            return lemmatizedSetOfSets.also { if (addExactWords && exactSet.isNotEmpty()) it.addAll(listOf(exactSet)) }
         }
     }
 

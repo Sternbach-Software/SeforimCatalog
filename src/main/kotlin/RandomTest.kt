@@ -1,6 +1,15 @@
+import SearchableTableJPanel.Companion.matchesAllOrdered
+import SearchableTableJPanel.Companion.matchesAllUnordered
+import SearchableTableJPanel.Companion.matchesAny
 import lemmatizer.hebmorph.tests.LemmatizerTest
 
 fun main() {
+    val queryShorashim = LemmatizerTest.getLemmatizedList("ספר עקר", true, false).toList()
+    val entryShorashim = LemmatizerTest.getLemmatizedList("הגאון הספר העיקרים הגדול", true, false).toList()
+    val listOfChecks = mutableListOf<String>()
+    println("Query shorashim: $queryShorashim")
+    println("Entry shorashim: $entryShorashim")
+}/*{
 //    LemmatizerTest().testGetLemmas()
     val result = LemmatizerTest.getLemmatizedList(
         "למד" +
@@ -132,5 +141,5 @@ fun main() {
     println("---------------------")
     println("batar: " + LemmatizerTest.getLemmatizedList("בגבורתו", true, true,))
 //    println("adjectives: " + LemmatizerTest.getLemmatizedList(" יפיפיה מפואר נהדר מדהים נאזר עטוף אדום כחול אדיר אמור", true, true,))//TODO fails
-}
+}*/
 //after sanitization: (?!(למד|אמר|עקר))

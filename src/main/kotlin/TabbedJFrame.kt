@@ -61,23 +61,23 @@ class TabbedJFrame : JFrame() {
         jScrollPane2.setViewportView(jTextArea1)
         jTabbedPane1.addTab(
             "Seforim by name",
-            (FindSeferByCriteriaJPanel("Enter name of sefer:") { it.seferName }).initComponents()
+            (FindSeferByCriteriaJPanel("Enter name of sefer:", { it.seferName }, { it._seferName.second })).initComponents()
         )
         jTabbedPane1.addTab(
             "Seforim by author",
-            (FindSeferByCriteriaJPanel("Enter author of sefer:") { it.author }).initComponents()
+            (FindSeferByCriteriaJPanel("Enter author of sefer:", { it.author }, { it._author.second })).initComponents()
         )
         jTabbedPane1.addTab(
             "Seforim by category",
-            (FindSeferByCriteriaJPanel("Enter category of sefer:") { it.category }).initComponents()
+            (FindSeferByCriteriaJPanel("Enter category of sefer:", { it.category })).initComponents()
         )
         jTabbedPane1.addTab(
             "Seforim by publisher",
-            (FindSeferByCriteriaJPanel("Enter publisher of sefer:") { it.publisher }).initComponents()
+            (FindSeferByCriteriaJPanel("Enter publisher of sefer:", { it.publisher })).initComponents()
         )
         jTabbedPane1.addTab(
             "Seforim by shelf",
-            (FindSeferByCriteriaJPanel("Enter shelf of sefer:") { it.shelfNum }).initComponents()
+            (FindSeferByCriteriaJPanel("Enter shelf of sefer:", { it.shelfNum })).initComponents()
         )
         jTabbedPane1.addTab(
             "Authors",

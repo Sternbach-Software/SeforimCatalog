@@ -3,11 +3,6 @@ import kotlinx.coroutines.SupervisorJob
 import java.awt.EventQueue
 import java.io.File
 import kotlin.jvm.JvmStatic
-import java.lang.ClassNotFoundException
-import java.lang.InstantiationException
-import java.lang.IllegalAccessException
-import java.util.logging.Level
-import java.util.logging.Logger
 import javax.swing.*
 
 /**
@@ -16,6 +11,8 @@ import javax.swing.*
  */
 lateinit var logFile: File
 val scope = CoroutineScope(SupervisorJob())
+var rootSearchShouldMatchAll = true
+var rootSearchShouldMatchSequential = true
 class MainJFrame : JFrame() {
     /**
      * This method is called from within the constructor to initialize the form.
@@ -28,13 +25,13 @@ class MainJFrame : JFrame() {
         extendedState = JFrame.MAXIMIZED_BOTH;
         isUndecorated = false;
         jTabbedPane1 = JTabbedPane()
-        findSeferByNameJPanel1 = (FindSeferByCriteriaJPanel("Enter name of sefer$alternatePhrases:") { it.seferName }).initComponents() as FindSeferByCriteriaJPanel
+        findSeferByNameJPanel1 = (FindSeferByCriteriaJPanel("Enter name of sefer$alternatePhrases:", { it.seferName }, { it._seferName.second })).initComponents() as FindSeferByCriteriaJPanel
         seforimByCriteriaTabJPanel = TabJPanel(
             listOf(
-                "Seforim by author" to (FindSeferByCriteriaJPanel("Enter author of sefer$alternatePhrases:") { it.author }).initComponents(),
-                "Seforim by category" to (FindSeferByCriteriaJPanel("Enter category of sefer$alternatePhrases:") { it.category }).initComponents(),
-                "Seforim by publisher" to (FindSeferByCriteriaJPanel("Enter publisher of sefer$alternatePhrases:") { it.publisher }).initComponents(),
-                "Seforim by shelf" to (FindSeferByCriteriaJPanel("Enter shelf of sefer$alternatePhrases:") { it.shelfNum }).initComponents(),
+                "Seforim by author" to (FindSeferByCriteriaJPanel("Enter author of sefer$alternatePhrases:", { it.author }, { it._author.second })).initComponents(),
+                "Seforim by category" to (FindSeferByCriteriaJPanel("Enter category of sefer$alternatePhrases:", { it.category })).initComponents(),
+                "Seforim by publisher" to (FindSeferByCriteriaJPanel("Enter publisher of sefer$alternatePhrases:", { it.publisher })).initComponents(),
+                "Seforim by shelf" to (FindSeferByCriteriaJPanel("Enter shelf of sefer$alternatePhrases:", { it.shelfNum })).initComponents(),
             )
         )
         criteriaTabJPanel = TabJPanel(
@@ -60,7 +57,7 @@ class MainJFrame : JFrame() {
 
         val getLastUpdateString = { "Catalog last updated: ${Catalog.lastModificationDate()}"}
         jLabel1!!.text = getLastUpdateString()
-        jLabel2!!.text = "Program Version: 1.0.0"
+        jLabel2!!.text = "Program Version: 2.0.0"
 
         refreshDatabaseButton!!.addActionListener {
             Catalog.refreshObjects()

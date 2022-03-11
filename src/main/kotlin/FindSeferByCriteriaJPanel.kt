@@ -5,7 +5,8 @@
 class FindSeferByCriteriaJPanel(
     searchPhrase: String,
     val getCriteriaLambda: (CatalogEntry) -> String,
-) : SearchableTableJPanel(searchPhrase) {
+    getLemmatizedCriteriaLambda: ((LemmatizedCatalogEntry) -> Set<Set<String>>)? = null,
+) : SearchableTableJPanel(searchPhrase, getLemmatizedCriteriaLambda) {
     override val originalCollection: Collection<Any>
         get() = Catalog.entries
     override val originalCollectionLemmatized: List<LemmatizedCatalogEntry>
