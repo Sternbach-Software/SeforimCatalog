@@ -464,10 +464,10 @@ Name (שם הספר)"*/
             .toList()
         rootWordSearchJPanel.setShorashim(queryShorashim.flatten())
 //        println("Query shorashim: $queryShorashim")
+        val listOfChecks = mutableListOf<Pair<String, String>>()
         filterWithPredicate(true, {
             false //root search not available on columns whose lemmas weren't indexed
         }) { entry ->
-            val listOfChecks = mutableListOf<Pair<String, String>>()
             val entryShorashim = getLemmatizedCriteriaLambda!!(entry as LemmatizedCatalogEntry).toList()
             //return:
             /* if (entryShorashim.isEmpty()) false
@@ -479,9 +479,9 @@ Name (שם הספר)"*/
                         else matchesAllUnordered(queryShorashim, entryShorashim, listOfChecks)
                     else matchesAny(queryShorashim, entryShorashim, listOfChecks)
                     )
-                .also {//ספר עקר
-                    if(it) println("Sefer: ${entry.seferName}, Entry shorashim: $entryShorashim, checks: $listOfChecks")
-                }
+//                .also {
+                    //if(it) println("Sefer: ${entry.seferName}, Entry shorashim: $entryShorashim, checks: $listOfChecks")
+//                }
 //            }
         }
     }
@@ -600,13 +600,14 @@ Name (שם הספר)"*/
         fun matchesAllUnordered(
             queryShorashim: List<Set<String>>,
             entryShorashim: List<Set<String>>,
-            listOfChecks: MutableList<Pair<String, String>>
+            listOfChecks: MutableList<Pair<String, String>>,
+            logChecks: Boolean = false
         ): Boolean {
             return queryShorashim.all { shorashim: Set<String> ->
                 shorashim.any { shoresh: String ->
                     entryShorashim.any {
                         it.any {
-                            listOfChecks.add(shoresh to it)
+                            if(logChecks) listOfChecks.add(shoresh to it)
                             it == shoresh
                         }
                     }
@@ -617,12 +618,13 @@ Name (שם הספר)"*/
         fun matchesAny(
             queryShorashim: List<Set<String>>,
             entryShorashim: List<Set<String>>,
-            listOfChecks: MutableList<Pair<String, String>>
+            listOfChecks: MutableList<Pair<String, String>>,
+            logChecks: Boolean = false
         ) = queryShorashim.any {
             it.any { queryShoresh ->
                 entryShorashim.any {
                     it.any { entryShoresh ->
-                        listOfChecks.add(queryShoresh to entryShoresh)
+                        if(logChecks) listOfChecks.add(queryShoresh to entryShoresh)
                         entryShoresh == queryShoresh
                     }
                 }
@@ -632,7 +634,8 @@ Name (שם הספר)"*/
         fun matchesAllOrdered(
             queryShorashim: List<Set<String>>,
             entryShorashim: List<Set<String>>,
-            listOfChecks: MutableList<Pair<String, String>>
+            listOfChecks: MutableList<Pair<String, String>>,
+            logChecks: Boolean = false
         ): Boolean {
             if (entryShorashim.isEmpty()) return false
             return kotlin.runCatching {
@@ -640,7 +643,7 @@ Name (שם הספר)"*/
                     shorashim.any { shoresh: String ->
                         entryShorashim[index]/*, entryShorashim.size)*/.any {
 //                            it.any {
-                                listOfChecks.add("shoresh=$shoresh" to "entry=$it")
+                                if(logChecks) listOfChecks.add("shoresh=$shoresh" to "entry=$it")
                                 it == shoresh
 //                            }
                         }
