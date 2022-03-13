@@ -1,5 +1,4 @@
 import java.awt.EventQueue
-import java.awt.event.ActionListener
 import java.awt.event.ActionEvent
 import javax.swing.*
 
@@ -16,57 +15,70 @@ class RootWordSearchSettingsJPanel(val searchableTableJPanel: SearchableTableJPa
     // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
     private fun initComponents() {
         jPanel5 = JPanel()
-        jRadioButton6 = JRadioButton()
-        jRadioButton7 = JRadioButton()
-        jLabel1 = JLabel()
-        jLabel2 = JLabel()
+        sequentialRadioButton = JRadioButton()
+        unorderedRadioButton = JRadioButton()
+        sequentialLabel = JLabel()
+        unorderedLabel = JLabel()
         jPanel16 = JPanel()
-        jRadioButton28 = JRadioButton()
-        jRadioButton29 = JRadioButton()
-        jLabel3 = JLabel()
-        jLabel4 = JLabel()
-        jPanel5!!.border = BorderFactory.createTitledBorder("Search phrase interpretation")
-        jPanel16!!.border = BorderFactory.createTitledBorder("Search strictness")
+        matchesAllRadioButton = JRadioButton()
+        matchesAnyRadioButton = JRadioButton()
+        matchesAllLabel = JLabel()
+        matchesAny = JLabel()
+        jPanel5!!.border = BorderFactory.createTitledBorder("Word order mode")
+        jPanel16!!.border = BorderFactory.createTitledBorder("Word inclusivity mode")
 
-        jRadioButton6!!.text = "Ordered/Sequential"
-        jRadioButton7!!.text = "Unordered/Keywords"
-        jRadioButton28!!.text = "Match all"
-        jRadioButton29!!.text = "Match any"
-        jRadioButton6!!.addActionListener {
+        sequentialRadioButton!!.text = "Ordered/Sequential"
+        sequentialLabel!!.text =
+            "<html><body style='width: 1%spx'>Respect the order that the words in the search phrase appear in, and only return results in which the shorashim appear in the same order as the order in which they appear in the search phrase."
+
+        unorderedRadioButton!!.text = "Unordered/Keywords"
+        unorderedLabel!!.text =
+            "Disregard the order that the words in the search phrase appear in, and return results which contain the shorashim that are in the search phrase, regardless of the order in which they appear in the result."
+
+        matchesAllRadioButton!!.text = "Match all"
+        matchesAllLabel!!.text = "Only return results which contain all of the shorashim contained in the search phrase."
+
+        matchesAnyRadioButton!!.text = "Match any"
+        matchesAny!!.text = "Return results which contain any (even one) of the shorashim in the search phrase. This is by definition neither sequential nor unordered."
+
+
+        val orderRadioGroup = ButtonGroup()
+        val strictnessButtonGroup = ButtonGroup()
+        orderRadioGroup.add(sequentialRadioButton)
+        orderRadioGroup.add(unorderedRadioButton)
+        strictnessButtonGroup.add(matchesAllRadioButton)
+        strictnessButtonGroup.add(matchesAnyRadioButton)
+        var buttonToReenableAfterSelectingMatchAny: JRadioButton? = null
+        sequentialRadioButton!!.addActionListener {
             rootSearchShouldMatchSequential = true
             searchableTableJPanel.filterList()
         }
-        jRadioButton7!!.addActionListener {
+        unorderedRadioButton!!.addActionListener {
             rootSearchShouldMatchSequential = false
             searchableTableJPanel.filterList()
         }
-        jRadioButton28!!.addActionListener {
+        matchesAllRadioButton!!.addActionListener {
             rootSearchShouldMatchAll = true
             searchableTableJPanel.filterList()
+            if(buttonToReenableAfterSelectingMatchAny != null){
+                orderRadioGroup.setSelected(buttonToReenableAfterSelectingMatchAny?.model, true)
+                orderRadioGroup.elements.iterator().forEach { it.isEnabled = true }
+                buttonToReenableAfterSelectingMatchAny = null
+            }
         }
-        jRadioButton29!!.addActionListener {
+        matchesAnyRadioButton!!.addActionListener {
             rootSearchShouldMatchAll = false
             searchableTableJPanel.filterList()
+            buttonToReenableAfterSelectingMatchAny = orderRadioGroup.selectedRadioButton()
+            orderRadioGroup.clearSelection()
+            orderRadioGroup.elements.iterator().forEach { it.isEnabled = false }
         }
         EventQueue.invokeLater {
-            jRadioButton6!!.doClick()
+            sequentialRadioButton!!.doClick()
         }
         EventQueue.invokeLater {
-            jRadioButton28!!.doClick()
+            matchesAllRadioButton!!.doClick()
         }
-        val buttonGroup1 = ButtonGroup()
-        val buttonGroup2 = ButtonGroup()
-        buttonGroup1.add(jRadioButton6)
-        buttonGroup1.add(jRadioButton7)
-        buttonGroup2.add(jRadioButton28)
-        buttonGroup2.add(jRadioButton29)
-        jLabel2!!.text =
-            "Disregard the order that the words in the search phrase appear in, and return results which contain the shorashim that are in the search phrase, regardless of the order in which they appear in the result."
-        jLabel1!!.text =
-            "<html><body style='width: 1%spx'>Respect the order that the words in the search phrase appear in, and only return results in which the shorashim appear in the same order as the order in which they appear in the search phrase."
-        jLabel3!!.text = "Only return results which contain all of the shorashim contained in the search phrase."
-        jLabel4!!.text = "Return results which contain any (even one) of the shorashim in the search phrase."
-
         val jPanel5Layout = GroupLayout(jPanel5)
         jPanel5!!.layout = jPanel5Layout
         jPanel5Layout.setHorizontalGroup(
@@ -77,13 +89,13 @@ class RootWordSearchSettingsJPanel(val searchableTableJPanel: SearchableTableJPa
                         .addGroup(
                             jPanel5Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                 .addComponent(
-                                    jRadioButton6,
+                                    sequentialRadioButton,
                                     GroupLayout.PREFERRED_SIZE,
                                     1297,
                                     GroupLayout.PREFERRED_SIZE
                                 )
                                 .addComponent(
-                                    jRadioButton7,
+                                    unorderedRadioButton,
                                     GroupLayout.PREFERRED_SIZE,
                                     983,
                                     GroupLayout.PREFERRED_SIZE
@@ -94,12 +106,12 @@ class RootWordSearchSettingsJPanel(val searchableTableJPanel: SearchableTableJPa
                                         .addGroup(
                                             jPanel5Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                                 .addComponent(
-                                                    jLabel2,
+                                                    unorderedLabel,
                                                     GroupLayout.PREFERRED_SIZE,
                                                     1268,
                                                     GroupLayout.PREFERRED_SIZE
                                                 )
-                                                .addComponent(jLabel1)
+                                                .addComponent(sequentialLabel)
                                         )
                                 )
                         )
@@ -111,17 +123,17 @@ class RootWordSearchSettingsJPanel(val searchableTableJPanel: SearchableTableJPa
                 .addGroup(
                     jPanel5Layout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(jRadioButton6, GroupLayout.PREFERRED_SIZE, 23, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(sequentialRadioButton, GroupLayout.PREFERRED_SIZE, 23, GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(
                             LayoutStyle.ComponentPlacement.RELATED,
                             GroupLayout.DEFAULT_SIZE,
                             Short.MAX_VALUE.toInt()
                         )
-                        .addComponent(jLabel1)
+                        .addComponent(sequentialLabel)
                         .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jRadioButton7)
+                        .addComponent(unorderedRadioButton)
                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel2)
+                        .addComponent(unorderedLabel)
                         .addContainerGap()
                 )
         )
@@ -139,8 +151,8 @@ class RootWordSearchSettingsJPanel(val searchableTableJPanel: SearchableTableJPa
                                         .addGap(29, 29, 29)
                                         .addGroup(
                                             jPanel16Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                                .addComponent(jLabel3)
-                                                .addComponent(jLabel4)
+                                                .addComponent(matchesAllLabel)
+                                                .addComponent(matchesAny)
                                         )
                                 )
                                 .addGroup(
@@ -148,13 +160,13 @@ class RootWordSearchSettingsJPanel(val searchableTableJPanel: SearchableTableJPa
                                         .addGroup(
                                             jPanel16Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                                 .addComponent(
-                                                    jRadioButton29,
+                                                    matchesAnyRadioButton,
                                                     GroupLayout.PREFERRED_SIZE,
                                                     983,
                                                     GroupLayout.PREFERRED_SIZE
                                                 )
                                                 .addComponent(
-                                                    jRadioButton28,
+                                                    matchesAllRadioButton,
                                                     GroupLayout.DEFAULT_SIZE,
                                                     GroupLayout.DEFAULT_SIZE,
                                                     Short.MAX_VALUE.toInt()
@@ -170,17 +182,17 @@ class RootWordSearchSettingsJPanel(val searchableTableJPanel: SearchableTableJPa
                 .addGroup(
                     jPanel16Layout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(jRadioButton28, GroupLayout.PREFERRED_SIZE, 23, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(matchesAllRadioButton, GroupLayout.PREFERRED_SIZE, 23, GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel3)
+                        .addComponent(matchesAllLabel)
                         .addPreferredGap(
                             LayoutStyle.ComponentPlacement.RELATED,
                             GroupLayout.DEFAULT_SIZE,
                             Short.MAX_VALUE.toInt()
                         )
-                        .addComponent(jRadioButton29)
+                        .addComponent(matchesAnyRadioButton)
                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel4)
+                        .addComponent(matchesAny)
                         .addContainerGap()
                 )
         )
@@ -240,7 +252,9 @@ class RootWordSearchSettingsJPanel(val searchableTableJPanel: SearchableTableJPa
                         )
                 )
         )
-    } // </editor-fold>                        
+    } // </editor-fold>
+
+    private fun ButtonGroup.selectedRadioButton(): JRadioButton = elements.asSequence().find { isSelected(it.model)  } as JRadioButton
 
     private fun jRadioButton6ActionPerformed(evt: ActionEvent) {
         // TODO add your handling code here:
@@ -259,16 +273,16 @@ class RootWordSearchSettingsJPanel(val searchableTableJPanel: SearchableTableJPa
     }
 
     // Variables declaration - do not modify                     
-    private var jLabel1: JLabel? = null
-    private var jLabel2: JLabel? = null
-    private var jLabel3: JLabel? = null
-    private var jLabel4: JLabel? = null
+    private var sequentialLabel: JLabel? = null
+    private var unorderedLabel: JLabel? = null
+    private var matchesAllLabel: JLabel? = null
+    private var matchesAny: JLabel? = null
     private var jPanel16: JPanel? = null
     private var jPanel5: JPanel? = null
-    private var jRadioButton28: JRadioButton? = null
-    private var jRadioButton29: JRadioButton? = null
-    private var jRadioButton6: JRadioButton? = null
-    private var jRadioButton7: JRadioButton? = null // End of variables declaration                   
+    private var matchesAllRadioButton: JRadioButton? = null
+    private var matchesAnyRadioButton: JRadioButton? = null
+    private var sequentialRadioButton: JRadioButton? = null
+    private var unorderedRadioButton: JRadioButton? = null // End of variables declaration
 
     /**
      * Creates new form RootWordSearchSettingsJPanel
