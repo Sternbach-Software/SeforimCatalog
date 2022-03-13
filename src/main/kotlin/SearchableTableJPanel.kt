@@ -7,6 +7,7 @@ import java.awt.*
 import java.awt.event.*
 import java.util.*
 import javax.swing.*
+import javax.swing.border.TitledBorder
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 import javax.swing.table.AbstractTableModel
@@ -99,7 +100,7 @@ abstract class SearchableTableJPanel(
         jLabel6 = JLabel()/*.also { it.isVisible = false }*/
         exactSearchRadioButton = JRadioButton()/*.also { it.isVisible = false }*/
         rootWordSearchRadioButton = JRadioButton()/*.also { it.isVisible = false }*/
-        similaritySearchRadioButton = JRadioButton()/*.also { it.isVisible = false }*/
+        patternSearchRadioButton = JRadioButton()/*.also { it.isVisible = false }*/
         seferNameTextField.locale = Locale("he")
         seferNameTextField.componentOrientation = ComponentOrientation.RIGHT_TO_LEFT
         table.model = catalogModel()
@@ -233,48 +234,39 @@ abstract class SearchableTableJPanel(
         rowSorter.sortKeys = listOf(RowSorter.SortKey(seferNameColumnIndex, SortOrder.ASCENDING))
         jLabel2.text = "Results: ${listBeingDisplayed.size}"
 
-        jLabel6!!.text = "Search mode:"
+        jLabel6.text = "Search mode:"
         val exactSearchName = "Exact search"
         val rootSearchName = "Root word search"
         val similaritySearchName = "Similarity search"
+        val alternatePhraseSearchName = "Alternate phrase search"
         rootWordSearchJPanel = RootWordSearchExplanationJPanel(this)
         similaritySearchJPanel = SimilaritySearchJPanel()
-        val exactMatchJPanel = ExactMatchJPanel()
+        val exactMatchJPanel = PlainTextExplanationJPanel(
+            "Exact search determines matching entries based on whether the entry contains the exact search phrase entered."
+        )
+        val alternatePhrasesJPanel = PlainTextExplanationJPanel(
+            "Alternate phrase search determines matches based on whether the entry contains any of the phrases separated by \"#\", e.g. \"fire#אור#אש\" or \"עשר(ת#ה) (מאמר#הדיבר)ות\" (i.e. show results for either עשרת הדיברות or עשרה מאמרות). Surround words with an exclamation mark to have the program turn the word into its shoresh/shorashim. See tip #5 for more information"
+        )
         val explanationPanelTitledBorder = BorderFactory.createTitledBorder(exactSearchName/*start with exact*/)
-        searchModeExplanation!!.border = explanationPanelTitledBorder
-        searchModeExplanation!!.layout = GridLayout()
-        exactSearchRadioButton!!.text = exactSearchName
-        rootWordSearchRadioButton!!.text = rootSearchName
-        similaritySearchRadioButton!!.text = similaritySearchName
-        exactSearchRadioButton!!.addActionListener {
-            searchModeExplanation!!.removeAll()
-            searchModeExplanation!!.add(exactMatchJPanel)
-            searchModeExplanation!!.revalidate()
-            searchModeExplanation!!.repaint()
-            explanationPanelTitledBorder.title = exactSearchName
-            filterList(FILTER_EXACT)//update list to reflect new search mode
+        searchModeExplanation.border = explanationPanelTitledBorder
+        searchModeExplanation.layout = GridLayout()
+        exactSearchRadioButton.text = exactSearchName
+        rootWordSearchRadioButton.text = rootSearchName
+        patternSearchRadioButton.text = alternatePhraseSearchName
+        exactSearchRadioButton.addActionListener {
+            setExplanationJPanel(exactMatchJPanel, explanationPanelTitledBorder, exactSearchName, FILTER_EXACT)
         }
-        rootWordSearchRadioButton!!.addActionListener {
-            searchModeExplanation!!.removeAll()
-            searchModeExplanation!!.add(rootWordSearchJPanel)
-            searchModeExplanation!!.revalidate()
-            searchModeExplanation!!.repaint()
-            explanationPanelTitledBorder.title = rootSearchName
-            filterList(FILTER_ROOT)//update list to reflect new search mode
+        rootWordSearchRadioButton.addActionListener {
+            setExplanationJPanel(rootWordSearchJPanel, explanationPanelTitledBorder, rootSearchName, FILTER_ROOT)
         }
-        similaritySearchRadioButton!!.addActionListener {
-            searchModeExplanation!!.removeAll()
-            searchModeExplanation!!.add(similaritySearchJPanel)
-            searchModeExplanation!!.revalidate()
-            searchModeExplanation!!.repaint()
-            explanationPanelTitledBorder.title = similaritySearchName
-            filterList(FILTER_SIMILARITY, similaritySearchJPanel.ld)//update list to reflect new search mode
+        patternSearchRadioButton.addActionListener {
+            setExplanationJPanel(alternatePhrasesJPanel, explanationPanelTitledBorder, alternatePhraseSearchName, FILTER_EXACT)
         }
-        buttonGroup1!!.add(exactSearchRadioButton)
-        buttonGroup1!!.add(rootWordSearchRadioButton)
-        buttonGroup1!!.add(similaritySearchRadioButton)
+        buttonGroup1.add(exactSearchRadioButton)
+        buttonGroup1.add(rootWordSearchRadioButton)
+        buttonGroup1.add(patternSearchRadioButton)
 
-        exactSearchRadioButton!!.doClick()
+        exactSearchRadioButton.doClick()
 
         similaritySearchJPanel.filterCallback = object : Function1<LevenshteinDistance, Unit> {
             override fun invoke(p1: LevenshteinDistance) {
@@ -333,7 +325,7 @@ abstract class SearchableTableJPanel(
                                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(rootWordSearchRadioButton)
                                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(similaritySearchRadioButton)
+                                        .addComponent(patternSearchRadioButton)
                                         .addGap(0, 0, Short.MAX_VALUE.toInt())
                                 )
                         )
@@ -349,7 +341,7 @@ abstract class SearchableTableJPanel(
                                 .addComponent(jLabel6)
                                 .addComponent(exactSearchRadioButton)
                                 .addComponent(rootWordSearchRadioButton)
-                                .addComponent(similaritySearchRadioButton)
+                                .addComponent(patternSearchRadioButton)
                         )
                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(
@@ -378,6 +370,20 @@ abstract class SearchableTableJPanel(
         )
         return this
     } // </editor-fold>
+
+    private fun setExplanationJPanel(
+        panel: JPanel,
+        explanationPanelTitledBorder: TitledBorder,
+        borderSearchExplanation: String,
+        searchMode: Int
+    ) {
+        searchModeExplanation.removeAll()
+        searchModeExplanation.add(panel)
+        searchModeExplanation.revalidate()
+        searchModeExplanation.repaint()
+        explanationPanelTitledBorder.title = borderSearchExplanation
+        filterList(searchMode)//update list to reflect new search mode
+    }
 
     private fun catalogModel() = object : AbstractTableModel() {
 
@@ -422,7 +428,7 @@ Name (שם הספר)"*/
     lateinit var tableModel: AbstractTableModel
     lateinit var rootWordSearchRadioButton: JRadioButton
     lateinit var searchModeExplanation: JPanel
-    lateinit var similaritySearchRadioButton: JRadioButton
+    lateinit var patternSearchRadioButton: JRadioButton
     lateinit var buttonGroup1: ButtonGroup
     lateinit var exactSearchRadioButton: JRadioButton
     lateinit var jLabel6: JLabel
@@ -434,7 +440,7 @@ Name (שם הספר)"*/
         else FILTER_SIMILARITY
         filterList(
             mode,
-            null//if (mode != FILTER_SIMILARITY) null else similaritySearchJPanel.ld!!
+            null//if (mode != FILTER_SIMILARITY) null else similaritySearchJPanel.ld
         )
     }
 
@@ -555,7 +561,7 @@ Name (שם הספר)"*/
         }
         val newList = Collections.synchronizedList(mutableListOf<Any>())
         val firstElement = originalCollection.firstOrNull()
-        val needsRegex = constraint.contains('#') || constraint.startsWith('~')
+        val needsRegex = constraint.contains("[#!]".toRegex()) || constraint.startsWith('~')
             .also { if (it) constraint = constraint.removePrefix("~") }
         val regex = if (needsRegex) getConstraintRegex(constraint) else null
         val predicate: (Any) -> Boolean =
