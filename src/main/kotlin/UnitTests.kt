@@ -3,6 +3,7 @@ import SearchableTableJPanel.Companion.matchesAllUnordered
 import SearchableTableJPanel.Companion.matchesAny
 import lemmatizer.hebmorph.tests.LemmatizerTest
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class UnitTests {
     val queryShorashim = LemmatizerTest.getLemmatizedList("ספר עקר", true, false).toList()
@@ -18,7 +19,7 @@ class UnitTests {
     }
 
     fun test3() {
-        matchesAllUnordered(queryShorashim, entryShorashim, listOfChecks)
+        matchesAllUnordered(queryShorashim, entryShorashim, listOfChecks, true)
         assertEquals(
             listOfChecks, listOf(
                 "ספר" to "גאן",
@@ -32,18 +33,12 @@ class UnitTests {
     }
 
     fun test4() {
-        matchesAllOrdered(queryShorashim, entryShorashim, listOfChecks)
-        assertEquals(
-            listOfChecks, listOf(
-                "ספר" to "ספר",
-                "עקר" to "עקר",
-            )
-        )
-        listOfChecks.clear()
+        assertTrue(matchesAllOrdered(queryShorashim, entryShorashim))
+        //should compare: listOf("ספר" to "ספר","עקר" to "עקר",))
     }
 
     fun test5() {
-        matchesAny(queryShorashim, entryShorashim, listOfChecks)
+        matchesAny(queryShorashim, entryShorashim, listOfChecks, true)
         assertEquals(
             listOfChecks, listOf(
                 "ספר" to "גאן",

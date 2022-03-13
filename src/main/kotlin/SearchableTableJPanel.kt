@@ -475,7 +475,7 @@ Name (שם הספר)"*/
             (
                     if (rootSearchShouldMatchAll)
                         if (rootSearchShouldMatchSequential)
-                            matchesAllOrdered(queryShorashim, entryShorashim, listOfChecks)
+                            matchesAllOrdered(queryShorashim, entryShorashim)
                         else matchesAllUnordered(queryShorashim, entryShorashim, listOfChecks)
                     else matchesAny(queryShorashim, entryShorashim, listOfChecks)
                     )
@@ -631,25 +631,47 @@ Name (שם הספר)"*/
             }
         }
 
+        /**
+         * Determines whether [this] list contains a sublist such that at least one element in each list of said sublist is contained in a parallel sublist of [other].
+         * This is a direct adaptation of [CharSequence.contains(CharSequence)].
+         * For example the following returns true:
+        val x = listOf(                       listOf('a', 'b', 'c'), listOf('d', 'e', 'f')             )
+        val y = listOf(listOf('x' ,'y' ,'z'), listOf('1', '2', 'a'), listOf('3', 'f', '4'), listOf('9'))
+        val z = listOf(                       listOf('1', '2', 'a'), listOf('3', 'f', '4')             )
+        println(x in y) //prints true
+        println(x in z) //prints true
+         */
+        operator fun <T> List<Iterable<T>>.contains(other: List<Iterable<T>>): Boolean = contains(other) { thisList, otherList -> thisList.any { it in otherList } }
+
+        fun <T> List<T>.contains(other: List<T>, predicate: (thisElement: T, otherElement: T) -> Boolean): Boolean = indexOf(other, 0, this.size, predicate) >= 0
+
+        private fun <T> List<T>.indexOf(other: List<T>, startIndex: Int, endIndex: Int, predicate: (thisElement: T, otherElement: T) -> Boolean): Int {
+            fun <T> List<T>.regionMatches(thisOffset: Int, other: List<T>, otherOffset: Int, size: Int, predicate: (thisElement: T, otherElement: T) -> Boolean): Boolean {
+                if ((otherOffset < 0) || (thisOffset < 0) || (thisOffset > this.size - size) || (otherOffset > other.size - size)) {
+                    return false
+                }
+
+                for (index in 0 until size) {
+                    if (!predicate(this[thisOffset + index], other[otherOffset + index]))
+                        return false
+                }
+                return true
+            }
+            val indices = startIndex.coerceAtLeast(0)..endIndex.coerceAtMost(this.size)
+
+            for (index in indices) {
+                if (other.regionMatches(0, this, index, other.size, predicate))
+                    return index
+            }
+            return -1
+        }
+
         fun matchesAllOrdered(
-            queryShorashim: List<Set<String>>,
-            entryShorashim: List<Set<String>>,
-            listOfChecks: MutableList<Pair<String, String>>,
-            logChecks: Boolean = false
+            queryShorashim: List<Iterable<String>>,
+            entryShorashim: List<Iterable<String>>,
         ): Boolean {
             if (entryShorashim.isEmpty()) return false
-            return kotlin.runCatching {
-                queryShorashim.withIndex().all { (index, shorashim: Set<String>) ->
-                    shorashim.any { shoresh: String ->
-                        entryShorashim[index]/*, entryShorashim.size)*/.any {
-//                            it.any {
-                                if(logChecks) listOfChecks.add("shoresh=$shoresh" to "entry=$it")
-                                it == shoresh
-//                            }
-                        }
-                    }
-                }
-            }.let { if (it.isSuccess) it.getOrNull()!! else false }
+            return queryShorashim in entryShorashim
         }
     }
 }
