@@ -39,7 +39,10 @@ abstract class SearchableTableJPanel(
         if (constraint == _searchPhrase /*already got regex*/ || constraint.lastOrNull() == '#'/*user has not typed alternate phrase, so don't search for whitespace (i.e. every entry)*/) return _constraint!! /*use "old" regex*/
         /*get new regex*/
         lateinit var regex: Regex
-        val replaceHashWithOr = constraint.replace("#", "|")
+        val lemmatizerRegex = "![^!]+!".toRegex()
+        val mConstraint = if(!constraint.contains(lemmatizerRegex)) constraint else constraint.replace(lemmatizerRegex) { lemmatizer.getLemmatizedList(it.value).also { if(it.size > 1) println("Error: $constraint") }.first().joinToString("|", "(", ")") }
+        println("Constraint: $mConstraint")
+        val replaceHashWithOr = mConstraint.replace("#", "|")
         regex = try {
             replaceHashWithOr.toRegex(RegexOption.IGNORE_CASE) //if it is a valid regex, go for it
         } catch (t: Throwable) { //probably invalid pattern
@@ -99,7 +102,7 @@ abstract class SearchableTableJPanel(
         searchModeExplanation = JPanel().also { it.isVisible = true }
         jLabel6 = JLabel()/*.also { it.isVisible = false }*/
         exactSearchRadioButton = JRadioButton()/*.also { it.isVisible = false }*/
-        rootWordSearchRadioButton = JRadioButton()/*.also { it.isVisible = false }*/
+        rootWordSearchRadioButton = JRadioButton().also { it.isVisible = getLemmatizedCriteriaLambda != null }
         patternSearchRadioButton = JRadioButton()/*.also { it.isVisible = false }*/
         seferNameTextField.locale = Locale("he")
         seferNameTextField.componentOrientation = ComponentOrientation.RIGHT_TO_LEFT
@@ -236,7 +239,7 @@ abstract class SearchableTableJPanel(
 
         jLabel6.text = "Search mode:"
         val exactSearchName = "Exact search"
-        val rootSearchName = "Root word search"
+        val rootSearchName = "Root word (שרש) search"
         val similaritySearchName = "Similarity search"
         val alternatePhraseSearchName = "Alternate phrase search"
         rootWordSearchJPanel = RootWordSearchExplanationJPanel(this)
@@ -459,13 +462,7 @@ Name (שם הספר)"*/
     }
 
     fun filterListRootSearch(constraint: String) {
-        val queryShorashim = lemmatizer.getLemmatizedList(
-            constraint,
-            true,
-            false,
-            true,
-            false
-        )
+        val queryShorashim = lemmatizer.getLemmatizedList(constraint)
 //            .reversed()//the text field puts the words backwards
             .toList()
         rootWordSearchJPanel.setShorashim(queryShorashim.flatten())

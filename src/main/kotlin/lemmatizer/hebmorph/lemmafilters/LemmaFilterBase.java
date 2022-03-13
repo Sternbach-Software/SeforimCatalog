@@ -18,7 +18,7 @@
  **************************************************************************/
 package lemmatizer.hebmorph.lemmafilters;
 
-import com.code972.hebmorph.Token;
+import lemmatizer.hebmorph.Token;
 
 import java.util.List;
 

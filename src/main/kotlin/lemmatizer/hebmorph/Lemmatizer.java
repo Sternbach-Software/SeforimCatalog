@@ -17,11 +17,11 @@
  **************************************************************************/
 package lemmatizer.hebmorph;
 
-import com.code972.hebmorph.HebrewToken;
-import com.code972.hebmorph.LookupTolerators;
-import com.code972.hebmorph.MorphData;
-import com.code972.hebmorph.datastructures.DictHebMorph;
-import com.code972.hebmorph.datastructures.DictRadix;
+import lemmatizer.hebmorph.HebrewToken;
+import lemmatizer.hebmorph.LookupTolerators;
+import lemmatizer.hebmorph.MorphData;
+import lemmatizer.hebmorph.datastructures.DictHebMorph;
+import lemmatizer.hebmorph.datastructures.DictRadix;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -165,7 +165,7 @@ public class Lemmatizer {
         byte prefLen = 0;
         Integer prefixMask;
 
-        List<DictRadix<MorphData>.LookupResult> tolerated = m_dict.lookupTolerant(word, com.code972.hebmorph.LookupTolerators.TolerateEmKryiaAll);
+        List<DictRadix<MorphData>.LookupResult> tolerated = m_dict.lookupTolerant(word, lemmatizer.hebmorph.LookupTolerators.TolerateEmKryiaAll);
         if (tolerated != null) {
             for (DictRadix<MorphData>.LookupResult lr : tolerated) {
                 for (int result = 0; result < lr.getData().getLemmas().length; result++) {

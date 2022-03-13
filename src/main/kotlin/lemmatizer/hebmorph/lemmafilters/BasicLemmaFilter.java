@@ -18,10 +18,10 @@
  **************************************************************************/
 package lemmatizer.hebmorph.lemmafilters;
 
-import com.code972.hebmorph.DescFlag;
-import com.code972.hebmorph.HebrewToken;
-import com.code972.hebmorph.Token;
-import com.code972.hebmorph.lemmafilters.LemmaFilterBase;
+import lemmatizer.hebmorph.DescFlag;
+import lemmatizer.hebmorph.HebrewToken;
+import lemmatizer.hebmorph.Token;
+import lemmatizer.hebmorph.lemmafilters.LemmaFilterBase;
 
 import java.util.List;
 

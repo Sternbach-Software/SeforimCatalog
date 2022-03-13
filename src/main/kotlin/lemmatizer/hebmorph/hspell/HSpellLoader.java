@@ -17,12 +17,12 @@
  **************************************************************************/
 package lemmatizer.hebmorph.hspell;
 
-import com.code972.hebmorph.DescFlag;
-import com.code972.hebmorph.DictionaryLoader;
-import com.code972.hebmorph.MorphData;
-import com.code972.hebmorph.PrefixType;
-import com.code972.hebmorph.datastructures.DictHebMorph;
-import com.code972.hebmorph.datastructures.DictRadix;
+import lemmatizer.hebmorph.DictionaryLoader;
+import lemmatizer.hebmorph.MorphData;
+import lemmatizer.hebmorph.PrefixType;
+import lemmatizer.hebmorph.datastructures.DictHebMorph;
+import lemmatizer.hebmorph.datastructures.DictRadix;
+import lemmatizer.hebmorph.DescFlag;
 
 import java.io.*;
 import java.nio.charset.Charset;

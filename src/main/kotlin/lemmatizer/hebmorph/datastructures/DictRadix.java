@@ -17,8 +17,8 @@
  **************************************************************************/
 package lemmatizer.hebmorph.datastructures;
 
-import com.code972.hebmorph.LookupTolerators;
-import com.code972.hebmorph.Reference;
+import lemmatizer.hebmorph.LookupTolerators;
+import lemmatizer.hebmorph.Reference;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;

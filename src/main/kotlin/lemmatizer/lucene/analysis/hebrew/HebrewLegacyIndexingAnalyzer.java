@@ -19,14 +19,14 @@
  */
 package lemmatizer.lucene.analysis.hebrew;
 
-import com.code972.hebmorph.datastructures.DictHebMorph;
+import lemmatizer.hebmorph.datastructures.DictHebMorph;
 import org.apache.lucene.analysis.LowerCaseFilter;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.hebrew.HebrewAnalyzer;
-import org.apache.lucene.analysis.hebrew.HebrewTokenizer;
-import org.apache.lucene.analysis.hebrew.TokenFilters.AddSuffixTokenFilter;
-import org.apache.lucene.analysis.hebrew.TokenFilters.HebrewLemmatizerTokenFilter;
-import org.apache.lucene.analysis.hebrew.TokenFilters.NiqqudFilter;
+import lemmatizer.lucene.analysis.hebrew.HebrewAnalyzer;
+import lemmatizer.lucene.analysis.hebrew.HebrewTokenizer;
+import lemmatizer.lucene.analysis.hebrew.TokenFilters.AddSuffixTokenFilter;
+import lemmatizer.lucene.analysis.hebrew.TokenFilters.HebrewLemmatizerTokenFilter;
+import lemmatizer.lucene.analysis.hebrew.TokenFilters.NiqqudFilter;
 import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
 
 import java.io.IOException;
@@ -45,7 +45,7 @@ public class HebrewLegacyIndexingAnalyzer extends HebrewAnalyzer {
         // on indexing we should always keep both the stem and marked original word
         // will ignore $ && will always output all lemmas + origin word$
         // basically, if analyzerType == AnalyzerType.INDEXING)
-        org.apache.lucene.analysis.hebrew.HebrewTokenizer src = new HebrewTokenizer(dict.getPref(), SPECIAL_TOKENIZATION_CASES);
+        lemmatizer.lucene.analysis.hebrew.HebrewTokenizer src = new HebrewTokenizer(dict.getPref(), SPECIAL_TOKENIZATION_CASES);
         src.setSuffixForExactMatch(originalTermSuffix);
         TokenStream tok = new NiqqudFilter(src);
         tok = new ASCIIFoldingFilter(tok);

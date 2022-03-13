@@ -1,11 +1,11 @@
 package lemmatizer.lucene.analysis.hebrew.TokenFilters;
 
-import com.code972.hebmorph.*;
-import com.code972.hebmorph.datastructures.DictHebMorph;
+import lemmatizer.hebmorph.*;
+import lemmatizer.hebmorph.datastructures.DictHebMorph;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.hebrew.HebrewPosAttribute;
-import org.apache.lucene.analysis.hebrew.HebrewTokenTypeAttribute;
+import lemmatizer.lucene.analysis.hebrew.HebrewPosAttribute;
+import lemmatizer.lucene.analysis.hebrew.HebrewTokenTypeAttribute;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;

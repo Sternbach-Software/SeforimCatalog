@@ -1,9 +1,9 @@
 package lemmatizer.lucene.analysis.hebrew.TokenFilters;
 
-import com.code972.hebmorph.HebrewUtils;
+import lemmatizer.hebmorph.HebrewUtils;
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.hebrew.HebrewTokenTypeAttribute;
+import lemmatizer.lucene.analysis.hebrew.HebrewTokenTypeAttribute;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 
 import java.io.IOException;

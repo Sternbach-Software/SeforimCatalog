@@ -1,7 +1,8 @@
 package lemmatizer.hebmorph.hspell;
 
-import com.code972.hebmorph.DictionaryLoader;
-import com.code972.hebmorph.datastructures.DictHebMorph;
+
+import lemmatizer.hebmorph.DictionaryLoader;
+import lemmatizer.hebmorph.datastructures.DictHebMorph;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -44,16 +45,15 @@ public class HSpellDictionaryLoader implements DictionaryLoader {
 
     @Override
     public DictHebMorph loadDictionaryFromPath(String path) throws IOException {
-        if (!path.endsWith("/")) {
-            path += "/";
-        }
+//        if (path.charAt(path.length() - 1) != File.separatorChar) {
+//            path += File.separatorChar;
+//        }
 
         final File file = new File(path);
         if (file.isDirectory()) {
-            HSpellLoader loader = new HSpellLoader(new File(path), true);
-            return loader.loadDictionaryFromHSpellData(new FileInputStream(new File(path, HSpellLoader.PREFIX_H)));
+            return new HSpellLoader(file, true).loadDictionaryFromHSpellData(new FileInputStream(new File(path, HSpellLoader.PREFIX_H)));
         } else {
-            throw new IOException("Expected a folder. Cannot load dictionary from HSpell files.");
+            throw new IOException("Expected a folder. Cannot load dictionary from HSpell files: " + path);
         }
     }
 

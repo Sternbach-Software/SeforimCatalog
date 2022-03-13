@@ -140,8 +140,8 @@ object Catalog {
                         (!printedEight && percentageDone == 80).also { if (it) printedEight = true }
                     ) println("Progress: $percentageDone%")
                     LemmatizedCatalogEntry(
-                        it.seferName to lemmatizer.getLemmatizedList(it.seferName, true, false, true, false, true),
-                        it.author to lemmatizer.getLemmatizedList(it.author, true, false, true, false, true),
+                        it.seferName to lemmatizer.getLemmatizedList(it.seferName),
+                        it.author to lemmatizer.getLemmatizedList(it.author),
                         it.publisher,
                         it.volumeNum,
                         it.category,

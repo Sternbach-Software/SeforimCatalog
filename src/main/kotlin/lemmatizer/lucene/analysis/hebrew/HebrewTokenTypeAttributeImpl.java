@@ -1,6 +1,6 @@
 package lemmatizer.lucene.analysis.hebrew;
 
-import org.apache.lucene.analysis.hebrew.HebrewTokenTypeAttribute;
+import lemmatizer.lucene.analysis.hebrew.HebrewTokenTypeAttribute;
 import org.apache.lucene.analysis.tokenattributes.KeywordAttribute;
 import org.apache.lucene.util.AttributeImpl;
 import org.apache.lucene.util.AttributeReflector;

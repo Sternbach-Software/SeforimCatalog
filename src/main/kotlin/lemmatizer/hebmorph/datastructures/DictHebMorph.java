@@ -17,8 +17,8 @@
  **************************************************************************/
 package lemmatizer.hebmorph.datastructures;
 
-import com.code972.hebmorph.MorphData;
-import com.code972.hebmorph.datastructures.DictRadix;
+import lemmatizer.hebmorph.MorphData;
+import lemmatizer.hebmorph.datastructures.DictRadix;
 
 import java.util.HashMap;
 

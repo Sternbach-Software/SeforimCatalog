@@ -17,14 +17,14 @@
  **************************************************************************/
 package lemmatizer.lucene.analysis.hebrew;
 
-import com.code972.hebmorph.*;
-import com.code972.hebmorph.datastructures.DictHebMorph;
-import com.code972.hebmorph.datastructures.DictRadix;
-import com.code972.hebmorph.lemmafilters.LemmaFilterBase;
+import lemmatizer.hebmorph.*;
+import lemmatizer.hebmorph.datastructures.DictHebMorph;
+import lemmatizer.hebmorph.datastructures.DictRadix;
+import lemmatizer.hebmorph.lemmafilters.LemmaFilterBase;
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.CharacterUtils;
-import org.apache.lucene.analysis.hebrew.HebrewPosAttribute;
-import org.apache.lucene.analysis.hebrew.HebrewTokenizer;
+import lemmatizer.lucene.analysis.hebrew.HebrewPosAttribute;
+import lemmatizer.lucene.analysis.hebrew.HebrewTokenizer;
 import org.apache.lucene.analysis.tokenattributes.*;
 
 import java.io.IOException;
@@ -42,7 +42,7 @@ public class StreamLemmasFilter extends org.apache.lucene.analysis.Tokenizer {
     private final PositionIncrementAttribute posIncrAtt = addAttribute(PositionIncrementAttribute.class);
     private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
     private final KeywordAttribute keywordAtt = addAttribute(KeywordAttribute.class);
-    private final org.apache.lucene.analysis.hebrew.HebrewPosAttribute posAtt = addAttribute(HebrewPosAttribute.class);
+    private final lemmatizer.lucene.analysis.hebrew.HebrewPosAttribute posAtt = addAttribute(HebrewPosAttribute.class);
 
     private final LemmaFilterBase lemmaFilter;
     private final List<Token> stack = new ArrayList<Token>();
@@ -89,7 +89,7 @@ public class StreamLemmasFilter extends org.apache.lucene.analysis.Tokenizer {
 
             createHebrewToken(res);
             offsetAtt.setOffset(currentStartOffset, currentEndOffset);
-            typeAtt.setType(org.apache.lucene.analysis.hebrew.HebrewTokenizer.tokenTypeSignature(org.apache.lucene.analysis.hebrew.HebrewTokenizer.TOKEN_TYPES.Hebrew));
+            typeAtt.setType(lemmatizer.lucene.analysis.hebrew.HebrewTokenizer.tokenTypeSignature(lemmatizer.lucene.analysis.hebrew.HebrewTokenizer.TOKEN_TYPES.Hebrew));
             posIncrAtt.setPositionIncrement(0);
 
             return true;
@@ -115,7 +115,7 @@ public class StreamLemmasFilter extends org.apache.lucene.analysis.Tokenizer {
         final String word = tempRefObject.ref;
         if (commonWords.contains(word)) { // common words should be treated later using dedicated filters
             termAtt.copyBuffer(word.toCharArray(), 0, word.length());
-            typeAtt.setType(org.apache.lucene.analysis.hebrew.HebrewTokenizer.tokenTypeSignature(org.apache.lucene.analysis.hebrew.HebrewTokenizer.TOKEN_TYPES.Hebrew));
+            typeAtt.setType(lemmatizer.lucene.analysis.hebrew.HebrewTokenizer.tokenTypeSignature(lemmatizer.lucene.analysis.hebrew.HebrewTokenizer.TOKEN_TYPES.Hebrew));
             stack.clear();
 
             if (!keepOriginalWord) {
@@ -144,9 +144,9 @@ public class StreamLemmasFilter extends org.apache.lucene.analysis.Tokenizer {
 
             final Token tkn = stack.get(0);
             if (tkn.isNumeric()) {
-                typeAtt.setType(org.apache.lucene.analysis.hebrew.HebrewTokenizer.tokenTypeSignature(org.apache.lucene.analysis.hebrew.HebrewTokenizer.TOKEN_TYPES.Numeric));
+                typeAtt.setType(lemmatizer.lucene.analysis.hebrew.HebrewTokenizer.tokenTypeSignature(lemmatizer.lucene.analysis.hebrew.HebrewTokenizer.TOKEN_TYPES.Numeric));
             } else {
-                typeAtt.setType(org.apache.lucene.analysis.hebrew.HebrewTokenizer.tokenTypeSignature(org.apache.lucene.analysis.hebrew.HebrewTokenizer.TOKEN_TYPES.NonHebrew));
+                typeAtt.setType(lemmatizer.lucene.analysis.hebrew.HebrewTokenizer.tokenTypeSignature(lemmatizer.lucene.analysis.hebrew.HebrewTokenizer.TOKEN_TYPES.NonHebrew));
             }
 
             applyLowercaseFilter();
@@ -156,7 +156,7 @@ public class StreamLemmasFilter extends org.apache.lucene.analysis.Tokenizer {
         }
 
         // If we arrived here, we hit a Hebrew word
-        typeAtt.setType(org.apache.lucene.analysis.hebrew.HebrewTokenizer.tokenTypeSignature(org.apache.lucene.analysis.hebrew.HebrewTokenizer.TOKEN_TYPES.Hebrew));
+        typeAtt.setType(lemmatizer.lucene.analysis.hebrew.HebrewTokenizer.tokenTypeSignature(lemmatizer.lucene.analysis.hebrew.HebrewTokenizer.TOKEN_TYPES.Hebrew));
 
         // Do some filtering if requested...
         if (lemmaFilter != null && lemmaFilter.filterCollection(word, stack, filterCache) != null) {
@@ -173,7 +173,7 @@ public class StreamLemmasFilter extends org.apache.lucene.analysis.Tokenizer {
             }
 
             if ((tokenType & Tokenizer.TokenType.Mixed) > 0) {
-                typeAtt.setType(org.apache.lucene.analysis.hebrew.HebrewTokenizer.tokenTypeSignature(HebrewTokenizer.TOKEN_TYPES.Mixed));
+                typeAtt.setType(lemmatizer.lucene.analysis.hebrew.HebrewTokenizer.tokenTypeSignature(HebrewTokenizer.TOKEN_TYPES.Mixed));
                 applyLowercaseFilter();
                 return true;
             }

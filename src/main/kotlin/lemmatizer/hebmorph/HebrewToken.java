@@ -17,10 +17,10 @@
  **************************************************************************/
 package lemmatizer.hebmorph;
 
-import com.code972.hebmorph.DescFlag;
-import com.code972.hebmorph.MorphData;
-import com.code972.hebmorph.PrefixType;
-import com.code972.hebmorph.Token;
+import lemmatizer.hebmorph.DescFlag;
+import lemmatizer.hebmorph.MorphData;
+import lemmatizer.hebmorph.PrefixType;
+import lemmatizer.hebmorph.Token;
 
 public class HebrewToken extends Token implements Comparable<Token> {
     private static final long serialVersionUID = -5809495040446607703L;
@@ -29,7 +29,7 @@ public class HebrewToken extends Token implements Comparable<Token> {
         this(_word, _prefixLength, lemma.getDescFlag(), lemma.getLemma(), lemma.getPrefix(), _score);
     }
 
-    public HebrewToken(String _word, byte _prefixLength, com.code972.hebmorph.DescFlag _mask, String _lemma, PrefixType _pref, float _score) {
+    public HebrewToken(String _word, byte _prefixLength, lemmatizer.hebmorph.DescFlag _mask, String _lemma, PrefixType _pref, float _score) {
         super(_word);
         prefixLength = _prefixLength;
         prefType = _pref;
@@ -44,7 +44,7 @@ public class HebrewToken extends Token implements Comparable<Token> {
 
     private float score = 1.0f;
     private byte prefixLength;
-    private com.code972.hebmorph.DescFlag mask;
+    private lemmatizer.hebmorph.DescFlag mask;
     private String lemma;
     private PrefixType prefType;
 
@@ -122,7 +122,7 @@ public class HebrewToken extends Token implements Comparable<Token> {
         return score;
     }
 
-    public void setMask(com.code972.hebmorph.DescFlag mask) {
+    public void setMask(lemmatizer.hebmorph.DescFlag mask) {
         this.mask = mask;
     }
 

@@ -17,10 +17,10 @@
  **************************************************************************/
 package lemmatizer.lucene.analysis.hebrew;
 
-import com.code972.hebmorph.Reference;
-import com.code972.hebmorph.datastructures.DictRadix;
+import lemmatizer.hebmorph.Reference;
+import lemmatizer.hebmorph.datastructures.DictRadix;
 import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.analysis.hebrew.HebrewTokenTypeAttribute;
+import lemmatizer.lucene.analysis.hebrew.HebrewTokenTypeAttribute;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 
@@ -33,7 +33,7 @@ import java.util.HashMap;
  */
 public final class HebrewTokenizer extends Tokenizer {
 
-    private final com.code972.hebmorph.Tokenizer hebMorphTokenizer;
+    private final lemmatizer.hebmorph.Tokenizer hebMorphTokenizer;
     private final HashMap<String, Integer> prefixesTree;
 
     private final CharTermAttribute termAtt = addAttribute(CharTermAttribute.class);
@@ -46,7 +46,7 @@ public final class HebrewTokenizer extends Tokenizer {
 
     public HebrewTokenizer(final HashMap<String, Integer> _prefixesTree, final DictRadix<Byte> specialCases) {
         super();
-        hebMorphTokenizer = new com.code972.hebmorph.Tokenizer(input, _prefixesTree, specialCases);
+        hebMorphTokenizer = new lemmatizer.hebmorph.Tokenizer(input, _prefixesTree, specialCases);
         prefixesTree = _prefixesTree;
     }
 
@@ -93,11 +93,11 @@ public final class HebrewTokenizer extends Tokenizer {
             if (tokenType == 0)
                 return false; // EOS
 
-            if ((tokenType & com.code972.hebmorph.Tokenizer.TokenType.Hebrew) > 0 && prefixesTree != null) {
+            if ((tokenType & lemmatizer.hebmorph.Tokenizer.TokenType.Hebrew) > 0 && prefixesTree != null) {
                 // Ignore "words" which are actually only prefixes in a single word.
                 // This first case is easy to spot, since the prefix and the following word will be
                 // separated by a dash marked as a construct (סמיכות) by the Tokenizer
-                if ((tokenType & com.code972.hebmorph.Tokenizer.TokenType.Construct) > 0) {
+                if ((tokenType & lemmatizer.hebmorph.Tokenizer.TokenType.Construct) > 0) {
                     if (isLegalPrefix(nextToken.ref))
                         continue;
                 }
@@ -106,12 +106,12 @@ public final class HebrewTokenizer extends Tokenizer {
                 // abbrevated word into two, so we send it to an external function to analyze the word, and
                 // get a possibly corrected word. Examples for words we expect to simplify by this operation
                 // are ה"שטיח", ש"המידע.
-                if ((tokenType & com.code972.hebmorph.Tokenizer.TokenType.Acronym) > 0) {
+                if ((tokenType & lemmatizer.hebmorph.Tokenizer.TokenType.Acronym) > 0) {
                     nextTokenVal = nextToken.ref = tryStrippingPrefix(nextToken.ref);
 
                     // Re-detect acronym, in case it was a false positive
                     if (nextTokenVal.indexOf('"') == -1) {
-                        tokenType &= ~com.code972.hebmorph.Tokenizer.TokenType.Acronym;
+                        tokenType &= ~lemmatizer.hebmorph.Tokenizer.TokenType.Acronym;
                     }
                 }
             }
@@ -122,18 +122,18 @@ public final class HebrewTokenizer extends Tokenizer {
         // Record the term string
         termAtt.copyBuffer(nextTokenVal.toCharArray(), 0, nextTokenVal.length());
         offsetAtt.setOffset(correctOffset(hebMorphTokenizer.getOffset()), correctOffset(hebMorphTokenizer.getOffset() + hebMorphTokenizer.getLengthInSource()));
-        if ((tokenType & com.code972.hebmorph.Tokenizer.TokenType.Exact) > 0)
+        if ((tokenType & lemmatizer.hebmorph.Tokenizer.TokenType.Exact) > 0)
             hebTypeAtt.setExact(true);
 
-        if ((tokenType & com.code972.hebmorph.Tokenizer.TokenType.Hebrew) > 0) {
-            if ((tokenType & com.code972.hebmorph.Tokenizer.TokenType.Acronym) > 0) {
+        if ((tokenType & lemmatizer.hebmorph.Tokenizer.TokenType.Hebrew) > 0) {
+            if ((tokenType & lemmatizer.hebmorph.Tokenizer.TokenType.Acronym) > 0) {
                 hebTypeAtt.setType(HebrewTokenTypeAttribute.HebrewType.Acronym);
-            } else if ((tokenType & com.code972.hebmorph.Tokenizer.TokenType.Construct) > 0) {
+            } else if ((tokenType & lemmatizer.hebmorph.Tokenizer.TokenType.Construct) > 0) {
                 hebTypeAtt.setType(HebrewTokenTypeAttribute.HebrewType.Construct);
             } else {
                 hebTypeAtt.setType(HebrewTokenTypeAttribute.HebrewType.Hebrew);
             }
-        } else if ((tokenType & com.code972.hebmorph.Tokenizer.TokenType.Numeric) > 0) {
+        } else if ((tokenType & lemmatizer.hebmorph.Tokenizer.TokenType.Numeric) > 0) {
             hebTypeAtt.setType(HebrewTokenTypeAttribute.HebrewType.Numeric);
         } else {
             hebTypeAtt.setType(HebrewTokenTypeAttribute.HebrewType.NonHebrew);

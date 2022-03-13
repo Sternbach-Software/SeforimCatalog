@@ -19,15 +19,15 @@
  */
 package lemmatizer.lucene.analysis.hebrew;
 
-import com.code972.hebmorph.datastructures.DictHebMorph;
+import lemmatizer.hebmorph.datastructures.DictHebMorph;
 import org.apache.lucene.analysis.LowerCaseFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
-import org.apache.lucene.analysis.hebrew.HebrewAnalyzer;
-import org.apache.lucene.analysis.hebrew.TokenFilters.AddSuffixTokenFilter;
-import org.apache.lucene.analysis.hebrew.TokenFilters.HebrewLemmatizerTokenFilter;
-import org.apache.lucene.analysis.hebrew.TokenFilters.MarkHebrewTokensFilter;
-import org.apache.lucene.analysis.hebrew.TokenFilters.NiqqudFilter;
+import lemmatizer.lucene.analysis.hebrew.HebrewAnalyzer;
+import lemmatizer.lucene.analysis.hebrew.TokenFilters.AddSuffixTokenFilter;
+import lemmatizer.lucene.analysis.hebrew.TokenFilters.HebrewLemmatizerTokenFilter;
+import lemmatizer.lucene.analysis.hebrew.TokenFilters.MarkHebrewTokensFilter;
+import lemmatizer.lucene.analysis.hebrew.TokenFilters.NiqqudFilter;
 import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 

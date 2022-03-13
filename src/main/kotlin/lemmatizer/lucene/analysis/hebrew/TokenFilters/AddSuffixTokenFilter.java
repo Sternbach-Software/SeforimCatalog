@@ -21,7 +21,7 @@ package lemmatizer.lucene.analysis.hebrew.TokenFilters;
 
 import org.apache.lucene.analysis.TokenFilter;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.hebrew.HebrewTokenTypeAttribute;
+import lemmatizer.lucene.analysis.hebrew.HebrewTokenTypeAttribute;
 import org.apache.lucene.analysis.tokenattributes.*;
 
 import java.io.IOException;

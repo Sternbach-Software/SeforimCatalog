@@ -17,13 +17,13 @@
  **************************************************************************/
 package lemmatizer.lucene.analysis.hebrew;
 
-import com.code972.hebmorph.HebrewUtils;
-import com.code972.hebmorph.LookupTolerators;
-import com.code972.hebmorph.MorphData;
-import com.code972.hebmorph.WordType;
-import com.code972.hebmorph.datastructures.DictHebMorph;
-import com.code972.hebmorph.datastructures.DictRadix;
-import com.code972.hebmorph.hspell.HSpellDictionaryLoader;
+import lemmatizer.hebmorph.HebrewUtils;
+import lemmatizer.hebmorph.LookupTolerators;
+import lemmatizer.hebmorph.MorphData;
+import lemmatizer.hebmorph.WordType;
+import lemmatizer.hebmorph.datastructures.DictHebMorph;
+import lemmatizer.hebmorph.datastructures.DictRadix;
+import lemmatizer.hebmorph.hspell.HSpellDictionaryLoader;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.WordlistLoader;

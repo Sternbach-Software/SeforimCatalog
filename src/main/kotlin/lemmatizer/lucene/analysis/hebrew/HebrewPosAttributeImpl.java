@@ -1,12 +1,12 @@
 package lemmatizer.lucene.analysis.hebrew;
 
-import com.code972.hebmorph.DescFlag;
-import com.code972.hebmorph.HebrewToken;
-import org.apache.lucene.analysis.hebrew.HebrewPosAttribute;
+import lemmatizer.hebmorph.DescFlag;
+import lemmatizer.hebmorph.HebrewToken;
+import lemmatizer.lucene.analysis.hebrew.HebrewPosAttribute;
 import org.apache.lucene.util.AttributeImpl;
 import org.apache.lucene.util.AttributeReflector;
 
-public class HebrewPosAttributeImpl extends AttributeImpl implements org.apache.lucene.analysis.hebrew.HebrewPosAttribute {
+public class HebrewPosAttributeImpl extends AttributeImpl implements lemmatizer.lucene.analysis.hebrew.HebrewPosAttribute {
 
     private HebrewToken token;
 
@@ -42,12 +42,12 @@ public class HebrewPosAttributeImpl extends AttributeImpl implements org.apache.
     @Override
     public void reflectWith(AttributeReflector reflector) {
         PosTag partOfSpeech = getPosTag();
-        reflector.reflect(org.apache.lucene.analysis.hebrew.HebrewPosAttribute.class, "partOfSpeech", partOfSpeech);
+        reflector.reflect(lemmatizer.lucene.analysis.hebrew.HebrewPosAttribute.class, "partOfSpeech", partOfSpeech);
     }
 
     @Override
     public void copyTo(AttributeImpl target) {
-        org.apache.lucene.analysis.hebrew.HebrewPosAttribute t = (HebrewPosAttribute) target;
+        lemmatizer.lucene.analysis.hebrew.HebrewPosAttribute t = (HebrewPosAttribute) target;
         t.setHebrewToken(token);
     }
 }

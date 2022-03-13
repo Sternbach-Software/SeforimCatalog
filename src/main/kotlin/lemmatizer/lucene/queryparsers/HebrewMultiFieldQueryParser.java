@@ -21,7 +21,6 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.queryparsers.HebrewQueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
@@ -84,7 +83,7 @@ public class HebrewMultiFieldQueryParser extends MultiFieldQueryParser {
             throw new IllegalArgumentException("fields.length != flags.length");
         BooleanQuery.Builder bQueryBuilder = new BooleanQuery.Builder();
         for (int i = 0; i < fields.length; i++) {
-            QueryParser qp = new org.apache.lucene.queryparsers.HebrewQueryParser(fields[i], analyzer);
+            QueryParser qp = new HebrewQueryParser(fields[i], analyzer);
             Query q = qp.parse(query);
             if (q != null && (!(q instanceof BooleanQuery) || ((BooleanQuery) q).clauses().size() > 0)) {
                 bQueryBuilder.add(q,flags[i]);
@@ -125,7 +124,7 @@ public class HebrewMultiFieldQueryParser extends MultiFieldQueryParser {
             throw new IllegalArgumentException("queries.length != fields.length");
         BooleanQuery.Builder bQueryBuilder = new BooleanQuery.Builder();
         for (int i = 0; i < fields.length; i++) {
-            QueryParser qp = new org.apache.lucene.queryparsers.HebrewQueryParser(fields[i], analyzer);
+            QueryParser qp = new HebrewQueryParser(fields[i], analyzer);
             Query q = qp.parse(queries[i]);
             if (q != null && (!(q instanceof BooleanQuery) || ((BooleanQuery) q).clauses().size() > 0)) {
                 bQueryBuilder.add(q, BooleanClause.Occur.SHOULD);

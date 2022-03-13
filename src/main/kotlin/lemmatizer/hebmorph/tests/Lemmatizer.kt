@@ -19,12 +19,12 @@ package lemmatizer.hebmorph.tests
 
 import Catalog.containsEnglish
 import catalogDirectory
-import com.code972.hebmorph.HebrewToken
-import com.code972.hebmorph.Reference
-import com.code972.hebmorph.StreamLemmatizer
-import com.code972.hebmorph.Token
-import com.code972.hebmorph.datastructures.DictHebMorph
-import com.code972.hebmorph.hspell.HSpellDictionaryLoader
+import lemmatizer.hebmorph.HebrewToken
+import lemmatizer.hebmorph.Reference
+import lemmatizer.hebmorph.StreamLemmatizer
+import lemmatizer.hebmorph.Token
+import lemmatizer.hebmorph.datastructures.DictHebMorph
+import lemmatizer.hebmorph.hspell.HSpellDictionaryLoader
 import kotlin.Throws
 import java.io.IOException
 import java.awt.EventQueue
@@ -34,16 +34,7 @@ import java.util.ArrayList
 
 class Lemmatizer {
 
-    val DICT_PATH = File(catalogDirectory, "hspell-data-files").absolutePath
-    private var dict: DictHebMorph? = null
-
-    val dictionary: DictHebMorph?
-        get() {
-            if (dict == null) {
-                dict = HSpellDictionaryLoader().loadDictionaryFromPath(DICT_PATH)
-            }
-            return dict
-        }
+    val dictionary by lazy { HSpellDictionaryLoader().loadDictionaryFromPath(catalogDirectory.absolutePath + File.separatorChar + "hspell-data-files") }
 
     @Throws(IOException::class)
     fun testLemmatizer() {
@@ -113,11 +104,11 @@ class Lemmatizer {
 //                isVisible = true
 //            }
         }
-        val lemmatizedList = getLemmatizedList(text, true, false)
+        val lemmatizedList = getLemmatizedList(text)
         println(lemmatizedList)
         for (entry in lemmatizedList) println("\"" + entry + "\"")
         println()
-        println("List: " + getLemmatizedList("hello my name is asam", true, true))
+        println("List: " + getLemmatizedList("hello my name is asam"))
     }
 
     @Throws(IOException::class)
@@ -184,6 +175,10 @@ class Lemmatizer {
      * This is in addition to returning the regular lemmas (if any) and the exact word, which will be returned either way.
      * @return a set of both lemmas and the exact words
      */
+    fun getLemmatizedList(
+        text: String?
+    ) = getLemmatizedList(text, true, false, true, false, true)
+
     @Throws(IOException::class)
     fun getLemmatizedList(
         text: String?,

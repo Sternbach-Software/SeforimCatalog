@@ -17,8 +17,8 @@
  **************************************************************************/
 package lemmatizer.hebmorph;
 
-import com.code972.hebmorph.HebrewCharacters;
-import com.code972.hebmorph.Reference;
+import lemmatizer.hebmorph.HebrewCharacters;
+import lemmatizer.hebmorph.Reference;
 
 /**
  * Contains static tolerator function driving the tolerant lookup in HebMorph's dictionary radix

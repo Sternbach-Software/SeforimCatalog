@@ -17,16 +17,16 @@
  **************************************************************************/
 package lemmatizer.hebmorph;
 
-import com.code972.hebmorph.DescFlag;
-import com.code972.hebmorph.HebrewToken;
-import com.code972.hebmorph.HebrewUtils;
-import com.code972.hebmorph.Lemmatizer;
-import com.code972.hebmorph.PrefixType;
-import com.code972.hebmorph.Reference;
-import com.code972.hebmorph.Token;
-import com.code972.hebmorph.Tokenizer;
-import com.code972.hebmorph.datastructures.DictHebMorph;
-import com.code972.hebmorph.datastructures.DictRadix;
+import lemmatizer.hebmorph.DescFlag;
+import lemmatizer.hebmorph.HebrewToken;
+import lemmatizer.hebmorph.HebrewUtils;
+import lemmatizer.hebmorph.Lemmatizer;
+import lemmatizer.hebmorph.PrefixType;
+import lemmatizer.hebmorph.Reference;
+import lemmatizer.hebmorph.Token;
+import lemmatizer.hebmorph.Tokenizer;
+import lemmatizer.hebmorph.datastructures.DictHebMorph;
+import lemmatizer.hebmorph.datastructures.DictRadix;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -34,7 +34,7 @@ import java.util.List;
 
 
 public class StreamLemmatizer extends Lemmatizer {
-    private final com.code972.hebmorph.Tokenizer _tokenizer;
+    private final lemmatizer.hebmorph.Tokenizer _tokenizer;
 
     public StreamLemmatizer(final Reader input, final DictHebMorph dict) {
         this(input, dict, null);
@@ -43,7 +43,7 @@ public class StreamLemmatizer extends Lemmatizer {
     public StreamLemmatizer(final Reader input, final DictHebMorph dict,
                             final DictRadix<Byte> specialTokenizationCases) {
         super(dict);
-        _tokenizer = new com.code972.hebmorph.Tokenizer(input, (dict == null ? null : dict.getPref()), specialTokenizationCases);
+        _tokenizer = new lemmatizer.hebmorph.Tokenizer(input, (dict == null ? null : dict.getPref()), specialTokenizationCases);
     }
 
     public void reset(final Reader input) {
@@ -82,7 +82,7 @@ public class StreamLemmatizer extends Lemmatizer {
             if (tokenType == 0)
                 break; // EOS
 
-            if ((tokenType & com.code972.hebmorph.Tokenizer.TokenType.Hebrew) > 0) {
+            if ((tokenType & lemmatizer.hebmorph.Tokenizer.TokenType.Hebrew) > 0) {
                 // Right now we are blindly removing all Niqqud characters. Later we will try and make some
                 // use of Niqqud for some cases. We do this before everything else to allow for a correct
                 // identification of prefixes.
@@ -91,8 +91,8 @@ public class StreamLemmatizer extends Lemmatizer {
                 // Ignore "words" which are actually only prefixes in a single word.
                 // This first case is easy to spot, since the prefix and the following word will be
                 // separated by a dash marked as a construct (סמיכות) by the Tokenizer
-                if (((tokenType & com.code972.hebmorph.Tokenizer.TokenType.Construct) > 0)
-                        || ((tokenType & com.code972.hebmorph.Tokenizer.TokenType.Acronym) > 0)) {
+                if (((tokenType & lemmatizer.hebmorph.Tokenizer.TokenType.Construct) > 0)
+                        || ((tokenType & lemmatizer.hebmorph.Tokenizer.TokenType.Acronym) > 0)) {
                     if (isLegalPrefix(nextToken.ref))
                         continue; // this should be treated as a word prefix
                 }
@@ -100,16 +100,16 @@ public class StreamLemmatizer extends Lemmatizer {
                 // An exact match request was identified
                 // Returning an with an empty stack will force consumer to use the tokenized word,
                 // available through the Reference passed to this method
-                if ((tokenType & com.code972.hebmorph.Tokenizer.TokenType.Exact) > 0) {
+                if ((tokenType & lemmatizer.hebmorph.Tokenizer.TokenType.Exact) > 0) {
                     break; // report this as an OOV, will force treating as Exact
                 }
 
                 // Strip Hebrew prefixes for mixed words, only if the word itself is a Non-Hebrew word
                 // Useful for English company names or numbers that have Hebrew prefixes stuck to them without
                 // proper separation
-                if ((tokenType & com.code972.hebmorph.Tokenizer.TokenType.Mixed) > 0 || (tokenType & com.code972.hebmorph.Tokenizer.TokenType.Custom) > 0) {
+                if ((tokenType & lemmatizer.hebmorph.Tokenizer.TokenType.Mixed) > 0 || (tokenType & lemmatizer.hebmorph.Tokenizer.TokenType.Custom) > 0) {
                     int curChar = 0, startOfNonHebrew;
-                    while (curChar < nextToken.ref.length() && com.code972.hebmorph.HebrewUtils.isHebrewLetter(nextToken.ref.charAt(curChar))) {
+                    while (curChar < nextToken.ref.length() && lemmatizer.hebmorph.HebrewUtils.isHebrewLetter(nextToken.ref.charAt(curChar))) {
                         curChar++;
                     }
                     if (curChar > 0 && curChar < nextToken.ref.length() - 1 && isLegalPrefix(nextToken.ref.substring(0, curChar))) {
@@ -119,7 +119,7 @@ public class StreamLemmatizer extends Lemmatizer {
                         }
                         if (curChar == nextToken.ref.length()) {
                             nextToken.ref = nextToken.ref.substring(startOfNonHebrew, nextToken.ref.length());
-                            tokenType = com.code972.hebmorph.Tokenizer.TokenType.NonHebrew;
+                            tokenType = lemmatizer.hebmorph.Tokenizer.TokenType.NonHebrew;
                             retTokens.add(new Token(nextToken.ref));
                             break;
                         }
@@ -130,24 +130,24 @@ public class StreamLemmatizer extends Lemmatizer {
                 // abbrevated word into two, so we send it to an external function to analyze the word, and
                 // get a possibly corrected word. Examples for words we expect to simplify by this operation
                 // are ה"שטיח", ש"המידע.
-                if ((tokenType & com.code972.hebmorph.Tokenizer.TokenType.Acronym) > 0) {
+                if ((tokenType & lemmatizer.hebmorph.Tokenizer.TokenType.Acronym) > 0) {
                     nextToken.ref = tryStrippingPrefix(nextToken.ref);
 
                     // Re-detect acronym, in case it was a false positive
                     if (nextToken.ref.indexOf('"') == -1) {
-                        tokenType &= ~com.code972.hebmorph.Tokenizer.TokenType.Acronym;
+                        tokenType &= ~lemmatizer.hebmorph.Tokenizer.TokenType.Acronym;
                     }
                 }
 
                 // TODO: Perhaps by easily identifying the prefixes above we can also rule out some of the
                 // stem ambiguities retreived later...
 
-                List<com.code972.hebmorph.HebrewToken> lemmas = lemmatize(nextToken.ref);
+                List<lemmatizer.hebmorph.HebrewToken> lemmas = lemmatize(nextToken.ref);
 
                 if ((lemmas != null) && (lemmas.size() > 0)) {
                     // TODO: Filter Stop Words based on morphological data (hspell 'x' identification)
                     // TODO: Check for worthy lemmas, if there are none then perform tolerant lookup and check again...
-                    if ((tokenType & com.code972.hebmorph.Tokenizer.TokenType.Construct) > 0) {
+                    if ((tokenType & lemmatizer.hebmorph.Tokenizer.TokenType.Construct) > 0) {
                         // TODO: Test for (lemma.Mask & DMask.D_OSMICHUT) > 0
                     }
 
@@ -155,7 +155,7 @@ public class StreamLemmatizer extends Lemmatizer {
                     retTokens.addAll(lemmas);
                 }
 
-                if (retTokens.isEmpty() && ((tokenType & com.code972.hebmorph.Tokenizer.TokenType.Acronym) > 0)) {
+                if (retTokens.isEmpty() && ((tokenType & lemmatizer.hebmorph.Tokenizer.TokenType.Acronym) > 0)) {
                     // TODO: Perform Gimatria test
                     // TODO: Treat an acronym as a noun and strip affixes accordingly?
                     // TODO: proper values for acronym?
@@ -165,7 +165,7 @@ public class StreamLemmatizer extends Lemmatizer {
                     if ((lemmas != null) && (lemmas.size() > 0)) {
                         // TODO: Keep only worthy lemmas, based on characteristics and score / confidence
 
-                        if ((tokenType & com.code972.hebmorph.Tokenizer.TokenType.Construct) > 0) {
+                        if ((tokenType & lemmatizer.hebmorph.Tokenizer.TokenType.Construct) > 0) {
                             // TODO: Test for (lemma.Mask & DMask.D_OSMICHUT) > 0
                         }
 

@@ -17,7 +17,7 @@
  **************************************************************************/
 package lemmatizer.hebmorph;
 
-import com.code972.hebmorph.datastructures.DictHebMorph;
+import lemmatizer.hebmorph.datastructures.DictHebMorph;
 
 import java.io.IOException;
 import java.io.InputStream;

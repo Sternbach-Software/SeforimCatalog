@@ -1,6 +1,6 @@
 package lemmatizer.lucene.analysis.hebrew;
 
-import com.code972.hebmorph.HebrewToken;
+import lemmatizer.hebmorph.HebrewToken;
 import org.apache.lucene.util.Attribute;
 
 /**

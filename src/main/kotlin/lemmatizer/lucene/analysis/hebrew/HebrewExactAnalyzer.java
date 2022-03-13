@@ -19,13 +19,11 @@
  */
 package lemmatizer.lucene.analysis.hebrew;
 
-import com.code972.hebmorph.datastructures.DictHebMorph;
+import lemmatizer.hebmorph.datastructures.DictHebMorph;
+import lemmatizer.lucene.analysis.hebrew.TokenFilters.AddSuffixTokenFilter;
+import lemmatizer.lucene.analysis.hebrew.TokenFilters.NiqqudFilter;
 import org.apache.lucene.analysis.LowerCaseFilter;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.hebrew.HebrewAnalyzer;
-import org.apache.lucene.analysis.hebrew.HebrewTokenizer;
-import org.apache.lucene.analysis.hebrew.TokenFilters.AddSuffixTokenFilter;
-import org.apache.lucene.analysis.hebrew.TokenFilters.NiqqudFilter;
 import org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilter;
 
 import java.io.IOException;
@@ -42,7 +40,7 @@ public class HebrewExactAnalyzer extends HebrewAnalyzer {
     @Override
     protected TokenStreamComponents createComponents(final String fieldName) {
         // on exact - we don't care about suffixes at all, we always output original word with suffix only
-        final org.apache.lucene.analysis.hebrew.HebrewTokenizer src = new HebrewTokenizer(dict.getPref(), SPECIAL_TOKENIZATION_CASES);
+        final HebrewTokenizer src = new HebrewTokenizer(dict.getPref(), SPECIAL_TOKENIZATION_CASES);
         src.setSuffixForExactMatch(originalTermSuffix);
         TokenStream tok = new NiqqudFilter(src);
         tok = new ASCIIFoldingFilter(tok);

@@ -17,8 +17,8 @@
  **************************************************************************/
 package lemmatizer.hebmorph;
 
-import com.code972.hebmorph.DescFlag;
-import com.code972.hebmorph.PrefixType;
+import lemmatizer.hebmorph.DescFlag;
+import lemmatizer.hebmorph.PrefixType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,11 +31,11 @@ public class MorphData {
     private boolean haltIfFound;
 
     public static class Lemma {
-        private final com.code972.hebmorph.DescFlag descFlag;
+        private final lemmatizer.hebmorph.DescFlag descFlag;
         private final String lemma;
         private final PrefixType prefix;
 
-        public Lemma(String lemma, com.code972.hebmorph.DescFlag descFlag, PrefixType prefix) {
+        public Lemma(String lemma, lemmatizer.hebmorph.DescFlag descFlag, PrefixType prefix) {
             this.lemma = lemma;
             this.descFlag = descFlag;
             this.prefix = prefix;
