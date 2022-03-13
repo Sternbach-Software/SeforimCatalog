@@ -22,8 +22,8 @@ fun main() {
     println(list.sortedByDescending { it.third }.take(100))
 //    }
 }/*{
-//    LemmatizerTest().testGetLemmas()
-    val result = LemmatizerTest.getLemmatizedList(
+//    Lemmatizer().testGetLemmas()
+    val result = lemmatizer.getLemmatizedList(
         "למד" +
                 " לימד" +
                 " ילמד" +
@@ -61,7 +61,7 @@ fun main() {
     println()
     println()
 
-    val result1 = LemmatizerTest.getLemmatizedList(
+    val result1 = lemmatizer.getLemmatizedList(
         "אמר" +
                 " אימר" +
                 " נאמר" +
@@ -103,7 +103,7 @@ fun main() {
     println()
     println()
 
-    val result2 = LemmatizerTest.getLemmatizedList(
+    val result2 = lemmatizer.getLemmatizedList(
         "עקר" +
                 " עיקר" +
                 " נעקר" +
@@ -140,19 +140,19 @@ fun main() {
     )
     println()
     println(result2)
-    println("Madad: " + LemmatizerTest.getLemmatizedList(" מודדים מודדו מודדות מדד מודד מדדו למדוד למודד מדדו ימודדו ימודד", false, true,))
-    println("mamar: " + LemmatizerTest.getLemmatizedList("מאמר וממאמר וממאמרי וממאמרים ומאמרותיהם וממאמריהם וממאמרותהם", true, true,))
-    println("lamad: " + LemmatizerTest.getLemmatizedList(" ילמדינו ילמדנו", true, true,))//TODO fails
-    println("atar: " + LemmatizerTest.getLemmatizedList(" עיטור", true, true,))
-    println("hatar: " + LemmatizerTest.getLemmatizedList(" העטרה ", true, true,))
-    println("batar: " + LemmatizerTest.getLemmatizedList(" בעטר", true, true,))
-    println("batar: " + LemmatizerTest.getLemmatizedList(" מעטר", true, true,))
-    println("batar: " + LemmatizerTest.getLemmatizedList("א. מחברת מנחם / ב. תשובות דונש / ג. תשובות תלמידי מנחם / ד. תשובות דונש על רס״ג", true, true,))
+    println("Madad: " + lemmatizer.getLemmatizedList(" מודדים מודדו מודדות מדד מודד מדדו למדוד למודד מדדו ימודדו ימודד", false, true,))
+    println("mamar: " + lemmatizer.getLemmatizedList("מאמר וממאמר וממאמרי וממאמרים ומאמרותיהם וממאמריהם וממאמרותהם", true, true,))
+    println("lamad: " + lemmatizer.getLemmatizedList(" ילמדינו ילמדנו", true, true,))//TODO fails
+    println("atar: " + lemmatizer.getLemmatizedList(" עיטור", true, true,))
+    println("hatar: " + lemmatizer.getLemmatizedList(" העטרה ", true, true,))
+    println("batar: " + lemmatizer.getLemmatizedList(" בעטר", true, true,))
+    println("batar: " + lemmatizer.getLemmatizedList(" מעטר", true, true,))
+    println("batar: " + lemmatizer.getLemmatizedList("א. מחברת מנחם / ב. תשובות דונש / ג. תשובות תלמידי מנחם / ד. תשובות דונש על רס״ג", true, true,))
     println("---------------------")
-    println("batar: " + LemmatizerTest.getLemmatizedList("בגבורה", true, true,))
+    println("batar: " + lemmatizer.getLemmatizedList("בגבורה", true, true,))
     println("---------------------")
-    println("batar: " + LemmatizerTest.getLemmatizedList("בגבורתו", true, true,))
-//    println("adjectives: " + LemmatizerTest.getLemmatizedList(" יפיפיה מפואר נהדר מדהים נאזר עטוף אדום כחול אדיר אמור", true, true,))//TODO fails
+    println("batar: " + lemmatizer.getLemmatizedList("בגבורתו", true, true,))
+//    println("adjectives: " + lemmatizer.getLemmatizedList(" יפיפיה מפואר נהדר מדהים נאזר עטוף אדום כחול אדיר אמור", true, true,))//TODO fails
 }*/
 //after sanitization: (?!(למד|אמר|עקר))
 //[(ארבעה טורים השלם - אבן העזר -- א -- א - צה   (מהדורת י״ב כרכים)

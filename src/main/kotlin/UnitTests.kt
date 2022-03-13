@@ -1,13 +1,13 @@
 import SearchableTableJPanel.Companion.matchesAllOrdered
 import SearchableTableJPanel.Companion.matchesAllUnordered
 import SearchableTableJPanel.Companion.matchesAny
-import lemmatizer.hebmorph.tests.LemmatizerTest
+import lemmatizer.hebmorph.tests.Lemmatizer
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class UnitTests {
-    val queryShorashim = LemmatizerTest.getLemmatizedList("ספר עקר", true, false).toList()
-    val entryShorashim = LemmatizerTest.getLemmatizedList("הגאון הספר העיקרים הגדול", true, false).toList()
+    val queryShorashim = lemmatizer.getLemmatizedList("ספר עקר", true, false).toList()
+    val entryShorashim = lemmatizer.getLemmatizedList("הגאון הספר העיקרים הגדול", true, false).toList()
     val listOfChecks = mutableListOf<Pair<String, String>>()
 
     fun test1() {

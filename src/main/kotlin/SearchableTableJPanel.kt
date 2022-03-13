@@ -1,7 +1,7 @@
 import Catalog.containsEnglish
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import lemmatizer.hebmorph.tests.LemmatizerTest
+import lemmatizer.hebmorph.tests.Lemmatizer
 import org.apache.commons.text.similarity.LevenshteinDistance
 import java.awt.*
 import java.awt.event.*
@@ -459,7 +459,7 @@ Name (שם הספר)"*/
     }
 
     fun filterListRootSearch(constraint: String) {
-        val queryShorashim = LemmatizerTest.getLemmatizedList(
+        val queryShorashim = lemmatizer.getLemmatizedList(
             constraint,
             true,
             false,

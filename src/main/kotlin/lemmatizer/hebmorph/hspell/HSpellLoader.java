@@ -34,7 +34,7 @@ final class HSpellLoader {
     public final static String DELIMETER = "#",
             PREFIXES_INDICATOR = "#PREFIXES",
             DICTIONARY_INDICATOR = "#DICTIONARY";
-    
+
     public static final String dictionaryFile = "hebrew.wgz";
     public static final String prefixesFile = dictionaryFile + ".prefixes";
     public static final String stemsFile = dictionaryFile + ".stems";

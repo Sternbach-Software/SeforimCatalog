@@ -21,7 +21,7 @@ class MainJFrame : JFrame() {
      */
     // <editor-fold defaultstate="expanded" desc="Generated Code">
     private fun initComponents() {
-        println("Beginning to draw main screen.")
+        println("Initializing program.")
         extendedState = JFrame.MAXIMIZED_BOTH;
         isUndecorated = false;
         jTabbedPane1 = JTabbedPane()

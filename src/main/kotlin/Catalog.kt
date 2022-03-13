@@ -1,6 +1,6 @@
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import lemmatizer.hebmorph.tests.LemmatizerTest
+import lemmatizer.hebmorph.tests.Lemmatizer
 import java.io.File
 import java.net.InetSocketAddress
 import java.net.Socket
@@ -16,7 +16,7 @@ import kotlin.math.roundToInt
 
 
 var catalogDirectory = File(System.getProperty("user.dir"))
-
+val lemmatizer = Lemmatizer()
 object Catalog {
     lateinit var entries: List<CatalogEntry>
     lateinit var entriesLemmatized: List<LemmatizedCatalogEntry>
@@ -140,8 +140,8 @@ object Catalog {
                         (!printedEight && percentageDone == 80).also { if (it) printedEight = true }
                     ) println("Progress: $percentageDone%")
                     LemmatizedCatalogEntry(
-                        it.seferName to LemmatizerTest.getLemmatizedList(it.seferName, true, false, true, false, true),
-                        it.author to LemmatizerTest.getLemmatizedList(it.author, true, false, true, false, true),
+                        it.seferName to lemmatizer.getLemmatizedList(it.seferName, true, false, true, false, true),
+                        it.author to lemmatizer.getLemmatizedList(it.author, true, false, true, false, true),
                         it.publisher,
                         it.volumeNum,
                         it.category,
@@ -152,6 +152,7 @@ object Catalog {
             entriesLemmatized = lemmatizedEntries
             println("Done.")
             println("Time to extract shorashim: ${(System.nanoTime() - lemmaStartTime).div(1_000_000_000.00)} seconds")
+            println("Beginning to draw main screen.")
         }
         //for getting length stats
         //entries.map { it.publisher.length }.let { File("publisher.csv").writeText(it.joinToString(",")) }

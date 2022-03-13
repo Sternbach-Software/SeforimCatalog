@@ -18,17 +18,33 @@
 package lemmatizer.hebmorph.tests
 
 import Catalog.containsEnglish
+import catalogDirectory
 import com.code972.hebmorph.HebrewToken
 import com.code972.hebmorph.Reference
 import com.code972.hebmorph.StreamLemmatizer
 import com.code972.hebmorph.Token
+import com.code972.hebmorph.datastructures.DictHebMorph
+import com.code972.hebmorph.hspell.HSpellDictionaryLoader
 import kotlin.Throws
 import java.io.IOException
 import java.awt.EventQueue
+import java.io.File
 import java.io.StringReader
 import java.util.ArrayList
 
-class LemmatizerTest : TestBase() {
+class Lemmatizer {
+
+    val DICT_PATH = File(catalogDirectory, "hspell-data-files").absolutePath
+    private var dict: DictHebMorph? = null
+
+    val dictionary: DictHebMorph?
+        get() {
+            if (dict == null) {
+                dict = HSpellDictionaryLoader().loadDictionaryFromPath(DICT_PATH)
+            }
+            return dict
+        }
+
     @Throws(IOException::class)
     fun testLemmatizer() {
         val text =
@@ -39,7 +55,7 @@ class LemmatizerTest : TestBase() {
         //StringReader reader = new StringReader("להישרדות בהישרדות ההישרדות מהישרדות ניסיון הניסיון הביטוח  בביטוח לביטוח שביטוח מביטוחים");
         var expectedNumberOfNonHebrewWords = 0
         val reader = StringReader(text)
-        val m_lemmatizer = StreamLemmatizer(reader, getDictionary())
+        val m_lemmatizer = StreamLemmatizer(reader, dictionary)
         val word = ""
         val tokens: List<Token> = ArrayList()
         while (m_lemmatizer!!.getLemmatizeNextToken(Reference(word), tokens) > 0) {
@@ -114,7 +130,7 @@ class LemmatizerTest : TestBase() {
         //StringReader reader = new StringReader("להישרדות בהישרדות ההישרדות מהישרדות ניסיון הניסיון הביטוח  בביטוח לביטוח שביטוח מביטוחים");
         var expectedNumberOfNonHebrewWords = 0
         val reader = StringReader(text)
-        val m_lemmatizer = StreamLemmatizer(reader, getDictionary())
+        val m_lemmatizer = StreamLemmatizer(reader, dictionary)
         val word = ""
         val tokens: List<Token> = ArrayList()
         while (m_lemmatizer!!.getLemmatizeNextToken(Reference(word), tokens) > 0) {
@@ -154,168 +170,166 @@ class LemmatizerTest : TestBase() {
         }
     }
 
-    companion object {
-        fun <T> Iterable<T>.toFrequencyMap(): Map<T, Int> {
-            val frequencies: MutableMap<T, Int> = mutableMapOf()
-            this.forEach { frequencies[it] = frequencies.getOrDefault(it, 0) + 1 }
-            return frequencies
-        }
+    fun <T> Iterable<T>.toFrequencyMap(): Map<T, Int> {
+        val frequencies: MutableMap<T, Int> = mutableMapOf()
+        this.forEach { frequencies[it] = frequencies.getOrDefault(it, 0) + 1 }
+        return frequencies
+    }
 
-        /**
-         * @param ignorePrefixes if true, for inputs like:
-         * לתת
-         * it will return
-         * תת
-         * This is in addition to returning the regular lemmas (if any) and the exact word, which will be returned either way.
-         * @return a set of both lemmas and the exact words
-         */
-        @Throws(IOException::class)
-        fun getLemmatizedList(
-            text: String?,
-            ignorePrefixes: Boolean,
-            printLogs: Boolean,
-            removeVavsAndYudsFromLemma: Boolean = true,
-            addExactWords: Boolean = false,
-            reduceNifalParticiple: Boolean = true,
-            includeEnglishInExactSet: Boolean = false
-        ): Set<Set<String>> {
-            //StringReader reader = new StringReader("להישרדות בהישרדות ההישרדות מהישרדות ניסיון הניסיון הביטוח  בביטוח לביטוח שביטוח מביטוחים");
-            val lemmatizedSetOfSets: MutableSet<Set<String>> = mutableSetOf()
-            val lemmatizedSet: MutableSet<String> = mutableSetOf()
-            val exactSet: MutableSet<String> = mutableSetOf()
-            val lemmatizedList = mutableListOf<String>()
-            //        if(IsBlankChecker.containsLatin(text)) {
+    /**
+     * @param ignorePrefixes if true, for inputs like:
+     * לתת
+     * it will return
+     * תת
+     * This is in addition to returning the regular lemmas (if any) and the exact word, which will be returned either way.
+     * @return a set of both lemmas and the exact words
+     */
+    @Throws(IOException::class)
+    fun getLemmatizedList(
+        text: String?,
+        ignorePrefixes: Boolean,
+        printLogs: Boolean,
+        removeVavsAndYudsFromLemma: Boolean = true,
+        addExactWords: Boolean = false,
+        reduceNifalParticiple: Boolean = true,
+        includeEnglishInExactSet: Boolean = false
+    ): Set<Set<String>> {
+        //StringReader reader = new StringReader("להישרדות בהישרדות ההישרדות מהישרדות ניסיון הניסיון הביטוח  בביטוח לביטוח שביטוח מביטוחים");
+        val lemmatizedSetOfSets: MutableSet<Set<String>> = mutableSetOf()
+        val lemmatizedSet: MutableSet<String> = mutableSetOf()
+        val exactSet: MutableSet<String> = mutableSetOf()
+        val lemmatizedList = mutableListOf<String>()
+        //        if(IsBlankChecker.containsLatin(text)) {
 //            lemmatizedList.addAll(Arrays.asList(text.split("[\\s,\"?!&.;:()]")));//split by words
 //            return lemmatizedList;
 //        }
-            val m_lemmatizer = StreamLemmatizer(StringReader(text), getDictionary())
-            val word = ""
-            val tokens: List<Token> = ArrayList()
-            while (m_lemmatizer.getLemmatizeNextToken(Reference(word), tokens) > 0) {
-                /*if(*/ /*IsBlankChecker.*/ /*isBlank(word)) {
+        val m_lemmatizer = StreamLemmatizer(StringReader(text), dictionary)
+        val word = ""
+        val tokens: List<Token> = ArrayList()
+        while (m_lemmatizer.getLemmatizeNextToken(Reference(word), tokens) > 0) {
+            /*if(*/ /*IsBlankChecker.*/ /*isBlank(word)) {
                 System.out.println("was blank");
                 continue;
             }*/
-                if (tokens.isEmpty() || (tokens.size == 1 && tokens[0] !is HebrewToken)) {
-                    val wordWhichFailed = if (tokens.isNotEmpty()) tokens[0].text else word
-                    if (printLogs) println("$wordWhichFailed Not a Hebrew word")
-                    if (wordWhichFailed.isNotBlank()) {
-                        val containsEnglish = wordWhichFailed.containsEnglish()
-                        if (!containsEnglish || includeEnglishInExactSet) {
-                            exactSet.add(wordWhichFailed)
-                        }
+            if (tokens.isEmpty() || (tokens.size == 1 && tokens[0] !is HebrewToken)) {
+                val wordWhichFailed = if (tokens.isNotEmpty()) tokens[0].text else word
+                if (printLogs) println("$wordWhichFailed Not a Hebrew word")
+                if (wordWhichFailed.isNotBlank()) {
+                    val containsEnglish = wordWhichFailed.containsEnglish()
+                    if (!containsEnglish || includeEnglishInExactSet) {
+                        exactSet.add(wordWhichFailed)
                     }
+                }
+                continue
+            }
+            var curPrefix = -1
+            var curWord = ""
+            var curLemma = ""
+            var counter = 0
+            for (r in tokens) {
+                if (printLogs) println("Counter is " + counter++)
+                if (r !is HebrewToken) {
+                    if (printLogs) println("Token text: " + r.text)
                     continue
                 }
-                var curPrefix = -1
-                var curWord = ""
-                var curLemma = ""
-                var counter = 0
-                for (r in tokens) {
-                    if (printLogs) println("Counter is " + counter++)
-                    if (r !is HebrewToken) {
-                        if (printLogs) println("Token text: " + r.text)
-                        continue
-                    }
-                    val ht = r
-                    if (curPrefix != ht.prefixLength.toInt() || curWord != ht.text || curLemma != ht.lemma) {
-                        curPrefix = ht.prefixLength.toInt()
-                        curWord = ht.text
-                        ht.lemma?.let { curLemma = it }
-                        if (curPrefix == 0) {
-                            if (printLogs) println(String.format("Legal word: %s (score: %f)", ht.text, ht.score))
-                        } else {
-                            val prefix = ht.text.substring(0, curPrefix)
-                            val wordAfterPrefix = ht.text.substring(curPrefix)
-                            if (printLogs) {
-                                println("Prefix: $prefix")
-                                println("Word after prefix: $wordAfterPrefix")
-                                println(
-                                    String.format(
-                                        "Legal combination: %s+%s (score: %f)",
-                                        prefix,
-                                        wordAfterPrefix,
-                                        ht.score
-                                    )
-                                )
-                            }
-                            //don't just add the word after the prefix, add the lemma (e.g. given שעיקרו, add עקר not עיקרו)
-                            if (ignorePrefixes && !wordAfterPrefix.isBlank()) {
-                                exactSet.add(wordAfterPrefix)
-                            }
-                        }
-                        var lemma = ht.lemma
-                        if (removeVavsAndYudsFromLemma) {
-                            if (printLogs) println("Lemma before sanitization: $lemma")
-                            lemma = ht.lemma?.replace("[וי]".toRegex(), "")
-                            if (printLogs) println("Lemma after sanitization: $lemma")
-                        }
+                val ht = r
+                if (curPrefix != ht.prefixLength.toInt() || curWord != ht.text || curLemma != ht.lemma) {
+                    curPrefix = ht.prefixLength.toInt()
+                    curWord = ht.text
+                    ht.lemma?.let { curLemma = it }
+                    if (curPrefix == 0) {
+                        if (printLogs) println(String.format("Legal word: %s (score: %f)", ht.text, ht.score))
+                    } else {
+                        val prefix = ht.text.substring(0, curPrefix)
+                        val wordAfterPrefix = ht.text.substring(curPrefix)
                         if (printLogs) {
-                            println("First: ${lemma?.firstOrNull()}")
-                            println("Last: ${lemma?.lastOrNull()}")
+                            println("Prefix: $prefix")
+                            println("Word after prefix: $wordAfterPrefix")
+                            println(
+                                String.format(
+                                    "Legal combination: %s+%s (score: %f)",
+                                    prefix,
+                                    wordAfterPrefix,
+                                    ht.score
+                                )
+                            )
                         }
-                        if (reduceNifalParticiple) {//e.g. נאזר
-                            if (lemma?.length == 4 && lemma.firstOrNull() == 'נ') lemma = lemma.substring(1)
+                        //don't just add the word after the prefix, add the lemma (e.g. given שעיקרו, add עקר not עיקרו)
+                        if (ignorePrefixes && !wordAfterPrefix.isBlank()) {
+                            exactSet.add(wordAfterPrefix)
                         }
-                        if (lemma?.startsWith("הת") == true) lemma = lemma.removePrefix("הת")
-                        if (/*lemma is העטר*/lemma?.length == 4 && lemma.firstOrNull() == 'ה') lemma =
-                            lemma.substring(1)
-                        if (/*lemma is עטרה*/lemma?.length == 4 && lemma.lastOrNull() == 'ה') lemma =
-                            lemma.dropLast(1)
+                    }
+                    var lemma = ht.lemma
+                    if (removeVavsAndYudsFromLemma) {
+                        if (printLogs) println("Lemma before sanitization: $lemma")
+                        lemma = ht.lemma?.replace("[וי]".toRegex(), "")
+                        if (printLogs) println("Lemma after sanitization: $lemma")
+                    }
+                    if (printLogs) {
+                        println("First: ${lemma?.firstOrNull()}")
+                        println("Last: ${lemma?.lastOrNull()}")
+                    }
+                    if (reduceNifalParticiple) {//e.g. נאזר
+                        if (lemma?.length == 4 && lemma.firstOrNull() == 'נ') lemma = lemma.substring(1)
+                    }
+                    if (lemma?.startsWith("הת") == true) lemma = lemma.removePrefix("הת")
+                    if (/*lemma is העטר*/lemma?.length == 4 && lemma.firstOrNull() == 'ה') lemma =
+                        lemma.substring(1)
+                    if (/*lemma is עטרה*/lemma?.length == 4 && lemma.lastOrNull() == 'ה') lemma =
+                        lemma.dropLast(1)
 
-                        if (lemma?.isNotBlank() == true) {
-                            lemmatizedSet.add(lemma)
-                            lemmatizedList.add(lemma)
-                        } else if (lemma == null) lemmatizedSet.add(ht.text)/*nouns don't have lemmas*/
-                        if (addExactWords && !ht.text.isBlank() && !ht.text.containsEnglish()) {
-                            exactSet.add(ht.text /*add actual word for exact search*/)
-                        }
-                        if (printLogs) println(
-                            """
+                    if (lemma?.isNotBlank() == true) {
+                        lemmatizedSet.add(lemma)
+                        lemmatizedList.add(lemma)
+                    } else if (lemma == null) lemmatizedSet.add(ht.text)/*nouns don't have lemmas*/
+                    if (addExactWords && !ht.text.isBlank() && !ht.text.containsEnglish()) {
+                        exactSet.add(ht.text /*add actual word for exact search*/)
+                    }
+                    if (printLogs) println(
+                        """
                                 lemma: $lemma
                                 word: ${ht.text}
                             """.trimIndent()
-                        )
-                    }
+                    )
                 }
-                //new word:
-                if (printLogs) {
-                    println("Starting new word; adding hashset")
-                    println("lemmatizedSetOfSets=$lemmatizedSetOfSets, lemmatizedSet=$lemmatizedSet")
-                }
-                if (lemmatizedSet.isNotEmpty()) lemmatizedSetOfSets.add(lemmatizedSet.toSet())
-                if (printLogs) {
-                    println("lemmatizedSetOfSets=$lemmatizedSetOfSets")
-                    println("Clearing set")
-                }
-                lemmatizedSet.clear()
-                if (printLogs) println("lemmatizedSetOfSets=$lemmatizedSetOfSets")
             }
-
-            //if list contains אמר and מאמר, remove the latter, but if it contains מד and למד, dont remove the latter
-            //Commented out because i think maamar should remain that way, because having results for אמר is too verbose and not what the user wants lemmatized, because it is a noun.
-            /*val copy = lemmatizedSet.toSet()
-            for(it in copy) {
-                inner@for(it1 in copy) {
-                    if(it == it1) continue@inner
-                    val bigger: String
-                    val smaller: String
-                    if (it1.length == 4 && it.length == 3) {
-                        bigger = it1
-                        smaller = it
-                    } else {
-                        bigger = it
-                        smaller = it1
-                    }
-                    if (bigger.contains(smaller)) {
-                        lemmatizedSet.remove(bigger)
-                        lemmatizedList.remove(bigger)
-                    }
-                }
-            }*/
-            if (printLogs) println("Frequency map: ${lemmatizedList.toFrequencyMap()}")
-            return lemmatizedSetOfSets.also { if (addExactWords && exactSet.isNotEmpty()) it.addAll(listOf(exactSet)) }
+            //new word:
+            if (printLogs) {
+                println("Starting new word; adding hashset")
+                println("lemmatizedSetOfSets=$lemmatizedSetOfSets, lemmatizedSet=$lemmatizedSet")
+            }
+            if (lemmatizedSet.isNotEmpty()) lemmatizedSetOfSets.add(lemmatizedSet.toSet())
+            if (printLogs) {
+                println("lemmatizedSetOfSets=$lemmatizedSetOfSets")
+                println("Clearing set")
+            }
+            lemmatizedSet.clear()
+            if (printLogs) println("lemmatizedSetOfSets=$lemmatizedSetOfSets")
         }
+
+        //if list contains אמר and מאמר, remove the latter, but if it contains מד and למד, dont remove the latter
+        //Commented out because i think maamar should remain that way, because having results for אמר is too verbose and not what the user wants lemmatized, because it is a noun.
+        /*val copy = lemmatizedSet.toSet()
+        for(it in copy) {
+            inner@for(it1 in copy) {
+                if(it == it1) continue@inner
+                val bigger: String
+                val smaller: String
+                if (it1.length == 4 && it.length == 3) {
+                    bigger = it1
+                    smaller = it
+                } else {
+                    bigger = it
+                    smaller = it1
+                }
+                if (bigger.contains(smaller)) {
+                    lemmatizedSet.remove(bigger)
+                    lemmatizedList.remove(bigger)
+                }
+            }
+        }*/
+        if (printLogs) println("Frequency map: ${lemmatizedList.toFrequencyMap()}")
+        return lemmatizedSetOfSets.also { if (addExactWords && exactSet.isNotEmpty()) it.addAll(listOf(exactSet)) }
     }
 
 
