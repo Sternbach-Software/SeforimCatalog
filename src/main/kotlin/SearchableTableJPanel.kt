@@ -248,7 +248,7 @@ abstract class SearchableTableJPanel(
             "Exact search determines matching entries based on whether the entry contains the exact search phrase entered."
         )
         val alternatePhrasesJPanel = PlainTextExplanationJPanel(
-            "Alternate phrase search determines matches based on whether the entry contains any of the phrases separated by \"#\", e.g. \"fire#אור#אש\" or \"עשר(ת#ה) (מאמר#הדיבר)ות\" (i.e. show results for either עשרת הדיברות or עשרה מאמרות). Surround words with an exclamation mark to have the program turn the word into its shoresh/shorashim. See tip #5 for more information"
+            "Alternate phrase search determines matches based on whether the entry contains any of the phrases separated by \"#\", e.g. \"fire#אור#אש\" or \"עשר(ת#ה) (מאמר#הדיבר)ות\" (i.e. show results for either עשרת הדיברות or עשרה מאמרות). Surround words with an exclamation mark to have the program turn the word into its shoresh/shorashim. See tip #5 for more information."
         )
         val explanationPanelTitledBorder = BorderFactory.createTitledBorder(exactSearchName/*start with exact*/)
         searchModeExplanation.border = explanationPanelTitledBorder
