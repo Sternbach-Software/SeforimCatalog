@@ -11,7 +11,7 @@ class FindSeferByCriteriaJPanel(
         get() = Catalog.entries
     override val originalCollectionLemmatized: List<LemmatizedCatalogEntry>
         get() = Catalog.entriesLemmatized
-    override val listBeingDisplayed: MutableList<Any> = Catalog.entries.toMutableList()
+    override val listBeingDisplayed: MutableList<Any> = Catalog.entries.toMutableList().toSynchronizedList() as MutableList<Any>
     override val displayingCatalogEntry: Boolean = true
     override val columns: List<String> = listOf(
         "Publisher (הוצאה)",

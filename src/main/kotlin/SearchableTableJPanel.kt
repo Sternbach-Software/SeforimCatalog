@@ -24,6 +24,7 @@ abstract class SearchableTableJPanel(
     private val searchPhrase: String,
     private val getLemmatizedCriteriaLambda: ((LemmatizedCatalogEntry) -> Set<Set<String>>)? = null
 ) : JPanel() {
+    fun <T> MutableList<T>.toSynchronizedList(): MutableList<T> = this//Collections.synchronizedList(this)
     open val originalCollection: Collection<Any> = emptyList()
     open val originalCollectionLemmatized: List<LemmatizedCatalogEntry> = emptyList()
     open val listBeingDisplayed: MutableList<Any> = mutableListOf()
@@ -447,8 +448,12 @@ Name (שם הספר)"*/
         )
     }
 
+    var mMode = 0
     fun filterList(mode: Int, ld: LevenshteinDistance? = null) {
         val _constraint1 = seferNameTextField.text.trim() //TODO consider making this a computed field
+        if(_searchPhrase == _constraint1 && (_constraint1.isBlank() || mode == mMode)) return //don't do anything if the constraint is blank and the user is clicking different modes
+        _searchPhrase = _constraint1
+        mMode = mode
         if (_constraint1.isBlank()) {
             updateList(originalCollection)
             rootWordSearchJPanel.setShorashim(listOf())
@@ -506,7 +511,7 @@ Name (שם הספר)"*/
         useLemmatizedList: Boolean,
         predicateIfString: (String) -> Boolean,
         predicateIfCatalogEntry: (CatalogEntry) -> Boolean
-    ) {
+    ) /*= scope.launch(Dispatchers.Default)*/ {
         if (useLemmatizedList) {
             val list = Collections.synchronizedList(mutableListOf<CatalogEntry>())
             (originalCollectionLemmatized as Collection<LemmatizedCatalogEntry>)
@@ -595,8 +600,10 @@ Name (שם הספר)"*/
     private fun updateList(newList: Collection<Any>) {
         listBeingDisplayed.clear()
         listBeingDisplayed.addAll(newList)
-        (table.model as AbstractTableModel).fireTableDataChanged()
-        jLabel2.text = "Results: ${listBeingDisplayed.size}"
+        //EventQueue.invokeLater {
+            (table.model as AbstractTableModel).fireTableDataChanged()
+            jLabel2.text = "Results: ${listBeingDisplayed.size}"
+        //}
     }
 
     companion object {
