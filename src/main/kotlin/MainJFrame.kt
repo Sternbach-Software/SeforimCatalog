@@ -25,21 +25,21 @@ class MainJFrame : JFrame() {
         extendedState = JFrame.MAXIMIZED_BOTH;
         isUndecorated = false;
         jTabbedPane1 = JTabbedPane()
-        findSeferByNameJPanel1 = (FindSeferByCriteriaJPanel("Enter name of sefer$alternatePhrases:", { it.seferName }, { it._seferName.second })).initComponents() as FindSeferByCriteriaJPanel
+        findSeferByNameJPanel1 = (FindSeferByCriteriaJPanel("Enter name of sefer$alternatePhrases:", { it.seferName }, { it._seferName.second })).also { println("Drawing \"Seforim by name\"") }.initComponents() as FindSeferByCriteriaJPanel
         seforimByCriteriaTabJPanel = TabJPanel(
             listOf(
-                "Seforim by author" to (FindSeferByCriteriaJPanel("Enter author of sefer$alternatePhrases:", { it.author }, { it._author.second })).initComponents(),
-                "Seforim by category" to (FindSeferByCriteriaJPanel("Enter category of sefer$alternatePhrases:", { it.category })).initComponents(),
-                "Seforim by publisher" to (FindSeferByCriteriaJPanel("Enter publisher of sefer$alternatePhrases:", { it.publisher })).initComponents(),
-                "Seforim by shelf" to (FindSeferByCriteriaJPanel("Enter shelf of sefer$alternatePhrases:", { it.shelfNum })).initComponents(),
+                "Seforim by author" to (FindSeferByCriteriaJPanel("Enter author of sefer$alternatePhrases:", { it.author }, { it._author.second })).also { println("Drawing \"Seforim by author\"") }.initComponents(),
+                "Seforim by category" to (FindSeferByCriteriaJPanel("Enter category of sefer$alternatePhrases:", { it.category })).also { println("Drawing \"Seforim by category\".") }.initComponents(),
+                "Seforim by publisher" to (FindSeferByCriteriaJPanel("Enter publisher of sefer$alternatePhrases:", { it.publisher })).also { println("Drawing \"Seforim by publisher\".") }.initCom.ponents(),
+                "Seforim by shelf" to (FindSeferByCriteriaJPanel("Enter shelf of sefer$alternatePhrases:", { it.shelfNum })).also { println("Drawing \"Seforim by shelf\".") }.initComponents(),
             )
         )
         criteriaTabJPanel = TabJPanel(
             listOf(
-                "Authors" to ListOfAuthorsJPanel().initComponents(),
-                "Categories" to ListOfCategoriesJPanel().initComponents(),
-                "Publishers" to ListOfPublishersJPanel().initComponents(),
-                "Shelves" to ListOfShelvesJPanel().initComponents()
+                "Authors" to ListOfAuthorsJPanel().also { println("Drawing list of authors.") }.initComponents(),
+                "Categories" to ListOfCategoriesJPanel().also { println("Drawing list of categories.") }.initComponents(),
+                "Publishers" to ListOfPublishersJPanel().also { println("Drawing list of publishers.") }.initComponents(),
+                "Shelves" to ListOfShelvesJPanel().also { println("Drawing list of shelves.") }.initComponents()
             )
         )
         textJPanel1 = TextJPanel(TIPS)
@@ -113,6 +113,7 @@ class MainJFrame : JFrame() {
                         .addContainerGap()
                 )
         )
+        println("Displaying main screen.")
         pack()
     } // </editor-fold>                        
 
