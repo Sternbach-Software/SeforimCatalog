@@ -457,8 +457,8 @@ Name (שם הספר)"*/
 
     var mMode = 0
     fun filterList(mode: Int, ld: LevenshteinDistance? = null) {
-        val _constraint1 = seferNameTextField.text.trim() //TODO consider making this a computed field
-        if(_searchPhrase == _constraint1 && (_constraint1.isBlank() || mode == mMode)) return //don't do anything if the constraint is blank and the user is clicking different modes
+        val _constraint1 = seferNameTextField.text?.trim() //TODO consider making this a computed field
+        if(_constraint1 == null || (_searchPhrase == _constraint1 && (_constraint1.isBlank() || mode == mMode))) return //don't do anything if the constraint is blank and the user is clicking different modes
         _searchPhrase = _constraint1
         mMode = mode
         if (_constraint1.isBlank()) {
