@@ -208,27 +208,34 @@ abstract class SearchableTableJPanel(
         if (seferNameColumnIndex != 0) rowSorter.setComparator(
             seferNameColumnIndex - 1,
             kotlin.Comparator<String> { o1, o2 ->
-                val indexOfDot1 = o1.indexOf(".")
-                val firstNum1 = o1.substring(0, indexOfDot1)
-                val secondNum1 = o1.substring(indexOfDot1 + 1)
+                val firstIsBelenofsky = o1.startsWith("B", true)
+                val secondIsBelenofsky = o2.startsWith("B", true)
+                if(firstIsBelenofsky && !secondIsBelenofsky) 1
+                else if(!firstIsBelenofsky && secondIsBelenofsky) -1
+                else { //they are either both belenofsky or neither 
+                    
+                    val indexOfDot1 = o1.indexOf(".")
+                    val firstNum1 = o1.substring(if(firstIsBelenofsky) 1/*exclude "B"*/ else 0, indexOfDot1)
+                    val secondNum1 = o1.substring(indexOfDot1 + 1)
 
-                val indexOfDot2 = o2.indexOf(".")
-                val firstNum2 = o2.substring(0, indexOfDot2)
-                val secondNum2 = o2.substring(indexOfDot2 + 1)
+                    val indexOfDot2 = o2.indexOf(".")
+                    val firstNum2 = o2.substring(if(secondIsBelenofsky) 1 else 0, indexOfDot2)
+                    val secondNum2 = o2.substring(indexOfDot2 + 1)
 
-                // First check size of strings: if one number has more digits than the other,
-                // then it is certainly bigger. Otherwise, check which is bigger.
-                // If they are the same number, do the previous operations for the second number.
-                if (firstNum1.length > firstNum2.length) 1
-                else if (firstNum1.length < firstNum2.length) -1
-                else { //check if same num; if yes, check second num
-                    val firstNumComparison = firstNum1.compareTo(firstNum2)
-                    if (firstNumComparison != 0) firstNumComparison
-                    else {
-                        if (secondNum1.length > secondNum2.length) 1
-                        else if (secondNum1.length < secondNum2.length) -1
+                    // First check size of strings: if one number has more digits than the other,
+                    // then it is certainly bigger. Otherwise, check which is bigger.
+                    // If they are the same number, do the previous operations for the second number.
+                    if (firstNum1.length > firstNum2.length) 1
+                    else if (firstNum1.length < firstNum2.length) -1
+                    else { //check if same num; if yes, check second num
+                        val firstNumComparison = firstNum1.compareTo(firstNum2)
+                        if (firstNumComparison != 0) firstNumComparison
                         else {
-                            secondNum1.compareTo(secondNum2)
+                            if (secondNum1.length > secondNum2.length) 1
+                            else if (secondNum1.length < secondNum2.length) -1
+                            else {
+                                secondNum1.compareTo(secondNum2)
+                            }
                         }
                     }
                 }
