@@ -30,7 +30,7 @@ class MainJFrame : JFrame() {
             listOf(
                 "Seforim by author" to (FindSeferByCriteriaJPanel("Enter author of sefer$alternatePhrases:", { it.author }, { it._author.second })).also { println("Drawing \"Seforim by author\"") }.initComponents(),
                 "Seforim by category" to (FindSeferByCriteriaJPanel("Enter category of sefer$alternatePhrases:", { it.category })).also { println("Drawing \"Seforim by category\".") }.initComponents(),
-                "Seforim by publisher" to (FindSeferByCriteriaJPanel("Enter publisher of sefer$alternatePhrases:", { it.publisher })).also { println("Drawing \"Seforim by publisher\".") }.initCom.ponents(),
+                "Seforim by publisher" to (FindSeferByCriteriaJPanel("Enter publisher of sefer$alternatePhrases:", { it.publisher })).also { println("Drawing \"Seforim by publisher\".") }.initComponents(),
                 "Seforim by shelf" to (FindSeferByCriteriaJPanel("Enter shelf of sefer$alternatePhrases:", { it.shelfNum })).also { println("Drawing \"Seforim by shelf\".") }.initComponents(),
             )
         )
