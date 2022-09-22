@@ -28,10 +28,10 @@ class MainJFrame : JFrame() {
         findSeferByNameJPanel1 = (FindSeferByCriteriaJPanel("Enter name of sefer$alternatePhrases:", { it.seferName }, { it._seferName.second })).initComponents() as FindSeferByCriteriaJPanel
         seforimByCriteriaTabJPanel = TabJPanel(
             listOf(
-                "Seforim by author" to (FindSeferByCriteriaJPanel("Enter author of sefer$alternatePhrases:", { it.author }, { it._author.second })).initComponents(),
-                "Seforim by category" to (FindSeferByCriteriaJPanel("Enter category of sefer$alternatePhrases:", { it.category })).initComponents(),
-                "Seforim by publisher" to (FindSeferByCriteriaJPanel("Enter publisher of sefer$alternatePhrases:", { it.publisher })).initComponents(),
-                "Seforim by shelf" to (FindSeferByCriteriaJPanel("Enter shelf of sefer$alternatePhrases:", { it.shelfNum })).initComponents(),
+                "Seforim by author" to (FindSeferByCriteriaJPanel("Enter author of sefer$alternatePhrases:", { it.author }, { it._author.second })).also { println("Drawing \"Seforim by author\"") }.initComponents(),
+                "Seforim by category" to (FindSeferByCriteriaJPanel("Enter category of sefer$alternatePhrases:", { it.category })).also { println("Drawing \"Seforim by category\"") }.initComponents(),
+                "Seforim by publisher" to (FindSeferByCriteriaJPanel("Enter publisher of sefer$alternatePhrases:", { it.publisher })).also { println("Drawing \"Seforim by publisher\"") }.initComponents(),
+                "Seforim by shelf" to (FindSeferByCriteriaJPanel("Enter shelf of sefer$alternatePhrases:", { it.shelfNum })).also { println("Drawing \"Seforim by shelf\"") }.initComponents(),
             )
         )
         criteriaTabJPanel = TabJPanel(
