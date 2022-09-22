@@ -142,7 +142,7 @@ abstract class SearchableTableJPanel(
                 renderer.horizontalAlignment = JLabel.RIGHT
             }
         }
-        table.font = Font("Default", 0, 14)
+        //table.font = Font("Default", 0, 14)
 //        table.showHorizontalLines = true
         table.showVerticalLines = true
         jScrollPane1.setViewportView(table)
