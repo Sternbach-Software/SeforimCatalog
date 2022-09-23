@@ -13,13 +13,15 @@ class FindSeferByCriteriaJPanel(
         get() = Catalog.entriesLemmatized
     override val listBeingDisplayed: MutableList<Any> = Catalog.entries.toMutableList().toSynchronizedList() as MutableList<Any>
     override val displayingCatalogEntry: Boolean = true
+    val seferNameColumnString = "Name (שם הספר)"
+    val shelfNumColumnString = "Shelf (מס' מדף)"
     override val columns: List<String> = listOf(
         "Publisher (הוצאה)",
         "Category (קטיגורי)",
         "Volume (כרך)",
         "Author (שם המחבר)",
-        "Shelf (מס' מדף)",
-        "Name (שם הספר)"
+        shelfNumColumnString,
+        seferNameColumnString
     )
     override fun getCriteria(entry: CatalogEntry): String = getCriteriaLambda(entry)
 }
