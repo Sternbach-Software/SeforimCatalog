@@ -2,22 +2,26 @@ import SearchableTableJPanel.Companion.matchesAllOrdered
 import SearchableTableJPanel.Companion.matchesAllUnordered
 import SearchableTableJPanel.Companion.matchesAny
 import lemmatizer.hebmorph.tests.Lemmatizer
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Test
 
 class UnitTests {
     val queryShorashim = lemmatizer.getLemmatizedList("ספר עקר", true, false).toList()
     val entryShorashim = lemmatizer.getLemmatizedList("הגאון הספר העיקרים הגדול", true, false).toList()
     val listOfChecks = mutableListOf<Pair<String, String>>()
 
+    @Test
     fun test1() {
         assertEquals(queryShorashim, setOf("ספר","עקר").map { setOf(it) })
     }
 
+    @Test
     fun test2() {
         assertEquals(entryShorashim, setOf("גאן", "ספר", "עקר", "גדל").map { setOf(it) })
     }
 
+    @Test
     fun test3() {
         matchesAllUnordered(queryShorashim, entryShorashim, listOfChecks, true)
         assertEquals(
@@ -32,11 +36,13 @@ class UnitTests {
         listOfChecks.clear()
     }
 
+    @Test
     fun test4() {
         assertTrue(matchesAllOrdered(queryShorashim, entryShorashim))
         //should compare: listOf("ספר" to "ספר","עקר" to "עקר",))
     }
 
+    @Test
     fun test5() {
         matchesAny(queryShorashim, entryShorashim, listOfChecks, true)
         assertEquals(
@@ -48,16 +54,18 @@ class UnitTests {
         listOfChecks.clear()
     }
 
-    companion object {
-        @JvmStatic
-        fun main(args: Array<String>) {
-            val x = UnitTests()
-            x.test1()
-            x.test2()
-            x.test3()
-            x.test4()
-            x.test5()
-            println("All tests passing!")
+    @Test
+    fun columnSortingWorks() {
+        val original = mutableListOf<String>()
+        for(i in 0..100) {
+            for(j in 0..100) {
+                original.add("$i.$j")
+            }
         }
+        original.addAll(original.map { "B$it" })
+        val list = original.shuffled()
+        println("Original columns: $original")
+        println("Shuffled columns: $list")
+        assertTrue(original == list.sortedWith(shelfNumComparator))
     }
 }
