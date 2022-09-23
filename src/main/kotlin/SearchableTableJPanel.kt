@@ -1,7 +1,6 @@
 import Catalog.containsEnglish
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import lemmatizer.hebmorph.tests.Lemmatizer
 import org.apache.commons.text.similarity.LevenshteinDistance
 import java.awt.*
 import java.awt.event.*
@@ -18,7 +17,41 @@ import javax.swing.table.TableRowSorter
 
 private const val FILTER_EXACT = 0
 private const val FILTER_ROOT = 1
-private const val FILTER_SIMILARITY = 3
+private const val FILTER_ALTERNATE_PHRASE = 3
+private const val FILTER_SIMILARITY = 4
+val shelfNumComparator = kotlin.Comparator<String> { o1, o2 ->
+    val firstIsBelenofsky = o1.startsWith("B", true)
+    val secondIsBelenofsky = o2.startsWith("B", true)
+    if (firstIsBelenofsky && !secondIsBelenofsky) 1
+    else if (!firstIsBelenofsky && secondIsBelenofsky) -1
+    else { //they are either both belenofsky or neither
+
+        val indexOfDot1 = o1.indexOf(".")
+        val firstNum1 = o1.substring(if (firstIsBelenofsky) 1/*exclude "B"*/ else 0, indexOfDot1)
+        val secondNum1 = o1.substring(indexOfDot1 + 1)
+
+        val indexOfDot2 = o2.indexOf(".")
+        val firstNum2 = o2.substring(if (secondIsBelenofsky) 1 else 0, indexOfDot2)
+        val secondNum2 = o2.substring(indexOfDot2 + 1)
+
+        // First check size of strings: if one number has more digits than the other,
+        // then it is certainly bigger. Otherwise, check which is bigger.
+        // If they are the same number, do the previous operations for the second number.
+        if (firstNum1.length > firstNum2.length) 1
+        else if (firstNum1.length < firstNum2.length) -1
+        else { //check if same num; if yes, check second num
+            val firstNumComparison = firstNum1.compareTo(firstNum2)
+            if (firstNumComparison != 0) firstNumComparison
+            else {
+                if (secondNum1.length > secondNum2.length) 1
+                else if (secondNum1.length < secondNum2.length) -1
+                else {
+                    secondNum1.compareTo(secondNum2)
+                }
+            }
+        }
+    }
+}
 
 abstract class SearchableTableJPanel(
     private val searchPhrase: String,
@@ -31,29 +64,34 @@ abstract class SearchableTableJPanel(
     open val displayingCatalogEntry: Boolean =
         false //if false, return listBeingDisplayed[rowNum] in table model, otherwise return value depending on columnNum
     open val columns = emptyList<String>()
+    open val getElementToSearchBy: (Pair<*, *>) -> String = { "" }
 
     var _constraint: Regex? = null //singleton pattern
     var _searchPhrase: String? = null
 
     /*only gets regex when the constraint hasn't changed, so that it doesn't create a new regex for every list item*/
     private fun getConstraintRegex(constraint: String): Regex {
-        if (constraint == _searchPhrase /*already got regex*/ || constraint.lastOrNull() == '#'/*user has not typed alternate phrase, so don't search for whitespace (i.e. every entry)*/) return _constraint!! /*use "old" regex*/
+        fun String.addBoundary() = "\\b($this)\\b"
+        println("getConstraintRegex(constraint=$constraint), _searchPhrase=$_searchPhrase, _constraint=$_constraint")
+        if ((constraint == _constraint?.toString() /*already got regex*/ || constraint.lastOrNull() == '#'/*user has not typed alternate phrase, so don't search for whitespace (i.e. every entry)*/) && _constraint != null) return _constraint!! /*use "old" regex*/
         /*get new regex*/
         lateinit var regex: Regex
         val lemmatizerRegex = "![^!]+!".toRegex()
-        val mConstraint = if(!constraint.contains(lemmatizerRegex)) constraint else constraint.replace(lemmatizerRegex) { lemmatizer.getLemmatizedList(it.value).also { if(it.size > 1) println("Error: $constraint") }.first().joinToString("|", "(", ")") }
-        println("Constraint: $mConstraint")
+        val mConstraint =
+            if (!constraint.contains(lemmatizerRegex)) constraint else constraint.replace(lemmatizerRegex) {
+                lemmatizer.getLemmatizedList(it.value).also { if (it.size > 1) println("Error: $constraint") }.first()
+                    .joinToString("|", "(", ")")
+            }
         val replaceHashWithOr = mConstraint.replace("#", "|")
         regex = try {
-            replaceHashWithOr.toRegex(RegexOption.IGNORE_CASE) //if it is a valid regex, go for it
+            replaceHashWithOr.addBoundary().toRegex(RegexOption.IGNORE_CASE) //if it is a valid regex, go for it
         } catch (t: Throwable) { //probably invalid pattern
             fun String.escapeRegexChars() =
                 listOf("\\", "(", ")", "[", "]", "{", "}", "?", "+", "*")
                     .fold(this) { acc: String, b: String -> acc.replace(b, "\\$b") }
-            replaceHashWithOr.escapeRegexChars().toRegex(RegexOption.IGNORE_CASE)
+            replaceHashWithOr.escapeRegexChars().addBoundary().toRegex(RegexOption.IGNORE_CASE)
         }
         _constraint = regex
-        _searchPhrase = constraint
         //println("Pattern of constraint: $regex")
         return regex
     }
@@ -97,7 +135,11 @@ abstract class SearchableTableJPanel(
         jLabel1 = JLabel()
         seferNameTextField = JTextField()
         jScrollPane1 = JScrollPane()
-        table = JTable()
+        table = object: JTable() {
+            /*override fun getToolTipText(e: MouseEvent): String? {
+                return getValueAt(rowAtPoint(e.point), columnAtPoint(e.point))?.toString()
+            }*/
+        }
         jLabel1.text = searchPhrase
         jLabel2 = JLabel()
         searchModeExplanation = JPanel().also { it.isVisible = true }
@@ -142,7 +184,8 @@ abstract class SearchableTableJPanel(
                 renderer.horizontalAlignment = JLabel.RIGHT
             }
         }
-        //table.font = Font("Default", 0, 14)
+        val (font, size) = fontFile.readText().split(",")
+        table.font = Font(font, 0, size.toInt())
 //        table.showHorizontalLines = true
         table.showVerticalLines = true
         jScrollPane1.setViewportView(table)
@@ -195,54 +238,22 @@ abstract class SearchableTableJPanel(
         )
 //        table.autoCreateRowSorter = true
         val rowSorter = TableRowSorter(table.model as AbstractTableModel)
-        val comparator = kotlin.Comparator<String> { o1, o2 ->
+        val hebrewEntriesFirstComparator = kotlin.Comparator<String> { o1, o2 ->
             val o1ContainsEnglish = o1.containsEnglish()
             val o2ContainsEnglish = o2.containsEnglish()
             if (o1ContainsEnglish && !o2ContainsEnglish) 1
             else if (!o1ContainsEnglish && o2ContainsEnglish) -1
             else (o1.lowercase()).compareTo(o2.lowercase())
         }
-        val seferNameColumnIndex =
-            if (columns.size - 1 != 0) columns.size - 1 else 0//if only 1 column (e.g. authors), index 0, else "name of sefer" column
-        rowSorter.setComparator(seferNameColumnIndex, comparator)
-        if (seferNameColumnIndex != 0) rowSorter.setComparator(
-            seferNameColumnIndex - 1,
-            kotlin.Comparator<String> { o1, o2 ->
-                val firstIsBelenofsky = o1.startsWith("B", true)
-                val secondIsBelenofsky = o2.startsWith("B", true)
-                if(firstIsBelenofsky && !secondIsBelenofsky) 1
-                else if(!firstIsBelenofsky && secondIsBelenofsky) -1
-                else { //they are either both belenofsky or neither 
-                    
-                    val indexOfDot1 = o1.indexOf(".")
-                    val firstNum1 = o1.substring(if(firstIsBelenofsky) 1/*exclude "B"*/ else 0, indexOfDot1)
-                    val secondNum1 = o1.substring(indexOfDot1 + 1)
-
-                    val indexOfDot2 = o2.indexOf(".")
-                    val firstNum2 = o2.substring(if(secondIsBelenofsky) 1 else 0, indexOfDot2)
-                    val secondNum2 = o2.substring(indexOfDot2 + 1)
-
-                    // First check size of strings: if one number has more digits than the other,
-                    // then it is certainly bigger. Otherwise, check which is bigger.
-                    // If they are the same number, do the previous operations for the second number.
-                    if (firstNum1.length > firstNum2.length) 1
-                    else if (firstNum1.length < firstNum2.length) -1
-                    else { //check if same num; if yes, check second num
-                        val firstNumComparison = firstNum1.compareTo(firstNum2)
-                        if (firstNumComparison != 0) firstNumComparison
-                        else {
-                            if (secondNum1.length > secondNum2.length) 1
-                            else if (secondNum1.length < secondNum2.length) -1
-                            else {
-                                secondNum1.compareTo(secondNum2)
-                            }
-                        }
-                    }
-                }
-            }
-        )
+        if (this is FindSeferByCriteriaJPanel) {
+            val indexOfSeferNameColumn = columns.indexOf(seferNameColumnString)
+            rowSorter.setComparator(indexOfSeferNameColumn, hebrewEntriesFirstComparator)
+            rowSorter.setComparator(columns.indexOf(shelfNumColumnString), shelfNumComparator)
+            rowSorter.sortKeys = listOf(RowSorter.SortKey(indexOfSeferNameColumn, SortOrder.ASCENDING))
+        } else if (this is ListOfShelvesJPanel) {
+            rowSorter.setComparator(columns.indices.last, shelfNumComparator) //TODO make this index dynamic
+        }
         table.rowSorter = rowSorter
-        rowSorter.sortKeys = listOf(RowSorter.SortKey(seferNameColumnIndex, SortOrder.ASCENDING))
         jLabel2.text = "Results: ${listBeingDisplayed.size}"
 
         jLabel6.text = "Search mode:"
@@ -264,6 +275,9 @@ abstract class SearchableTableJPanel(
         exactSearchRadioButton.text = exactSearchName
         rootWordSearchRadioButton.text = rootSearchName
         patternSearchRadioButton.text = alternatePhraseSearchName
+
+        patternSearchRadioButton.isVisible = false
+
         exactSearchRadioButton.addActionListener {
             setExplanationJPanel(exactMatchJPanel, explanationPanelTitledBorder, exactSearchName, FILTER_EXACT)
         }
@@ -271,7 +285,12 @@ abstract class SearchableTableJPanel(
             setExplanationJPanel(rootWordSearchJPanel, explanationPanelTitledBorder, rootSearchName, FILTER_ROOT)
         }
         patternSearchRadioButton.addActionListener {
-            setExplanationJPanel(alternatePhrasesJPanel, explanationPanelTitledBorder, alternatePhraseSearchName, FILTER_EXACT)
+            setExplanationJPanel(
+                alternatePhrasesJPanel,
+                explanationPanelTitledBorder,
+                alternatePhraseSearchName,
+                FILTER_EXACT
+            )
         }
         buttonGroup1.add(exactSearchRadioButton)
         buttonGroup1.add(rootWordSearchRadioButton)
@@ -405,16 +424,19 @@ abstract class SearchableTableJPanel(
         override fun getColumnCount(): Int = columns.size
 
         override fun getValueAt(row: Int, col: Int): Any {
-            return listBeingDisplayed[row].let {
-                if (!displayingCatalogEntry) it else {
+            val it = listBeingDisplayed[row]
+            return when (it) {
+                is String -> it
+                is Pair<*, *> -> if (col == 0) it.first else it.second
+                else -> {
                     it as CatalogEntry
                     when (col) {
                         /*Publisher (הוצאה)",
-Category (קטיגורי)",
-Volume (כרך)",
-Author (שם המחבר)",
-Shelf (מס' מדף)",
-Name (שם הספר)"*/
+        Category (קטיגורי)",
+        Volume (כרך)",
+        Author (שם המחבר)",
+        Shelf (מס' מדף)",
+        Name (שם הספר)"*/
                         0 -> it.publisher
                         1 -> it.category
                         2 -> it.volumeNum
@@ -424,7 +446,7 @@ Name (שם הספר)"*/
                         else -> TODO("This should not have happened: getValueAt($row:, $col)")
                     }
                 }
-            }
+            } ?: "".also { System.err.println("This should never have happened") }
         }
 
         override fun isCellEditable(row: Int, col: Int): Boolean = false
@@ -448,7 +470,7 @@ Name (שם הספר)"*/
     fun filterList() {
         val mode = if (exactSearchRadioButton.isSelected) FILTER_EXACT
         else if (rootWordSearchRadioButton.isSelected) FILTER_ROOT
-        else FILTER_SIMILARITY
+        else FILTER_ALTERNATE_PHRASE
         filterList(
             mode,
             null//if (mode != FILTER_SIMILARITY) null else similaritySearchJPanel.ld
@@ -458,7 +480,7 @@ Name (שם הספר)"*/
     var mMode = 0
     fun filterList(mode: Int, ld: LevenshteinDistance? = null) {
         val _constraint1 = seferNameTextField.text?.trim() //TODO consider making this a computed field
-        if(_constraint1 == null || (_searchPhrase == _constraint1 && (_constraint1.isBlank() || mode == mMode))) return //don't do anything if the constraint is blank and the user is clicking different modes
+        if (_constraint1 == null || (_searchPhrase == _constraint1 && (_constraint1.isBlank() || mode == mMode))) return //don't do anything if the constraint is blank and the user is clicking different modes, or the constraint hasn't changed
         _searchPhrase = _constraint1
         mMode = mode
         if (_constraint1.isBlank()) {
@@ -469,6 +491,10 @@ Name (שם הספר)"*/
         when (mode) {
             FILTER_EXACT -> filterListExactMatch(_constraint1)
             FILTER_ROOT -> filterListRootSearch(_constraint1)
+            FILTER_ALTERNATE_PHRASE -> filterListExactMatch(
+                _constraint1,
+                true
+            )//filterListSimilaritySearch(_constraint1, ld!!)
             FILTER_SIMILARITY -> filterListSimilaritySearch(_constraint1, ld!!)
         }
     }
@@ -495,7 +521,7 @@ Name (שם הספר)"*/
                     else matchesAny(queryShorashim, entryShorashim, listOfChecks)
                     )
 //                .also {
-                    //if(it) println("Sefer: ${entry.seferName}, Entry shorashim: $entryShorashim, checks: $listOfChecks")
+            //if(it) println("Sefer: ${entry.seferName}, Entry shorashim: $entryShorashim, checks: $listOfChecks")
 //                }
 //            }
         }
@@ -536,33 +562,46 @@ Name (שם הספר)"*/
             updateList(list)
         } else {
             val firstOrNull = originalCollection.firstOrNull()
-            if (firstOrNull is String) {
-                val list = Collections.synchronizedList(mutableListOf<String>())
-                (originalCollection as Collection<String>)
-                    .parallelStream()
-                    .filter { predicateIfString(it) }
-                    .forEach { list.add(it) }
-                updateList(list)
-            } else {
-                val list = Collections.synchronizedList(mutableListOf<CatalogEntry>())
-                (originalCollection as Collection<CatalogEntry>)
-                    .parallelStream()
-                    .filter {
-                        try {
-                            predicateIfCatalogEntry(it)
-                        } catch (t: Throwable) {
-                            t.printStackTrace()
-                            println("filterWithPredicate threw error, entry=\"$it\"")
-                            false
+            when (firstOrNull) { //Pretty sure this can be DRYed up with filter exact match function
+                is String -> {
+                    val list = Collections.synchronizedList(mutableListOf<String>())
+                    (originalCollection as Collection<String>)
+                        .parallelStream()
+                        .filter { predicateIfString(it) }
+                        .forEach { list.add(it) }
+                    updateList(list)
+                }
+
+                is Pair<*, *> -> {
+                    val list = Collections.synchronizedList(mutableListOf<String>())
+                    (originalCollection as Collection<Pair<String, String>>)
+                        .parallelStream()
+                        .filter { predicateIfString(getElementToSearchBy(it)) }
+                        .forEach { list.add(getElementToSearchBy(it)) }
+                    updateList(list)
+                }
+
+                else -> {
+                    val list = Collections.synchronizedList(mutableListOf<CatalogEntry>())
+                    (originalCollection as Collection<CatalogEntry>)
+                        .parallelStream()
+                        .filter {
+                            try {
+                                predicateIfCatalogEntry(it)
+                            } catch (t: Throwable) {
+                                t.printStackTrace()
+                                println("filterWithPredicate threw error, entry=\"$it\"")
+                                false
+                            }
                         }
-                    }
-                    .forEach { list.add(it) }
-                updateList(list)
+                        .forEach { list.add(it) }
+                    updateList(list)
+                }
             }
         }
     }
 
-    fun filterListExactMatch(_constraint: String) {
+    fun filterListExactMatch(_constraint: String, useAlternatePhraseSearch: Boolean = false) {
         var constraint = _constraint
         if (constraint.isBlank()) {
             updateList(originalCollection)
@@ -570,7 +609,7 @@ Name (שם הספר)"*/
         }
         val newList = Collections.synchronizedList(mutableListOf<Any>())
         val firstElement = originalCollection.firstOrNull()
-        val needsRegex = constraint.contains("[#!]".toRegex()) || constraint.startsWith('~')
+        val needsRegex = useAlternatePhraseSearch || constraint.contains("[#!]".toRegex()) || constraint.startsWith('~')
             .also { if (it) constraint = constraint.removePrefix("~") }
         val regex = if (needsRegex) getConstraintRegex(constraint) else null
         val predicate: (Any) -> Boolean =
@@ -579,6 +618,12 @@ Name (שם הספר)"*/
                     { matchesConstraint((it as String), constraint, regex!!) }
                 } else {
                     { matchesConstraintNoRegex((it as String), constraint) }
+                }
+            else if (firstElement is Pair<*, *>)
+                if (needsRegex) {
+                    { matchesConstraint(getElementToSearchBy((it as Pair<*, *>)), constraint, regex!!) }
+                } else {
+                    { matchesConstraintNoRegex(getElementToSearchBy((it as Pair<*, *>)), constraint) }
                 }
             else
                 if (needsRegex) {
@@ -608,8 +653,8 @@ Name (שם הספר)"*/
         listBeingDisplayed.clear()
         listBeingDisplayed.addAll(newList)
         //EventQueue.invokeLater {
-            (table.model as AbstractTableModel).fireTableDataChanged()
-            jLabel2.text = "Results: ${listBeingDisplayed.size}"
+        (table.model as AbstractTableModel).fireTableDataChanged()
+        jLabel2.text = "Results: ${listBeingDisplayed.size}"
         //}
     }
 
@@ -624,7 +669,7 @@ Name (שם הספר)"*/
                 shorashim.any { shoresh: String ->
                     entryShorashim.any {
                         it.any {
-                            if(logChecks) listOfChecks.add(shoresh to it)
+                            if (logChecks) listOfChecks.add(shoresh to it)
                             it == shoresh
                         }
                     }
@@ -641,7 +686,7 @@ Name (שם הספר)"*/
             it.any { queryShoresh ->
                 entryShorashim.any {
                     it.any { entryShoresh ->
-                        if(logChecks) listOfChecks.add(queryShoresh to entryShoresh)
+                        if (logChecks) listOfChecks.add(queryShoresh to entryShoresh)
                         entryShoresh == queryShoresh
                     }
                 }
@@ -658,12 +703,25 @@ Name (שם הספר)"*/
         println(x in y) //prints true
         println(x in z) //prints true
          */
-        operator fun <T> List<Iterable<T>>.contains(other: List<Iterable<T>>): Boolean = contains(other) { thisList, otherList -> thisList.any { it in otherList } }
+        operator fun <T> List<Iterable<T>>.contains(other: List<Iterable<T>>): Boolean =
+            contains(other) { thisList, otherList -> thisList.any { it in otherList } }
 
-        fun <T> List<T>.contains(other: List<T>, predicate: (thisElement: T, otherElement: T) -> Boolean): Boolean = indexOf(other, 0, this.size, predicate) >= 0
+        fun <T> List<T>.contains(other: List<T>, predicate: (thisElement: T, otherElement: T) -> Boolean): Boolean =
+            indexOf(other, 0, this.size, predicate) >= 0
 
-        private fun <T> List<T>.indexOf(other: List<T>, startIndex: Int, endIndex: Int, predicate: (thisElement: T, otherElement: T) -> Boolean): Int {
-            fun <T> List<T>.regionMatches(thisOffset: Int, other: List<T>, otherOffset: Int, size: Int, predicate: (thisElement: T, otherElement: T) -> Boolean): Boolean {
+        private fun <T> List<T>.indexOf(
+            other: List<T>,
+            startIndex: Int,
+            endIndex: Int,
+            predicate: (thisElement: T, otherElement: T) -> Boolean
+        ): Int {
+            fun <T> List<T>.regionMatches(
+                thisOffset: Int,
+                other: List<T>,
+                otherOffset: Int,
+                size: Int,
+                predicate: (thisElement: T, otherElement: T) -> Boolean
+            ): Boolean {
                 if ((otherOffset < 0) || (thisOffset < 0) || (thisOffset > this.size - size) || (otherOffset > other.size - size)) {
                     return false
                 }
@@ -674,6 +732,7 @@ Name (שם הספר)"*/
                 }
                 return true
             }
+
             val indices = startIndex.coerceAtLeast(0)..endIndex.coerceAtMost(this.size)
 
             for (index in indices) {
