@@ -27,10 +27,17 @@ val shelfNumComparator = kotlin.Comparator<String> { o1, o2 ->
     else { //they are either both belenofsky or neither
 
         val indexOfDot1 = o1.indexOf(".")
+        if(indexOfDot1 == -1) {
+            println("o1 does not contain dot: $o1")
+        }
         val firstNum1 = o1.substring(if (firstIsBelenofsky) 1/*exclude "B"*/ else 0, indexOfDot1)
         val secondNum1 = o1.substring(indexOfDot1 + 1)
 
         val indexOfDot2 = o2.indexOf(".")
+
+        if(indexOfDot2 == -1) {
+            println("o2 does not contain dot: $o2")
+        }
         val firstNum2 = o2.substring(if (secondIsBelenofsky) 1 else 0, indexOfDot2)
         val secondNum2 = o2.substring(indexOfDot2 + 1)
 
