@@ -64,8 +64,8 @@ object Catalog {
     fun refreshObjects(checkCloud: Boolean = false) {
         println("Reading catalog file.")
         val lines = Files.readAllLines(file.toPath()).toMutableList()
-        println("Done.")
-        println("Processing catalog file.")
+        println("Done reading catalog file.")
+        println("Extracting entries from catalog file.")
         lines.removeAt(0) //remove line with column names
         val listOfEnglishSeforim = mutableListOf<CatalogEntry>()
         val startTime = System.nanoTime()
@@ -84,21 +84,21 @@ object Catalog {
                     (!printedFourty && percentageDone == 40).also { if (it) printedFourty = true } ||
                     (!printedSixty && percentageDone == 60).also { if (it) printedSixty = true } ||
                     (!printedEight && percentageDone == 80).also { if (it) printedEight = true }
-                ) println("Progress: $percentageDone%")
+                ) println("Extracting entries $percentageDone% done")
                 val split = it.split("\t")
                 CatalogEntry(
                     split[0],
                     split[1],
-                    split[2],
-                    split[3],
-                    split[4],
+                    split[2].replace('״', '\"'),
+                    split[3].replace('״', '\"'),
+                    split[4].replace('״', '\"'),
                     split[5],
                     split[6],
                     split[7],
                     split[8],
                     split[9],
                     split[10],
-                    split[11],
+                    split[11].replace('״', '\"'),
                     split[12]
                 ).let {
                     when {
@@ -111,7 +111,7 @@ object Catalog {
                     }
                 }
             }
-            .also { println("Done.") }
+            .also { println("Done extracting entries.") }
 //            .filter { it != null }
 //            .collect(Collectors.toList())
             .toMutableList()
@@ -138,7 +138,7 @@ object Catalog {
                         (!printedFourty && percentageDone == 40).also { if (it) printedFourty = true } ||
                         (!printedSixty && percentageDone == 60).also { if (it) printedSixty = true } ||
                         (!printedEight && percentageDone == 80).also { if (it) printedEight = true }
-                    ) println("Progress: $percentageDone%")
+                    ) println("Extracting shorashim $percentageDone% done")
                     LemmatizedCatalogEntry(
                         it.seferName to lemmatizer.getLemmatizedList(it.seferName),
                         it.author to lemmatizer.getLemmatizedList(it.author),
@@ -150,7 +150,7 @@ object Catalog {
                 }
                 .forEach { syncrhonizedList.add(it) }
             entriesLemmatized = lemmatizedEntries
-            println("Done.")
+            println("Done extracting shorashim.")
             println("Time to extract shorashim: ${(System.nanoTime() - lemmaStartTime).div(1_000_000_000.00)} seconds")
             println("Beginning to draw main screen.")
         }
