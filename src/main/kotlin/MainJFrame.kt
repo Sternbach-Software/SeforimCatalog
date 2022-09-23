@@ -10,6 +10,7 @@ import javax.swing.*
  * @author shmuel
  */
 lateinit var logFile: File
+lateinit var fontFile: File
 val scope = CoroutineScope(SupervisorJob())
 var rootSearchShouldMatchAll = true
 var rootSearchShouldMatchSequential = true
@@ -57,7 +58,7 @@ class MainJFrame : JFrame() {
 
         val getLastUpdateString = { "Catalog last updated: ${Catalog.lastModificationDate()}"}
         jLabel1!!.text = getLastUpdateString()
-        jLabel2!!.text = "Program Version: 2.0.0"
+        jLabel2!!.text = "Program Version: 3.0.0"
 
         refreshDatabaseButton!!.addActionListener {
             Catalog.refreshObjects()
@@ -144,6 +145,7 @@ class MainJFrame : JFrame() {
             // Set the Nimbus look and feel
             // For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
             UIManager.setLookAndFeel(UIManager.getInstalledLookAndFeels().find { it.name == "Nimbus" }?.className)
+            fontFile = File(catalogDirectory,"table_font.txt")
             args.getOrNull(0)?.let {
                 catalogDirectory = File(it)
                 logFile = File(catalogDirectory,"logs.txt")
@@ -158,3 +160,4 @@ class MainJFrame : JFrame() {
         }
     }
 }
+
