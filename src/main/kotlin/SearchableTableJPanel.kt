@@ -19,44 +19,58 @@ private const val FILTER_EXACT = 0
 private const val FILTER_ROOT = 1
 private const val FILTER_ALTERNATE_PHRASE = 3
 private const val FILTER_SIMILARITY = 4
+var catalogOnlyContainsB = true
 val shelfNumComparator = kotlin.Comparator<String> { o1, o2 ->
-    val firstIsBelenofsky = o1.startsWith("B", true)
-    val secondIsBelenofsky = o2.startsWith("B", true)
-    if (firstIsBelenofsky && !secondIsBelenofsky) 1
-    else if (!firstIsBelenofsky && secondIsBelenofsky) -1
-    else { //they are either both belenofsky or neither
-
+    inline fun compareShelf(o1: String, o2: String, hasLetter: Boolean): Int {
         val indexOfDot1 = o1.indexOf(".")
-        if(indexOfDot1 == -1) {
-            println("o1 does not contain dot: $o1")
-        }
-        val firstNum1 = o1.substring(if (firstIsBelenofsky) 1/*exclude "B"*/ else 0, indexOfDot1)
+        val firstNum1 = o1.substring(if (hasLetter) 1/*exclude letter*/ else 0, indexOfDot1)
         val secondNum1 = o1.substring(indexOfDot1 + 1)
 
         val indexOfDot2 = o2.indexOf(".")
-
-        if(indexOfDot2 == -1) {
-            println("o2 does not contain dot: $o2")
-        }
-        val firstNum2 = o2.substring(if (secondIsBelenofsky) 1 else 0, indexOfDot2)
+        val firstNum2 = o2.substring(if (hasLetter) 1 else 0, indexOfDot2)
         val secondNum2 = o2.substring(indexOfDot2 + 1)
 
         // First check size of strings: if one number has more digits than the other,
         // then it is certainly bigger. Otherwise, check which is bigger.
         // If they are the same number, do the previous operations for the second number.
-        if (firstNum1.length > firstNum2.length) 1
-        else if (firstNum1.length < firstNum2.length) -1
-        else { //check if same num; if yes, check second num
-            val firstNumComparison = firstNum1.compareTo(firstNum2)
-            if (firstNumComparison != 0) firstNumComparison
-            else {
-                if (secondNum1.length > secondNum2.length) 1
-                else if (secondNum1.length < secondNum2.length) -1
+        return if (firstNum1.length > firstNum2.length) 1
+            else if (firstNum1.length < firstNum2.length) -1
+            else { //they are the same length, now check if same num; if yes, check second num
+                val firstNumComparison = firstNum1.compareTo(firstNum2)
+                if (firstNumComparison != 0) firstNumComparison //if not the same num, we know what to sort by. Otherwise, check the second num
                 else {
-                    secondNum1.compareTo(secondNum2)
-                }
+                    if (secondNum1.length > secondNum2.length) 1
+                    else if (secondNum1.length < secondNum2.length) -1
+                    else {
+                        secondNum1.compareTo(secondNum2)
+                    }
             }
         }
+    }
+    try {
+        if(catalogOnlyContainsB) {
+            val firstIsBelenofsky = o1.first().equals("B", true)
+            val secondIsBelenofsky = o2.first().equals("B", true)
+            if (firstIsBelenofsky && !secondIsBelenofsky) 1
+            else if (!firstIsBelenofsky && secondIsBelenofsky) -1
+            else compareShelf(o1, o2, firstIsBelenofsky && secondIsBelenofsky/*they are either both or neither*/)
+        } 
+        else {
+            var firstChar = o1.first()
+            var secondChar = o2.first()
+            val firstIsLetter = firstChar.isLetter()//being a letter means it is from a satelite beis medrash, like the belenefosky
+            val secondIsLetter = secondChar.isLetter() 
+            
+            if (firstIsLetter && !secondIsLetter) 1
+            else if (!firstIsLetter && secondIsLetter) -1
+            else if(firstIsLetter && secondIsLetter) //they are either both from a satelite
+                if(firstChar != secondChar) firstChar.compareTo(secondChar) //if they are not from the same beis medrash, sort the shelves by beis, then by shelf sort order (i.e. group seforim from belenefosky with belenofsky, beis X seforim with beis X seforim, etc.)
+                else compareShelf(o1, o2, true) //they are either both from the same beis medrash
+            else compareShelf(o1, o2, false) //they are both from the main beis
+        }
+    } catch(t: Throwable) {
+        println("Sorting encountered an error on \"$o1\" and \"$o2\": ${t.stackTraceToString()}")
+        1 //just dump them at the end
     }
 }
 
