@@ -74,6 +74,7 @@ object Catalog {
         var printedFourty = false
         var printedSixty = false
         var printedEight = false
+        val pattern = Pattern.compile("\\w\\d+\.\\d+")
         entries = lines
 //            .parallelStream()
             .mapNotNull {
@@ -86,7 +87,10 @@ object Catalog {
                     (!printedEight && percentageDone == 80).also { if (it) printedEight = true }
                 ) println("Extracting entries $percentageDone% done")
                 val split = it.split("\t")
-                CatalogEntry(
+                val shelf = split[12]
+                val shelfFirstChar = shelf.firstOrNull()
+                if(shelfFirstChar.isNullOrBlank() || !pattern.matcher(shelf).matches()) null //invalid shelf number format
+                else CatalogEntry(
                     split[0],
                     split[1],
                     split[2].replace('״', '\"'),
@@ -99,8 +103,9 @@ object Catalog {
                     split[9],
                     split[10],
                     split[11].replace('״', '\"'),
-                    split[12]
+                    shelf
                 ).let {
+                    if(shelfFirstChar!!.isLetter() && !shelfFirstChar.equals('B', true))) catalogOnlyContainsB = false //if the first char is a letter and does not equal B, the catalog does not only contain B
                     when {
                         it.everythingIsBlank() -> null
                         it.seferName.containsEnglish() -> {
