@@ -49,8 +49,8 @@ val shelfNumComparator = kotlin.Comparator<String> { o1, o2 ->
     }
     try {
         if(catalogOnlyContainsB) {
-            val firstIsBelenofsky = o1.first().equals("B", true)
-            val secondIsBelenofsky = o2.first().equals("B", true)
+            val firstIsBelenofsky = o1.first().equals('B', true)
+            val secondIsBelenofsky = o2.first().equals('B', true)
             if (firstIsBelenofsky && !secondIsBelenofsky) 1
             else if (!firstIsBelenofsky && secondIsBelenofsky) -1
             else compareShelf(o1, o2, firstIsBelenofsky && secondIsBelenofsky/*they are either both or neither*/)
