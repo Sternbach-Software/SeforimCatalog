@@ -21,7 +21,7 @@ private const val FILTER_ALTERNATE_PHRASE = 3
 private const val FILTER_SIMILARITY = 4
 var catalogOnlyContainsB = true
 val shelfNumComparator = kotlin.Comparator<String> { o1, o2 ->
-    inline fun compareShelf(o1: String, o2: String, hasLetter: Boolean): Int {
+    fun compareShelf(o1: String, o2: String, hasLetter: Boolean): Int {
         val indexOfDot1 = o1.indexOf(".")
         val firstNum1 = o1.substring(if (hasLetter) 1/*exclude letter*/ else 0, indexOfDot1)
         val secondNum1 = o1.substring(indexOfDot1 + 1)
