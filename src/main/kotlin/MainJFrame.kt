@@ -145,11 +145,12 @@ class MainJFrame : JFrame() {
             // Set the Nimbus look and feel
             // For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
             UIManager.setLookAndFeel(UIManager.getInstalledLookAndFeels().find { it.name == "Nimbus" }?.className)
-            args.getOrNull(0)?.let {
-                catalogDirectory = File(it)
-                fontFile = File(catalogDirectory,"table_font.txt")
-                logFile = File(catalogDirectory,"logs.txt")
-            } ?: (fontFile = File(catalogDirectory,"table_font.txt"))
+            val firstArg = args.getOrNull(0)
+            if(firstArg != null) {
+                catalogDirectory = File(firstArg)
+                fontFile = File(catalogDirectory, "table_font.txt")
+                logFile = File(catalogDirectory, "logs.txt")
+            } else fontFile = File(catalogDirectory,"table_font.txt")
             /* Create and display the form */EventQueue.invokeLater {
                 MainJFrame().apply {
                     title = "Seforim Finder"
