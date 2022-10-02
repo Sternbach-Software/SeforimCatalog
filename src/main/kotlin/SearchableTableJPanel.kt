@@ -56,8 +56,8 @@ val shelfNumComparator = kotlin.Comparator<String> { o1, o2 ->
             else compareShelf(o1, o2, firstIsBelenofsky && secondIsBelenofsky/*they are either both or neither*/)
         } 
         else {
-            var firstChar = o1.first()
-            var secondChar = o2.first()
+            val firstChar = o1.first()
+            val secondChar = o2.first()
             val firstIsLetter = firstChar.isLetter()//being a letter means it is from a satelite beis medrash, like the belenefosky
             val secondIsLetter = secondChar.isLetter() 
             
