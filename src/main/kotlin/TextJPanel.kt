@@ -20,7 +20,7 @@ class TextJPanel(val text: String) : JPanel() {
         jTextArea1 = JTextArea()
         jTextArea1!!.isEditable = false
         jTextArea1!!.columns = 20
-        jTextArea1!!.font = Font("Tahoma", 0, 14) // NOI18N
+//        jTextArea1!!.font = Font("Tahoma", 0, 14) // NOI18N
         jTextArea1!!.lineWrap = true
         jTextArea1!!.rows = 3
         jTextArea1!!.text = text
