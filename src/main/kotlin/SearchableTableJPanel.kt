@@ -17,11 +17,23 @@ import javax.swing.table.TableRowSorter
 
 private const val FILTER_EXACT = 0
 private const val FILTER_ROOT = 1
+private const val FILTER_INSENSITIVE = 2
 private const val FILTER_ALTERNATE_PHRASE = 3
 private const val FILTER_SIMILARITY = 4
+val letterBoundariesRegex = "(?<=\\p{InHebrew})(?=\\p{InHebrew})".toRegex()
+val yudOrVavInWordRegex = "(?<=\\p{InHebrew})[וי](?=\\p{InHebrew})".toRegex()
 var catalogOnlyContainsB = true
+const val defaultMatchWordBoundarySetting = false
+var _previousMatchWordBoundary = mutableMapOf(
+    FILTER_EXACT to defaultMatchWordBoundarySetting,
+    FILTER_ROOT to defaultMatchWordBoundarySetting,
+    FILTER_INSENSITIVE to defaultMatchWordBoundarySetting,
+    FILTER_ALTERNATE_PHRASE to defaultMatchWordBoundarySetting,
+    FILTER_SIMILARITY to defaultMatchWordBoundarySetting,
+) //used to know whether to update list if constraint hasn't changed
 val shelfNumComparator = kotlin.Comparator<String> { o1, o2 ->
     fun compareShelf(o1: String, o2: String, hasLetter: Boolean): Int {
+
         val indexOfDot1 = o1.indexOf(".")
         val firstNum1 = o1.substring(if (hasLetter) 1/*exclude letter*/ else 0, indexOfDot1)
         val secondNum1 = o1.substring(indexOfDot1 + 1)
@@ -29,46 +41,48 @@ val shelfNumComparator = kotlin.Comparator<String> { o1, o2 ->
         val indexOfDot2 = o2.indexOf(".")
         val firstNum2 = o2.substring(if (hasLetter) 1 else 0, indexOfDot2)
         val secondNum2 = o2.substring(indexOfDot2 + 1)
+        //val firstNumsCompared = firstNum1.toInt().compareTo(firstNum2.toInt())
+//        return if(firstNumsCompared == 0) secondNum1.toInt().compareTo(secondNum2.toInt()) else firstNumsCompared //this seems to be slower in my quick and dirty benchmarks on the yeshiva laptop (couldn't install JMH)
 
         // First check size of strings: if one number has more digits than the other,
-        // then it is certainly bigger. Otherwise, check which is bigger.
-        // If they are the same number, do the previous operations for the second number.
+        // then it is certainly greater. Otherwise, check which is greater.
+        // If they are the same number, do the previous operations/repeat for the second number.
         return if (firstNum1.length > firstNum2.length) 1
-            else if (firstNum1.length < firstNum2.length) -1
-            else { //they are the same length, now check if same num; if yes, check second num
-                val firstNumComparison = firstNum1.compareTo(firstNum2)
-                if (firstNumComparison != 0) firstNumComparison //if not the same num, we know what to sort by. Otherwise, check the second num
+        else if (firstNum1.length < firstNum2.length) -1
+        else { //they are the same length, now check if same num; if yes, check second num
+            val firstNumComparison = firstNum1.compareTo(firstNum2)
+            if (firstNumComparison != 0) firstNumComparison //if not the same num, we know what to sort by. Otherwise, check the second num
+            else {
+                if (secondNum1.length > secondNum2.length) 1
+                else if (secondNum1.length < secondNum2.length) -1
                 else {
-                    if (secondNum1.length > secondNum2.length) 1
-                    else if (secondNum1.length < secondNum2.length) -1
-                    else {
-                        secondNum1.compareTo(secondNum2)
-                    }
+                    secondNum1.compareTo(secondNum2)
+                }
             }
         }
     }
     try {
-        if(catalogOnlyContainsB) {
+        if (catalogOnlyContainsB) {
             val firstIsBelenofsky = o1.first().equals('B', true)
             val secondIsBelenofsky = o2.first().equals('B', true)
             if (firstIsBelenofsky && !secondIsBelenofsky) 1
             else if (!firstIsBelenofsky && secondIsBelenofsky) -1
             else compareShelf(o1, o2, firstIsBelenofsky && secondIsBelenofsky/*they are either both or neither*/)
-        } 
-        else {
+        } else {
             val firstChar = o1.first()
             val secondChar = o2.first()
-            val firstIsLetter = firstChar.isLetter()//being a letter means it is from a satelite beis medrash, like the belenefosky
-            val secondIsLetter = secondChar.isLetter() 
-            
+            val firstIsLetter =
+                firstChar.isLetter()//being a letter means it is from a satelite beis medrash, like the belenefosky
+            val secondIsLetter = secondChar.isLetter()
+
             if (firstIsLetter && !secondIsLetter) 1
             else if (!firstIsLetter && secondIsLetter) -1
-            else if(firstIsLetter && secondIsLetter) //they are either both from a satelite
-                if(firstChar != secondChar) firstChar.compareTo(secondChar) //if they are not from the same beis medrash, sort the shelves by beis, then by shelf sort order (i.e. group seforim from belenefosky with belenofsky, beis X seforim with beis X seforim, etc.)
+            else if (firstIsLetter && secondIsLetter) //they are either both from a satelite
+                if (firstChar != secondChar) firstChar.compareTo(secondChar) //if they are not from the same beis medrash, sort the shelves by beis, then by shelf sort order (i.e. group seforim from belenefosky with belenofsky, beis X seforim with beis X seforim, etc.)
                 else compareShelf(o1, o2, true) //they are either both from the same beis medrash
             else compareShelf(o1, o2, false) //they are both from the main beis
         }
-    } catch(t: Throwable) {
+    } catch (t: Throwable) {
         println("Sorting encountered an error on \"$o1\" and \"$o2\": ${t.stackTraceToString()}")
         1 //just dump them at the end
     }
@@ -90,11 +104,17 @@ abstract class SearchableTableJPanel(
     var _constraint: Regex? = null //singleton pattern
     var _searchPhrase: String? = null
 
+    private fun String.addHebrewWordBoundaryIfAllowed(matchWordBoundary: Boolean): String {
+        if (!matchWordBoundary) return this
+        val startBoundary = "(?:(?<=\\p{InHebrew})(?=\\P{InHebrew})|(?<=\\P{InHebrew})(?=\\p{InHebrew})|^)"
+        val endBoundary = "(?:(?<=\\p{InHebrew})(?=\\P{InHebrew})|(?<=\\P{InHebrew})(?=\\p{InHebrew})|$)"
+        return "$startBoundary($this)$endBoundary"
+    }//"(?!<\\p{InHebrew})($this)(?!\\p{InHebrew})"
+
     /*only gets regex when the constraint hasn't changed, so that it doesn't create a new regex for every list item*/
-    private fun getConstraintRegex(constraint: String): Regex {
-        fun String.addBoundary() = "\\b($this)\\b"
+    private fun getConstraintRegex(constraint: String, matchWordBoundary: Boolean): Regex {
         println("getConstraintRegex(constraint=$constraint), _searchPhrase=$_searchPhrase, _constraint=$_constraint")
-        if ((constraint == _constraint?.toString() /*already got regex*/ || constraint.lastOrNull() == '#'/*user has not typed alternate phrase, so don't search for whitespace (i.e. every entry)*/) && _constraint != null) return _constraint!! /*use "old" regex*/
+        if ((/*constraint == _constraint?.toString()*/ /*already got regex*/ /*||*/ constraint.lastOrNull() == '#'/*user has not typed alternate phrase, so don't search for whitespace (i.e. every entry)*/) && _constraint != null) return _constraint!! /*use "old" regex*/
         /*get new regex*/
         lateinit var regex: Regex
         val lemmatizerRegex = "![^!]+!".toRegex()
@@ -104,17 +124,21 @@ abstract class SearchableTableJPanel(
                     .joinToString("|", "(", ")")
             }
         val replaceHashWithOr = mConstraint.replace("#", "|")
-        regex = try {
-            replaceHashWithOr.addBoundary().toRegex(RegexOption.IGNORE_CASE) //if it is a valid regex, go for it
-        } catch (t: Throwable) { //probably invalid pattern
-            fun String.escapeRegexChars() =
-                listOf("\\", "(", ")", "[", "]", "{", "}", "?", "+", "*")
-                    .fold(this) { acc: String, b: String -> acc.replace(b, "\\$b") }
-            replaceHashWithOr.escapeRegexChars().addBoundary().toRegex(RegexOption.IGNORE_CASE)
-        }
+        regex = replaceHashWithOr.tryRegexOrEscape().pattern.addHebrewWordBoundaryIfAllowed(matchWordBoundary)
+            .toRegex(RegexOption.IGNORE_CASE)
         _constraint = regex
         //println("Pattern of constraint: $regex")
+        println("Searching for: $regex")
         return regex
+    }
+
+    private fun String.tryRegexOrEscape() = try {
+        toRegex(RegexOption.IGNORE_CASE) //if it is a valid regex, go for it
+    } catch (t: Throwable) { //probably invalid pattern
+        fun String.escapeRegexChars() =
+            listOf("\\", "(", ")", "[", "]", "{", "}", "?", "+", "*")
+                .fold(this) { acc: String, b: String -> acc.replace(b, "\\$b") }
+        escapeRegexChars().toRegex(RegexOption.IGNORE_CASE)
     }
 
     val specialChars = "\\s.,-·;:'\"\\[\\]()!?<>&#\\d"
@@ -156,7 +180,7 @@ abstract class SearchableTableJPanel(
         jLabel1 = JLabel()
         seferNameTextField = JTextField()
         jScrollPane1 = JScrollPane()
-        table = object: JTable() {
+        table = object : JTable() {
             /*override fun getToolTipText(e: MouseEvent): String? {
                 return getValueAt(rowAtPoint(e.point), columnAtPoint(e.point))?.toString()
             }*/
@@ -167,6 +191,7 @@ abstract class SearchableTableJPanel(
         jLabel6 = JLabel()/*.also { it.isVisible = false }*/
         exactSearchRadioButton = JRadioButton()/*.also { it.isVisible = false }*/
         rootWordSearchRadioButton = JRadioButton().also { it.isVisible = getLemmatizedCriteriaLambda != null }
+        maleiChaseirSearchRadioButton = JRadioButton()/*.also { it.isVisible = false }*/
         patternSearchRadioButton = JRadioButton()/*.also { it.isVisible = false }*/
         seferNameTextField.locale = Locale("he")
         seferNameTextField.componentOrientation = ComponentOrientation.RIGHT_TO_LEFT
@@ -282,20 +307,34 @@ abstract class SearchableTableJPanel(
         val rootSearchName = "Root word (שרש) search"
         val similaritySearchName = "Similarity search"
         val alternatePhraseSearchName = "Alternate phrase search"
+        val maleiChaseirSearchName = "Malei/Chaseir Insensitive search"
         rootWordSearchJPanel = RootWordSearchExplanationJPanel(this)
         similaritySearchJPanel = SimilaritySearchJPanel()
-        val exactMatchJPanel = PlainTextExplanationJPanel(
+        exactMatchJPanel = PlainTextExplanationJPanel(
             "Exact search determines matching entries based on whether the entry contains the exact search phrase entered."
-        )
-        val alternatePhrasesJPanel = PlainTextExplanationJPanel(
+        ) {
+            _previousMatchWordBoundary[FILTER_EXACT] = !it
+            filterList()
+        }
+        alternatePhrasesJPanel = PlainTextExplanationJPanel(
             "Alternate phrase search determines matches based on whether the entry contains any of the phrases separated by \"#\", e.g. \"fire#אור#אש\" or \"עשר(ת#ה) (מאמר#הדיבר)ות\" (i.e. show results for either עשרת הדיברות or עשרה מאמרות). Surround words with an exclamation mark to have the program turn the word into its shoresh/shorashim. See tip #5 for more information."
-        )
+        ) {
+            _previousMatchWordBoundary[FILTER_ALTERNATE_PHRASE] = !it
+            filterList()
+        }
+        maleiChaseirSearchJPanel = PlainTextExplanationJPanel(
+            "Malei/Chaseir Insensitive search determines matches based on whether the entry contains the exact search phrase entered, while allowing a vav or yud to appear anywhere in middle of any of the words in the search phrase or entry text. This means that searching for חמש will show results for חומש, and vice versa."
+        ) {
+            _previousMatchWordBoundary[FILTER_INSENSITIVE] = !it
+            filterList()
+        }
         val explanationPanelTitledBorder = BorderFactory.createTitledBorder(exactSearchName/*start with exact*/)
         searchModeExplanation.border = explanationPanelTitledBorder
         searchModeExplanation.layout = GridLayout()
         exactSearchRadioButton.text = exactSearchName
         rootWordSearchRadioButton.text = rootSearchName
         patternSearchRadioButton.text = alternatePhraseSearchName
+        maleiChaseirSearchRadioButton.text = maleiChaseirSearchName
 
         patternSearchRadioButton.isVisible = false
 
@@ -304,6 +343,14 @@ abstract class SearchableTableJPanel(
         }
         rootWordSearchRadioButton.addActionListener {
             setExplanationJPanel(rootWordSearchJPanel, explanationPanelTitledBorder, rootSearchName, FILTER_ROOT)
+        }
+        maleiChaseirSearchRadioButton.addActionListener {
+            setExplanationJPanel(
+                maleiChaseirSearchJPanel,
+                explanationPanelTitledBorder,
+                maleiChaseirSearchName,
+                FILTER_INSENSITIVE
+            )
         }
         patternSearchRadioButton.addActionListener {
             setExplanationJPanel(
@@ -316,13 +363,14 @@ abstract class SearchableTableJPanel(
         buttonGroup1.add(exactSearchRadioButton)
         buttonGroup1.add(rootWordSearchRadioButton)
         buttonGroup1.add(patternSearchRadioButton)
+        buttonGroup1.add(maleiChaseirSearchRadioButton)
 
         exactSearchRadioButton.doClick()
 
         similaritySearchJPanel.filterCallback = object : Function1<LevenshteinDistance, Unit> {
             override fun invoke(p1: LevenshteinDistance) {
                 println("Edit distance updated: ${p1.threshold}")
-                filterList(FILTER_SIMILARITY, p1)
+                filterList(FILTER_SIMILARITY, true, p1)
             }
         }
 
@@ -376,6 +424,8 @@ abstract class SearchableTableJPanel(
                                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(rootWordSearchRadioButton)
                                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(maleiChaseirSearchRadioButton)
+                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(patternSearchRadioButton)
                                         .addGap(0, 0, Short.MAX_VALUE.toInt())
                                 )
@@ -392,6 +442,7 @@ abstract class SearchableTableJPanel(
                                 .addComponent(jLabel6)
                                 .addComponent(exactSearchRadioButton)
                                 .addComponent(rootWordSearchRadioButton)
+                                .addComponent(maleiChaseirSearchRadioButton)
                                 .addComponent(patternSearchRadioButton)
                         )
                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
@@ -433,7 +484,11 @@ abstract class SearchableTableJPanel(
         searchModeExplanation.revalidate()
         searchModeExplanation.repaint()
         explanationPanelTitledBorder.title = borderSearchExplanation
-        filterList(searchMode)//update list to reflect new search mode
+        filterList(
+            searchMode,
+            if (panel is PlainTextExplanationJPanel) panel.boundaryCheckBox.isSelected
+            else true
+        ) //update list to reflect new search mode
     }
 
     private fun catalogModel() = object : AbstractTableModel() {
@@ -483,25 +538,32 @@ abstract class SearchableTableJPanel(
     lateinit var rootWordSearchRadioButton: JRadioButton
     lateinit var searchModeExplanation: JPanel
     lateinit var patternSearchRadioButton: JRadioButton
+    lateinit var maleiChaseirSearchRadioButton: JRadioButton
     lateinit var buttonGroup1: ButtonGroup
     lateinit var exactSearchRadioButton: JRadioButton
     lateinit var jLabel6: JLabel
     lateinit var rootWordSearchJPanel: RootWordSearchExplanationJPanel
     lateinit var similaritySearchJPanel: SimilaritySearchJPanel
+    lateinit var exactMatchJPanel: PlainTextExplanationJPanel
+    lateinit var alternatePhrasesJPanel: PlainTextExplanationJPanel
+    lateinit var maleiChaseirSearchJPanel: PlainTextExplanationJPanel
+
     fun filterList() {
-        val mode = if (exactSearchRadioButton.isSelected) FILTER_EXACT
-        else if (rootWordSearchRadioButton.isSelected) FILTER_ROOT
-        else FILTER_ALTERNATE_PHRASE
+        val (mode, matchWordBoundary) = if (exactSearchRadioButton.isSelected) FILTER_EXACT to exactMatchJPanel.boundaryCheckBox.isSelected
+        else if (rootWordSearchRadioButton.isSelected) FILTER_ROOT to true
+        else if (maleiChaseirSearchRadioButton.isSelected) FILTER_INSENSITIVE to maleiChaseirSearchJPanel.boundaryCheckBox.isSelected
+        else FILTER_ALTERNATE_PHRASE to alternatePhrasesJPanel.boundaryCheckBox.isSelected
         filterList(
             mode,
+            matchWordBoundary,
             null//if (mode != FILTER_SIMILARITY) null else similaritySearchJPanel.ld
         )
     }
 
     var mMode = 0
-    fun filterList(mode: Int, ld: LevenshteinDistance? = null) {
+    fun filterList(mode: Int, matchWordBoundary: Boolean, ld: LevenshteinDistance? = null) {
         val _constraint1 = seferNameTextField.text?.trim() //TODO consider making this a computed field
-        if (_constraint1 == null || (_searchPhrase == _constraint1 && (_constraint1.isBlank() || mode == mMode))) return //don't do anything if the constraint is blank and the user is clicking different modes, or the constraint hasn't changed
+        if (_constraint1 == null || (_searchPhrase == _constraint1 && (_constraint1.isBlank() || mode == mMode) && matchWordBoundary == _previousMatchWordBoundary[mode])) return //don't do anything if the constraint is blank and the user is clicking different modes, or the constraint hasn't changed, or the "Match word boundary" setting hasn't changed
         _searchPhrase = _constraint1
         mMode = mode
         if (_constraint1.isBlank()) {
@@ -510,15 +572,16 @@ abstract class SearchableTableJPanel(
             return
         }
         when (mode) {
-            FILTER_EXACT -> filterListExactMatch(_constraint1)
+            FILTER_EXACT -> filterListExactMatch(_constraint1, matchWordBoundary)
             FILTER_ROOT -> filterListRootSearch(_constraint1)
-            FILTER_ALTERNATE_PHRASE -> filterListExactMatch(
-                _constraint1,
-                true
-            )//filterListSimilaritySearch(_constraint1, ld!!)
+            FILTER_INSENSITIVE -> filterListMaleiChaseirInsensitive(_constraint1, matchWordBoundary)
+            FILTER_ALTERNATE_PHRASE -> filterListExactMatch(_constraint1, matchWordBoundary)
             FILTER_SIMILARITY -> filterListSimilaritySearch(_constraint1, ld!!)
         }
     }
+
+    fun filterListMaleiChaseirInsensitive(constraint: String, matchWordBoundary: Boolean) =
+        filterListExactMatch(constraint, matchWordBoundary, useMaleiChaseirInsensitive = true)
 
     fun filterListRootSearch(constraint: String) {
         val queryShorashim = lemmatizer.getLemmatizedList(constraint)
@@ -622,7 +685,13 @@ abstract class SearchableTableJPanel(
         }
     }
 
-    fun filterListExactMatch(_constraint: String, useAlternatePhraseSearch: Boolean = false) {
+    fun filterListExactMatch(
+        _constraint: String,
+        matchWordBoundary: Boolean,
+        useAlternatePhraseSearch: Boolean = false,
+        useMaleiChaseirInsensitive: Boolean = false,
+    ) {
+        println("filterListExactMatch($_constraint, $useAlternatePhraseSearch, $useMaleiChaseirInsensitive)")
         var constraint = _constraint
         if (constraint.isBlank()) {
             updateList(originalCollection)
@@ -630,24 +699,46 @@ abstract class SearchableTableJPanel(
         }
         val newList = Collections.synchronizedList(mutableListOf<Any>())
         val firstElement = originalCollection.firstOrNull()
-        val needsRegex = useAlternatePhraseSearch || constraint.contains("[#!]".toRegex()) || constraint.startsWith('~')
-            .also { if (it) constraint = constraint.removePrefix("~") }
-        val regex = if (needsRegex) getConstraintRegex(constraint) else null
+        val needsRegex =
+            matchWordBoundary || useAlternatePhraseSearch || constraint.contains("[#!]".toRegex()) || constraint.startsWith(
+                '~'
+            )
+                .also { if (it) constraint = constraint.removePrefix("~") }
+        val regex =
+            if (useMaleiChaseirInsensitive) {
+                println("Using malei chaseir insensitivity")
+                constraint = constraint.replace(yudOrVavInWordRegex, "")
+                val placesToInsert = letterBoundariesRegex
+                    .findAll(constraint)
+                    .map { it.range.first }
+                    .toList()
+                println("Places to insert: $placesToInsert")
+                val maleiInsensitive = StringBuilder(constraint)
+                for (index in placesToInsert.asReversed()) maleiInsensitive.insert(index, "[יו]{0,3}")
+                maleiInsensitive
+                    .toString()
+                    .tryRegexOrEscape()//don't want to escape the hebrew word boundary, only the constraint
+                    .pattern
+                    .addHebrewWordBoundaryIfAllowed(matchWordBoundary)
+                    .tryRegexOrEscape()
+                    .also { println("Searching for: $it") }
+            } else if (needsRegex) getConstraintRegex(constraint, matchWordBoundary)
+            else null
         val predicate: (Any) -> Boolean =
             if (firstElement is String)
-                if (needsRegex) {
+                if (needsRegex || useMaleiChaseirInsensitive) {
                     { matchesConstraint((it as String), constraint, regex!!) }
                 } else {
                     { matchesConstraintNoRegex((it as String), constraint) }
                 }
             else if (firstElement is Pair<*, *>)
-                if (needsRegex) {
+                if (needsRegex || useMaleiChaseirInsensitive) {
                     { matchesConstraint(getElementToSearchBy((it as Pair<*, *>)), constraint, regex!!) }
                 } else {
                     { matchesConstraintNoRegex(getElementToSearchBy((it as Pair<*, *>)), constraint) }
                 }
             else
-                if (needsRegex) {
+                if (needsRegex || useMaleiChaseirInsensitive) {
                     { matchesConstraint((it as CatalogEntry), constraint, regex!!) }
                 } else {
                     { matchesConstraintNoRegex((it as CatalogEntry), constraint) }
