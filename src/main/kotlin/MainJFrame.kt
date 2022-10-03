@@ -1,7 +1,12 @@
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+    import org.ocpsoft.prettytime.PrettyTime
 import java.awt.EventQueue
 import java.io.File
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import kotlin.jvm.JvmStatic
 import javax.swing.*
 
@@ -14,6 +19,7 @@ lateinit var fontFile: File
 val scope = CoroutineScope(SupervisorJob())
 var rootSearchShouldMatchAll = true
 var rootSearchShouldMatchSequential = true
+
 class MainJFrame : JFrame() {
     /**
      * This method is called from within the constructor to initialize the form.
@@ -44,6 +50,20 @@ class MainJFrame : JFrame() {
             )
         )
         textJPanel1 = TextJPanel(TIPS)
+        textJPanel3 = TextJPanel(
+            """
+                5.0.0 - 10/2/2022
+                    > 
+                    > 
+                    > 
+                    > 
+                4.0.0 - 09/2/2022
+                    > 
+                    > 
+                    > 
+                    > 
+                """.trimIndent()
+        )
         textJPanel2 = TextJPanel("For tech support, please contact ssternbach@torahdownloads.com; for catalog support, please contact Asher Lewis.")
         refreshDatabaseButton = JButton()
         jLabel1 = JLabel()
@@ -53,10 +73,26 @@ class MainJFrame : JFrame() {
         jTabbedPane1!!.addTab("Seforim by criteria", seforimByCriteriaTabJPanel)
         jTabbedPane1!!.addTab("Criteria", criteriaTabJPanel)
         jTabbedPane1!!.addTab("Tips (6)", textJPanel1)
+        val lastUpdate = LocalDateTime.ofInstant(
+            Instant.ofEpochMilli(
+                catalogDirectory
+                    .walk()
+                    .find { it.extension == "jar" }!!
+                    .lastModified()
+            ),
+            ZoneId.systemDefault()
+        )
+        jTabbedPane1!!.addTab(
+            "Updates (updated ${
+                DateTimeFormatter.ofPattern("MM/dd/yyyy").format(lastUpdate)
+            } - ${
+                PrettyTime(LocalDateTime.now()).format(lastUpdate)
+            })", textJPanel3
+        )
         jTabbedPane1!!.addTab("Help", HelpJPanel())
         refreshDatabaseButton!!.text = "Refresh Catalog"
 
-        val getLastUpdateString = { "Catalog last updated: ${Catalog.lastModificationDate()}"}
+        val getLastUpdateString = { "Catalog last updated: ${Catalog.lastModificationDate()}" }
         jLabel1!!.text = getLastUpdateString()
         jLabel2!!.text = "Program Version: 3.0.0"
 
@@ -65,10 +101,12 @@ class MainJFrame : JFrame() {
             jLabel1!!.text = getLastUpdateString()
             //LevenshteinDistance()
             (0 until jTabbedPane1!!.tabCount).map { jTabbedPane1!!.getTabComponentAt(it) }.forEach {
-                if(it is SearchableTableJPanel) {
+                if (it is SearchableTableJPanel) {
                     try {
                         it.filterList()
-                    } catch (t: Throwable) { t.printStackTrace() }
+                    } catch (t: Throwable) {
+                        t.printStackTrace()
+                    }
                 }
             }
         }
@@ -127,7 +165,8 @@ class MainJFrame : JFrame() {
     private var seforimByCriteriaTabJPanel: TabJPanel? = null
     private var criteriaTabJPanel: TabJPanel? = null
     private var textJPanel1: TextJPanel? = null
-    private var textJPanel2: TextJPanel? = null // End of variables declaration                   
+    private var textJPanel2: TextJPanel? = null
+    private var textJPanel3: TextJPanel? = null // End of variables declaration
 
     /**
      * Creates new form MainJFrame
@@ -146,11 +185,11 @@ class MainJFrame : JFrame() {
             // For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
             UIManager.setLookAndFeel(UIManager.getInstalledLookAndFeels().find { it.name == "Nimbus" }?.className)
             val firstArg = args.getOrNull(0)
-            if(firstArg != null) {
+            if (firstArg != null) {
                 catalogDirectory = File(firstArg)
                 fontFile = File(catalogDirectory, "table_font.txt")
                 logFile = File(catalogDirectory, "logs.txt")
-            } else fontFile = File(catalogDirectory,"table_font.txt")
+            } else fontFile = File(catalogDirectory, "table_font.txt")
             /* Create and display the form */EventQueue.invokeLater {
                 MainJFrame().apply {
                     title = "Seforim Finder"
