@@ -57,15 +57,12 @@ class UnitTests {
     @Test
     fun columnSortingWorks() {
         val original = mutableListOf<String>()
-        for(i in 0..100) {
-            for(j in 0..100) {
+        for (i in 0..100) {
+            for (j in 0..100) {
                 original.add("$i.$j")
             }
         }
         original.addAll(original.map { "B$it" })
-        val list = original.shuffled()
-        println("Original columns: $original")
-        println("Shuffled columns: $list")
-        assertTrue(original == list.sortedWith(shelfNumComparator))
+        assertEquals(original, original.shuffled().sortedWith(shelfNumComparator))
     }
 }
