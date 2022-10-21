@@ -250,7 +250,7 @@ class Lemmatizer {
                             )
                         }
                         //don't just add the word after the prefix, add the lemma (e.g. given שעיקרו, add עקר not עיקרו)
-                        if (ignorePrefixes && !wordAfterPrefix.isBlank()) {
+                        if (ignorePrefixes && wordAfterPrefix.isNotBlank()) {
                             exactSet.add(wordAfterPrefix)
                         }
                     }
