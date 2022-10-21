@@ -18,6 +18,7 @@
 package lemmatizer.hebmorph.tests
 
 import Catalog.containsEnglish
+import Catalog.containsHebrew
 import catalogDirectory
 import lemmatizer.hebmorph.HebrewToken
 import lemmatizer.hebmorph.Reference
@@ -179,6 +180,10 @@ class Lemmatizer {
         text: String?
     ) = getLemmatizedList(text, true, false, true, false, true)
 
+    fun getLemmatizedListPrintLogs(
+        text: String?
+    ) = getLemmatizedList(text, true, true, true, true, true)
+
     @Throws(IOException::class)
     fun getLemmatizedList(
         text: String?,
@@ -187,7 +192,7 @@ class Lemmatizer {
         removeVavsAndYudsFromLemma: Boolean = true,
         addExactWords: Boolean = false,
         reduceNifalParticiple: Boolean = true,
-        includeEnglishInExactSet: Boolean = false
+        includeEnglishInExactSet: Boolean = false,
     ): Set<Set<String>> {
         //StringReader reader = new StringReader("להישרדות בהישרדות ההישרדות מהישרדות ניסיון הניסיון הביטוח  בביטוח לביטוח שביטוח מביטוחים");
         val lemmatizedSetOfSets: MutableSet<Set<String>> = mutableSetOf()
@@ -255,6 +260,7 @@ class Lemmatizer {
                         }
                     }
                     var lemma = ht.lemma
+                    if (lemma == null) lemmatizedSet.add(ht.text)/*nouns don't have lemmas*/
                     if (removeVavsAndYudsFromLemma) {
                         if (printLogs) println("Lemma before sanitization: $lemma")
                         lemma = ht.lemma?.replace("[וי]".toRegex(), "")
@@ -276,8 +282,8 @@ class Lemmatizer {
                     if (lemma?.isNotBlank() == true) {
                         lemmatizedSet.add(lemma)
                         lemmatizedList.add(lemma)
-                    } else if (lemma == null) lemmatizedSet.add(ht.text)/*nouns don't have lemmas*/
-                    if (addExactWords && !ht.text.isBlank() && !ht.text.containsEnglish()) {
+                    }
+                    if (addExactWords && ht.text.isNotBlank() && !ht.text.containsEnglish()) {
                         exactSet.add(ht.text /*add actual word for exact search*/)
                     }
                     if (printLogs) println(
