@@ -180,6 +180,8 @@ abstract class SearchableTableJPanel(
         jLabel1 = JLabel()
         seferNameTextField = JTextField()
         jScrollPane1 = JScrollPane()
+        val hideExplanationString = "Hide search mode explanation"
+        jToggleButton1 = JToggleButton(hideExplanationString)
         table = object : JTable() {
             /*override fun getToolTipText(e: MouseEvent): String? {
                 return getValueAt(rowAtPoint(e.point), columnAtPoint(e.point))?.toString()
@@ -360,6 +362,15 @@ abstract class SearchableTableJPanel(
                 FILTER_EXACT
             )
         }
+        jToggleButton1.addItemListener {
+            if (it.stateChange == ItemEvent.SELECTED) {
+                jToggleButton1.text = "Show search mode explanation"
+                searchModeExplanation.isVisible = false
+            } else {
+                searchModeExplanation.isVisible = true
+                jToggleButton1.text = hideExplanationString
+            }
+        }
         buttonGroup1.add(exactSearchRadioButton)
         buttonGroup1.add(rootWordSearchRadioButton)
         buttonGroup1.add(patternSearchRadioButton)
@@ -427,6 +438,8 @@ abstract class SearchableTableJPanel(
                                         .addComponent(maleiChaseirSearchRadioButton)
                                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(patternSearchRadioButton)
+                                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jToggleButton1)
                                         .addGap(0, 0, Short.MAX_VALUE.toInt())
                                 )
                         )
@@ -444,6 +457,7 @@ abstract class SearchableTableJPanel(
                                 .addComponent(rootWordSearchRadioButton)
                                 .addComponent(maleiChaseirSearchRadioButton)
                                 .addComponent(patternSearchRadioButton)
+                                .addComponent(jToggleButton1)
                         )
                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(
@@ -531,6 +545,7 @@ abstract class SearchableTableJPanel(
 
     private lateinit var jLabel1: JLabel
     private lateinit var jLabel2: JLabel
+    private lateinit var jToggleButton1: JToggleButton
     private lateinit var jScrollPane1: JScrollPane
     lateinit var seferNameTextField: JTextField
     lateinit var table: JTable
