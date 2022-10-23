@@ -18,13 +18,11 @@
 package lemmatizer.hebmorph.tests
 
 import Catalog.containsEnglish
-import Catalog.containsHebrew
 import catalogDirectory
 import lemmatizer.hebmorph.HebrewToken
 import lemmatizer.hebmorph.Reference
 import lemmatizer.hebmorph.StreamLemmatizer
 import lemmatizer.hebmorph.Token
-import lemmatizer.hebmorph.datastructures.DictHebMorph
 import lemmatizer.hebmorph.hspell.HSpellDictionaryLoader
 import kotlin.Throws
 import java.io.IOException
@@ -177,16 +175,19 @@ class Lemmatizer {
      * @return a set of both lemmas and the exact words
      */
     fun getLemmatizedList(
-        text: String?
+        text: String
     ) = getLemmatizedList(text, true, false, true, false, true)
 
-    fun getLemmatizedListPrintLogs(
-        text: String?
+    /**
+     * Prints logs as it is lemmatizing, and is ultra sensitive (adds exact match, adds words minus their prefix, etc.)
+     * */
+    fun getLemmatizedListDebug(
+        text: String
     ) = getLemmatizedList(text, true, true, true, true, true)
 
     @Throws(IOException::class)
     fun getLemmatizedList(
-        text: String?,
+        text: String,
         ignorePrefixes: Boolean,
         printLogs: Boolean,
         removeVavsAndYudsFromLemma: Boolean = true,
@@ -213,7 +214,7 @@ class Lemmatizer {
             }*/
             if (tokens.isEmpty() || (tokens.size == 1 && tokens[0] !is HebrewToken)) {
                 val wordWhichFailed = if (tokens.isNotEmpty()) tokens[0].text else word
-                if (printLogs) println("$wordWhichFailed Not a Hebrew word")
+                if (printLogs) println("$wordWhichFailed is not a Hebrew word")
                 if (wordWhichFailed.isNotBlank()) {
                     val containsEnglish = wordWhichFailed.containsEnglish()
                     if (!containsEnglish || includeEnglishInExactSet) {
