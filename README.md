@@ -2,6 +2,18 @@
 
 
 This is a fast, beautiful, and powerful program for searching a catalog of seforim. It can search by exact match, malei/chaseir insensitivity, and Shoresh search (good for finding a sefer with an approximate title, among other things). I would love to spread it to other yeshivos for free. if you would like to use it, please let me know so i can keep tabs on the user base. Feel free to reach out if you need help setting it up.
+
+# Screenshots
+
+![Alt Text](https://raw.github.com/shmueldabomb441/SeforimCatalog/master/ScreenshotProgramMainPage.png)
+![Alt Text](https://raw.github.com/{USERNAME}/{REPOSITORY}/{BRANCH}/{PATH})
+![Alt Text](https://raw.github.com/{USERNAME}/{REPOSITORY}/{BRANCH}/{PATH})
+![Alt Text](https://raw.github.com/{USERNAME}/{REPOSITORY}/{BRANCH}/{PATH})
+![Alt Text](https://raw.github.com/{USERNAME}/{REPOSITORY}/{BRANCH}/{PATH})
+![Alt Text](https://raw.github.com/{USERNAME}/{REPOSITORY}/{BRANCH}/{PATH})
+![Alt Text](https://raw.github.com/{USERNAME}/{REPOSITORY}/{BRANCH}/{PATH})
+![Alt Text](https://raw.github.com/{USERNAME}/{REPOSITORY}/{BRANCH}/{PATH})
+
 # Installation
 
 This repository contains the source code for the program. A more installation friendly repository is available at https://github.com/shmueldabomb441/YGW-Seforim-Catalog. Installation instructions are available there.
