@@ -599,7 +599,7 @@ abstract class SearchableTableJPanel(
         filterListExactMatch(constraint, matchWordBoundary, useMaleiChaseirInsensitive = true)
 
     fun filterListRootSearch(constraint: String) {
-        val queryShorashim = lemmatizer.getLemmatizedList(constraint)
+        val queryShorashim = lemmatizer.getLemmatizedList/*Debug*/(constraint)
 //            .reversed()//the text field puts the words backwards
             .toList()
         rootWordSearchJPanel.setShorashim(queryShorashim.flatten())
