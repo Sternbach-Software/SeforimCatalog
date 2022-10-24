@@ -74,7 +74,7 @@ object Catalog {
         var printedFourty = false
         var printedSixty = false
         var printedEight = false
-        val pattern = Pattern.compile("\\w\\d+\\.\\d+")
+        val pattern = Pattern.compile("\\w?\\d+\\.\\d+")
         entries = lines
 //            .parallelStream()
             .mapNotNull {
