@@ -6,7 +6,7 @@ This is a fast, beautiful, and powerful program for searching a catalog of sefor
 
 # Installation
 
-This repository contains the source code for the program. A more user-friendly installation repository is available at https://github.com/shmueldabomb441/YGW-Seforim-Catalog. Installation instructions are available there.
+This repository contains the source code for the program. A more user-friendly installation repository is available at https://github.com/Sternbach-Software/YGW-Seforim-Catalog. Installation instructions are available there.
 
 # License 
 This software uses [HebMorph](https://github.com/synhershko/HebMorph) for the Shoresh search, which is licensed under the GNU Affero General Public License version 3.
