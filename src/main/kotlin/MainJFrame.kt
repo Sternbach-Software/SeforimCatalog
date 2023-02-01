@@ -16,6 +16,7 @@ import javax.swing.*
  */
 lateinit var logFile: File
 lateinit var fontFile: File
+val fontFileContents by lazy { fontFile.readText().split(",") }
 val scope = CoroutineScope(SupervisorJob())
 var rootSearchShouldMatchAll = true
 var rootSearchShouldMatchSequential = true
@@ -29,6 +30,7 @@ class MainJFrame : JFrame() {
     // <editor-fold defaultstate="expanded" desc="Generated Code">
     private fun initComponents() {
         println("Initializing program.")
+        val startTime = System.nanoTime()
         extendedState = JFrame.MAXIMIZED_BOTH;
         isUndecorated = false;
         jTabbedPane1 = JTabbedPane()
@@ -154,7 +156,10 @@ class MainJFrame : JFrame() {
         )
         println("Displaying main screen.")
         pack()
-    } // </editor-fold>                        
+        EventQueue.invokeLater {
+            println("Total startup time: ${(System.nanoTime() - startTime).div(1_000_000_000.00)} seconds")
+        }
+    } // </editor-fold>
 
     // Variables declaration - do not modify                     
     private var findSeferByNameJPanel1: FindSeferByCriteriaJPanel? = null

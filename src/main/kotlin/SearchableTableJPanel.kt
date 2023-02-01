@@ -1,5 +1,6 @@
 import Catalog.containsEnglish
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.apache.commons.text.similarity.LevenshteinDistance
 import java.awt.*
@@ -232,8 +233,8 @@ abstract class SearchableTableJPanel(
                 renderer.horizontalAlignment = JLabel.RIGHT
             }
         }
-        val (font, size) = fontFile.readText().split(",")
-        table.font = Font(font, 0, size.toInt())
+        val (globalTableFont, globalTableFontSize) = fontFileContents
+        table.font = Font(globalTableFont, 0, globalTableFontSize.toInt())
 //        table.showHorizontalLines = true
         table.showVerticalLines = true
         jScrollPane1.setViewportView(table)
@@ -284,24 +285,6 @@ abstract class SearchableTableJPanel(
             }
         }
         )
-//        table.autoCreateRowSorter = true
-        val rowSorter = TableRowSorter(table.model as AbstractTableModel)
-        val hebrewEntriesFirstComparator = kotlin.Comparator<String> { o1, o2 ->
-            val o1ContainsEnglish = o1.containsEnglish()
-            val o2ContainsEnglish = o2.containsEnglish()
-            if (o1ContainsEnglish && !o2ContainsEnglish) 1
-            else if (!o1ContainsEnglish && o2ContainsEnglish) -1
-            else (o1.lowercase()).compareTo(o2.lowercase())
-        }
-        if (this is FindSeferByCriteriaJPanel) {
-            val indexOfSeferNameColumn = columns.indexOf(seferNameColumnString)
-            rowSorter.setComparator(indexOfSeferNameColumn, hebrewEntriesFirstComparator)
-            rowSorter.setComparator(columns.indexOf(shelfNumColumnString), shelfNumComparator)
-            rowSorter.sortKeys = listOf(RowSorter.SortKey(indexOfSeferNameColumn, SortOrder.ASCENDING))
-        } else if (this is ListOfShelvesJPanel) {
-            rowSorter.setComparator(columns.indices.last, shelfNumComparator) //TODO make this index dynamic
-        }
-        table.rowSorter = rowSorter
         jLabel2.text = "Results: ${listBeingDisplayed.size}"
 
         jLabel6.text = "Search mode:"
@@ -375,8 +358,6 @@ abstract class SearchableTableJPanel(
         buttonGroup1.add(rootWordSearchRadioButton)
         buttonGroup1.add(patternSearchRadioButton)
         buttonGroup1.add(maleiChaseirSearchRadioButton)
-
-        exactSearchRadioButton.doClick()
 
         similaritySearchJPanel.filterCallback = object : Function1<LevenshteinDistance, Unit> {
             override fun invoke(p1: LevenshteinDistance) {
@@ -484,6 +465,35 @@ abstract class SearchableTableJPanel(
                         .addContainerGap()
                 )
         )
+        scope.launch(Dispatchers.Default) {
+            Catalog.isLemmatized.collect { //catalog done init
+                if(it) {
+                    val sortStartTime = System.nanoTime()
+//        table.autoCreateRowSorter = true
+                    val rowSorter = TableRowSorter(table.model as AbstractTableModel)
+                    val hebrewEntriesFirstComparator = kotlin.Comparator<String> { o1, o2 ->
+                        val o1ContainsEnglish = o1.containsEnglish()
+                        val o2ContainsEnglish = o2.containsEnglish()
+                        if (o1ContainsEnglish && !o2ContainsEnglish) 1
+                        else if (!o1ContainsEnglish && o2ContainsEnglish) -1
+                        else (o1.lowercase()).compareTo(o2.lowercase())
+                    }
+                    if (this@SearchableTableJPanel is FindSeferByCriteriaJPanel) {
+                        val indexOfSeferNameColumn = columns.indexOf(seferNameColumnString)
+                        rowSorter.setComparator(indexOfSeferNameColumn, hebrewEntriesFirstComparator)
+                        rowSorter.setComparator(columns.indexOf(shelfNumColumnString), shelfNumComparator)
+                        rowSorter.sortKeys = listOf(RowSorter.SortKey(indexOfSeferNameColumn, SortOrder.ASCENDING))
+                    } else if (this@SearchableTableJPanel is ListOfShelvesJPanel) {
+                        rowSorter.setComparator(columns.indices.last, shelfNumComparator) //TODO make this index dynamic
+                    }
+//            println("Time to sort \"$searchPhrase\": ${(System.nanoTime() - sortStartTime).div(1_000_000_000.00)} seconds")
+                    EventQueue.invokeLater {
+                        table.rowSorter = rowSorter
+                        exactSearchRadioButton.doClick()
+                    }
+                }
+            }
+        }
         return this
     } // </editor-fold>
 
