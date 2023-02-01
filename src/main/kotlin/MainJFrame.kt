@@ -55,7 +55,7 @@ class MainJFrame : JFrame() {
         textJPanel3 = TextJPanel(
             """
                 6.0.0 - 02/1/2023
-                    > Drastically increase startup time
+                    > Drastically increase startup time (~15 seconds to ~3 seconds)
                     > Update tips to include how to find seforim easier
                     > Add button to show/hide search mode explanation
                     > Improve shoresh finding algorithm
@@ -68,11 +68,8 @@ class MainJFrame : JFrame() {
                     > Remove alternate phrase search
                     > Fix exact search for seforim with abbreviations (would sometimes be excluded from results)
                     > Display startup progress in console
-                4.0.0 - 09/2/2022
-                    > 
-                    > 
-                    > 
-                    > 
+                4.0.0 - 02/17/2022
+                    > Implement Shoresh/root word search
                 """.trimIndent()
         )
         textJPanel2 = TextJPanel("For tech support, please contact ssternbach@torahdownloads.com; for catalog support, please contact Asher Lewis.")
