@@ -57,11 +57,17 @@ class MainJFrame : JFrame() {
                 6.0.0 - 02/1/2023
                     > Drastically increase startup time
                     > Update tips to include how to find seforim easier
+                    > Add button to show/hide search mode explanation
+                    > Improve shoresh finding algorithm
+                    > Clarify rules of root word search
                 5.0.0 - 10/2/2022
-                    > Add Malei/Chaseir insensitivity
-                    > 
-                    > 
-                    > 
+                    > Add Malei/Chaseir insensitive search
+                    > Add "Match whole word" option
+                    > Add "Updates" tab
+                    > Add column for displaying which categories are stored on a shelf and which shelves a category is stored on (in case it is spread across multiple shelves)
+                    > Remove alternate phrase search
+                    > Fix exact search for seforim with abbreviations (would sometimes be excluded from results)
+                    > Display startup progress in console
                 4.0.0 - 09/2/2022
                     > 
                     > 
