@@ -114,14 +114,14 @@ abstract class SearchableTableJPanel(
 
     /*only gets regex when the constraint hasn't changed, so that it doesn't create a new regex for every list item*/
     private fun getConstraintRegex(constraint: String, matchWordBoundary: Boolean): Regex {
-        println("getConstraintRegex(constraint=$constraint), _searchPhrase=$_searchPhrase, _constraint=$_constraint")
+        //println("getConstraintRegex(constraint=$constraint), _searchPhrase=$_searchPhrase, _constraint=$_constraint")
         if ((/*constraint == _constraint?.toString()*/ /*already got regex*/ /*||*/ constraint.lastOrNull() == '#'/*user has not typed alternate phrase, so don't search for whitespace (i.e. every entry)*/) && _constraint != null) return _constraint!! /*use "old" regex*/
         /*get new regex*/
         lateinit var regex: Regex
-        val lemmatizerRegex = "![^!]+!".toRegex()
+        val lemmatizerRegex = "!([^!]+)!".toRegex()
         val mConstraint =
             if (!constraint.contains(lemmatizerRegex)) constraint else constraint.replace(lemmatizerRegex) {
-                lemmatizer.getLemmatizedList(it.value).also { if (it.size > 1) println("Error: $constraint") }.first()
+                lemmatizer.getLemmatizedList(it.groupValues.first()).also { if (it.size > 1) println("Error: $constraint") }.first()
                     .joinToString("|", "(", ")")
             }
         val replaceHashWithOr = mConstraint.replace("#", "|")
@@ -129,7 +129,7 @@ abstract class SearchableTableJPanel(
             .toRegex(RegexOption.IGNORE_CASE)
         _constraint = regex
         //println("Pattern of constraint: $regex")
-        println("Searching for: $regex")
+        //println("Searching for: $regex")
         return regex
     }
 
