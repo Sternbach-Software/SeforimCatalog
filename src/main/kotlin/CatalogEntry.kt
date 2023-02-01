@@ -43,4 +43,30 @@ open class CatalogEntry(
 //                comments.isBlank() &&
                 category.isBlank() &&
                 shelfNum.isBlank()
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as CatalogEntry
+
+        if (seferName != other.seferName) return false
+        if (author != other.author) return false
+        if (publisher != other.publisher) return false
+        if (volumeNum != other.volumeNum) return false
+        if (category != other.category) return false
+        if (shelfNum != other.shelfNum) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = seferName.hashCode()
+        result = 31 * result + author.hashCode()
+        result = 31 * result + publisher.hashCode()
+        result = 31 * result + volumeNum.hashCode()
+        result = 31 * result + category.hashCode()
+        result = 31 * result + shelfNum.hashCode()
+        return result
+    }
 }

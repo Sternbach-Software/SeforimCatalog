@@ -37,6 +37,7 @@ object Catalog {
     val tableSizes: List<Double>
         get() = File(catalogDirectory, "sizes.txt").also { it.createNewFile() }.readText().split(",")
             .map { it.toDouble() }
+            .ifEmpty { listOf(20.0, 40.0, 1.3, 50.0, 1.5, 50.0) }
 
     fun initialize() {
         println("Initializing catalog.")
