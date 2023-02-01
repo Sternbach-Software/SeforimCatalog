@@ -54,8 +54,11 @@ class MainJFrame : JFrame() {
         textJPanel1 = TextJPanel(TIPS)
         textJPanel3 = TextJPanel(
             """
+                6.0.0 - 02/1/2023
+                    > Drastically increase startup time
+                    > Update tips to include how to find seforim easier
                 5.0.0 - 10/2/2022
-                    > 
+                    > Add Malei/Chaseir insensitivity
                     > 
                     > 
                     > 
@@ -74,7 +77,7 @@ class MainJFrame : JFrame() {
         jTabbedPane1!!.addTab("Seforim by name", findSeferByNameJPanel1)
         jTabbedPane1!!.addTab("Seforim by criteria", seforimByCriteriaTabJPanel)
         jTabbedPane1!!.addTab("Criteria", criteriaTabJPanel)
-        jTabbedPane1!!.addTab("Tips (6)", textJPanel1)
+        jTabbedPane1!!.addTab("Tips (7)", textJPanel1)
         val lastUpdate = LocalDateTime.ofInstant(
             Instant.ofEpochMilli(
                 catalogDirectory
@@ -96,7 +99,7 @@ class MainJFrame : JFrame() {
 
         val getLastUpdateString = { "Catalog last updated: ${Catalog.lastModificationDate()}" }
         jLabel1!!.text = getLastUpdateString()
-        jLabel2!!.text = "Program Version: 3.0.0"
+        jLabel2!!.text = "Program Version: 6.0.0"
 
         refreshDatabaseButton!!.addActionListener {
             Catalog.refreshObjects()

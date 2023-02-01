@@ -18,7 +18,9 @@ val TIPS =
             "        \n" +
             "        5. Separating alternate search phrases or spellings with \"#\" will return results for any of those phrases; for example, \"(מפרש#מפורש) (סידור#סדור)\" will search for all 4 possible variations of that phrase (viz. when the first is malei and the second isn't, vice versa, or when both or neither are malei). Make sure to group spellings in parentheses, because without parentheses \"סידור#סדור מפרש#מפורש\" will search for 3 phrases instead of 4: סידור, סדור מפרש, or מפורש.\n" +
             "        \n" +
-            "        6. A quick way to find seforim by a specific author or category when you know the name of the author or category you are looking for is to search the list of authors to find the author's exact spelling in the catalog, click on the author's name to select the cell, press Ctrl+C to copy the name, then press Ctrl+V in the search bar in the \"Seforim by author\" tab to filter the list for seforim by that author."
+            "        6. A quick way to find seforim by a specific author or category when you know the name of the author or category you are looking for is to search the list of authors to find the author's exact spelling in the catalog, click on the author's name to select the cell, press Ctrl+C to copy the name, then press Ctrl+V in the search bar in the \"Seforim by author\" tab to filter the list for seforim by that author.\n" +
+            "        \n" +
+            "        7. You can now learn the layout of the library easily by looking in the \"Criteria > Categories\" and \"Criteria > Shelves\" tabs to learn which categories are stored on a particular shelf, and on which shelves you can find a category (if it is spread across multiple shelves)."
 val alternatePhrases = ""
 
 class TabbedJFrame : JFrame() {
