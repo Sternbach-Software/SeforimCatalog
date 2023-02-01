@@ -35,9 +35,14 @@ object Catalog {
 
     val isLemmatized = MutableStateFlow(false)
     val tableSizes: List<Double>
-        get() = File(catalogDirectory, "sizes.txt").also { it.createNewFile() }.readText().split(",")
-            .map { it.toDouble() }
-            .ifEmpty { listOf(20.0, 40.0, 1.3, 50.0, 1.5, 50.0) }
+        get() = File(catalogDirectory, "sizes.txt").let {
+            if(it.createNewFile()) { //if file not present, use default values and write file
+                val list = listOf(20.0, 40.0, 1.3, 50.0, 1.5, 50.0)
+                it.writeText(list.joinToString())
+                list
+            }
+            else it.readText().split(",").map { it.toDouble() }
+        }
 
     fun initialize() {
         println("Initializing catalog.")
