@@ -21,7 +21,7 @@ class PlainTextExplanationJPanel(explanation: String, val matchWholeWordChangedC
         jLabel1 = JLabel()
 
         boundaryCheckBox.addItemListener {
-            matchWholeWordChangedCallback(boundaryCheckBox.isSelected.also { println("Calling boundary callback: $it") })
+            matchWholeWordChangedCallback(boundaryCheckBox.isSelected)
         }
 //        setBorder(javax.swing.BorderFactory.createTitledBorder(""));
         jLabel1!!.text = "<html><body style='width: %1spx'>$explanation</body>"
