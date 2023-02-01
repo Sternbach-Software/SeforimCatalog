@@ -78,14 +78,10 @@ class MainJFrame : JFrame() {
         jTabbedPane1!!.addTab("Seforim by criteria", seforimByCriteriaTabJPanel)
         jTabbedPane1!!.addTab("Criteria", criteriaTabJPanel)
         jTabbedPane1!!.addTab("Tips (7)", textJPanel1)
-        val lastUpdate = LocalDateTime.ofInstant(
-            Instant.ofEpochMilli(
-                catalogDirectory
-                    .walk()
-                    .find { it.extension == "jar" }!!
-                    .lastModified()
-            ),
-            ZoneId.systemDefault()
+        val lastUpdate = Catalog.getDateLastModifiedFromFile(
+            catalogDirectory
+            .walk()
+            .find { it.extension == "jar" }!!
         )
         jTabbedPane1!!.addTab(
             "Updates (updated ${
