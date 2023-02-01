@@ -237,8 +237,12 @@ object Catalog {
         scope.launch(Dispatchers.IO) {
             cachedCatalogFile = File(catalogDirectory, cachedCatalogFileName)
             cachedLemmatizedCatalogFile = File(catalogDirectory, cachedLemmatizedCatalogFileName)
+            // Sorting the lists before righting might make future searches faster, so why not.
+            // Don't want to sort while program is running so as not to impact startup time.
             cachedCatalogFile.writeText(
-                entries.joinToString("\n") {
+                entries
+                    .sortedBy { it.seferName }
+                    .joinToString("\n") {
                     listOf(
                         it.numberNotSure,
                         it.miyunNum,
@@ -258,7 +262,9 @@ object Catalog {
             )
             cachedLemmatizedCatalogFile.writeText(
                 "${originalCatalogTSVFile.lastModified()}\n" +
-                        entriesLemmatized.joinToString("\n") {
+                        entriesLemmatized
+                            .sortedBy { it.seferName }
+                            .joinToString("\n") {
                             listOf(
                                 it._seferName.serializeLemmatizedSet(gson),
                                 it._author.serializeLemmatizedSet(gson),
