@@ -30,8 +30,8 @@ object Catalog {
     lateinit var entries: List<CatalogEntry>
     lateinit var entriesLemmatized: List<LemmatizedCatalogEntry>
 
-    private const val cachedFileColumnSeparator = "~@~"
-    private const val lemmatizedDelimiter = "~!~"
+    private const val cachedFileColumnSeparator = "√"
+    private const val lemmatizedDelimiter = "∫"
 
     val isLemmatized = MutableStateFlow(false)
     val tableSizes: List<Double> by lazy {
@@ -277,7 +277,7 @@ object Catalog {
                             ).joinToString(cachedFileColumnSeparator)
                         }
             )
-//            testIfSerializedCorrectly(gson)
+            testIfSerializedCorrectly()
             if (System.getProperty("os.name").startsWith("win", true)) {
                 Files.setAttribute(
                     cachedCatalogFile.toPath(),
@@ -365,10 +365,10 @@ object Catalog {
     //    fun containsEnglish(string: String): Boolean {
 //        return (_pattern ?: Pattern.compile("[a-zA-Z]").also { _pattern = it }).matcher(string).find()
 //    }
-    /*private fun testIfSerializedCorrectly(gson: Gson) {
+    private fun testIfSerializedCorrectly() {
         val entriesCopy = entries.sortedBy { it.seferName }
         val lemmasCopy = entriesLemmatized.sortedBy { it._seferName.first }
-        initCatalogFromCacheOrTSVIfStale(gson)
+        initCatalogFromCacheOrTSVIfStale()
         val entriesFromCache = entries.sortedBy { it.seferName }
         val lemmasFromCache = entriesLemmatized.sortedBy { it._seferName.first }
         var catalogMatches = true
@@ -394,5 +394,5 @@ object Catalog {
             File("lemmas.txt").writeText(lemmasCopy.toString())
             File("lemmas_cache.txt").writeText(lemmasFromCache.toString())
         }
-    }*/
+    }
 }
