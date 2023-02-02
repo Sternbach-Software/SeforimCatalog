@@ -1,4 +1,4 @@
-import com.google.gson.Gson
+//import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -86,12 +86,14 @@ object Catalog {
     }
 
     fun refreshObjects(checkCloud: Boolean = false) {
-        val gson = Gson()
+//        val gson = Gson()
         if (::cachedCatalogFile.isInitialized) {
-            initCatalogFromCacheOrTSVIfStale(gson)
+            println("Cached catalog file was initialized.")
+            initCatalogFromCacheOrTSVIfStale()
             scope.launch { isLemmatized.emit(true) }
         } else {
-            initCatalogFromTSV(gson)
+            println("No cache, reading from TSV")
+            initCatalogFromTSV()
         }
         //for getting length stats
         //entries.map { it.publisher.length }.let { File("publisher.csv").writeText(it.joinToString(",")) }
@@ -114,14 +116,14 @@ object Catalog {
         }
     }
 
-    private fun initCatalogFromTSV(gson: Gson) {
+    private fun initCatalogFromTSV() {
         println("Reading catalog TSV")
         val lines = Files.readAllLines(originalCatalogTSVFile.toPath()).toMutableList()
         println("Done reading catalog file.")
         println("Extracting entries from catalog file.")
         lines.removeAt(0) //remove line with column names
         initCatalog(lines, System.nanoTime())
-        initLemmatizedCatalogAndWriteCache(lines, cachedFileColumnSeparator, gson)
+        initLemmatizedCatalogAndWriteCache(lines, cachedFileColumnSeparator)
     }
 
     private fun initCatalog(
@@ -192,7 +194,6 @@ object Catalog {
     private fun initLemmatizedCatalogAndWriteCache(
         lines: MutableList<String>,
         cachedFileColumnSeparator: String,
-        gson: Gson
     ) {
         scope.launch(Dispatchers.Default) {
             println("Extracting shorashim.")
@@ -230,11 +231,11 @@ object Catalog {
             println("Done extracting shorashim.")
             println("Time to extract shorashim: ${(System.nanoTime() - lemmaStartTime).div(1_000_000_000.00)} seconds")
             println("Beginning to draw main screen.")
-            writeCacheFiles(cachedFileColumnSeparator, gson)
+            writeCacheFiles(cachedFileColumnSeparator)
         }
     }
 
-    private fun writeCacheFiles(cachedFileColumnSeparator: String, gson: Gson) {
+    private fun writeCacheFiles(cachedFileColumnSeparator: String) {
         scope.launch(Dispatchers.IO) {
             cachedCatalogFile = File(catalogDirectory, cachedCatalogFileName)
             cachedLemmatizedCatalogFile = File(catalogDirectory, cachedLemmatizedCatalogFileName)
@@ -267,8 +268,8 @@ object Catalog {
                             .sortedBy { it.seferName }
                             .joinToString("\n") {
                             listOf(
-                                it._seferName.serializeLemmatizedSet(gson),
-                                it._author.serializeLemmatizedSet(gson),
+                                it._seferName.serializeLemmatizedSet(),
+                                it._author.serializeLemmatizedSet(),
                                 it._publisher,
                                 it._volumeNum,
                                 it._category,
@@ -290,14 +291,13 @@ object Catalog {
     }
 
     private fun initCatalogFromCacheOrTSVIfStale(
-        gson: Gson
     ) {
         println("Reading catalog from cache.")
         val linesOfLemmatizedCatalog = Files.readAllLines(cachedLemmatizedCatalogFile.toPath()).toMutableList()
         val dateModifed = linesOfLemmatizedCatalog.removeFirst()
         if(dateModifed.toLong() != originalCatalogTSVFile.lastModified()) { //if the cache was based on an older version of the catalog than the .tsv present in catalogDirectory, renew the cache
             println("Cache is stale, refreshing cache.")
-            initCatalogFromTSV(gson)
+            initCatalogFromTSV()
         } else {
             entries = Files.readAllLines(cachedCatalogFile.toPath()).mapTo(mutableListOf()) {
                 val split = it.split(cachedFileColumnSeparator).iterator()
@@ -320,8 +320,8 @@ object Catalog {
             entriesLemmatized = linesOfLemmatizedCatalog.mapTo(mutableListOf()) {
                 val split = it.split(cachedFileColumnSeparator).iterator()
                 LemmatizedCatalogEntry(
-                    split.next().split(lemmatizedDelimiter).convertToLemmatizedSet(gson),
-                    split.next().split(lemmatizedDelimiter).convertToLemmatizedSet(gson),
+                    split.next().split(lemmatizedDelimiter).convertToLemmatizedSet(),
+                    split.next().split(lemmatizedDelimiter).convertToLemmatizedSet(),
                     split.next(),
                     split.next(),
                     split.next(),
@@ -332,13 +332,20 @@ object Catalog {
         }
     }
 
-    private fun Pair<String, Set<Set<String>>>.serializeLemmatizedSet(gson: Gson) =
-        "$first$lemmatizedDelimiter${gson.toJson(second)}"
+    private fun Pair<String, Set<Set<String>>>.serializeLemmatizedSet() =
+        "$first$lemmatizedDelimiter${second.joinToString("π") { it.joinToString("Ω") }}"
 
-    private fun List<String>.convertToLemmatizedSet(gson: Gson) =
-        this[0] to gson.fromJson(this[1], Array<Array<String>>::class.java).mapTo(
-            mutableSetOf()
-        ) { it.toMutableSet() }
+    private fun List<String>.convertToLemmatizedSet() =
+        this[0] to this[1].let {
+            if(it.isBlank()) setOf()
+            else it
+                .splitToSequence("π")
+                .mapTo(mutableSetOf()) {
+                    it
+                        .splitToSequence("Ω")
+                        .toSet()
+                }
+        }
 
     private fun containsHebrewAndEnglish(it: CatalogEntry) =
         it.seferName.containsEnglish() && it.seferName.containsHebrew()

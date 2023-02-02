@@ -114,7 +114,7 @@ class MainJFrame : JFrame() {
                 }
             }
         }
-        println("Total startup time before rquesting display: ${(System.nanoTime() - startTime).div(1_000_000_000.00)} seconds")
+        println("Total startup time before requesting display: ${(System.nanoTime() - startTime).div(1_000_000_000.00)} seconds")
         val layout = GroupLayout(contentPane)
         contentPane.layout = layout
         layout.setHorizontalGroup(
