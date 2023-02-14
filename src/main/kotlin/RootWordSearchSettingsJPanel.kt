@@ -1,3 +1,6 @@
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import java.awt.EventQueue
 import java.awt.event.ActionEvent
 import javax.swing.*
@@ -36,10 +39,12 @@ class RootWordSearchSettingsJPanel(val searchableTableJPanel: SearchableTableJPa
             "Disregard the order that the words in the search phrase appear in, and return results which contain the shorashim that are in the search phrase, regardless of the order in which they appear in the result."
 
         matchesAllRadioButton!!.text = "Match all"
-        matchesAllLabel!!.text = "Only return results which contain all of the shorashim contained in the search phrase."
+        matchesAllLabel!!.text =
+            "Only return results which contain all of the shorashim contained in the search phrase."
 
         matchesAnyRadioButton!!.text = "Match any"
-        matchesAny!!.text = "Return results which contain any (even one) of the shorashim in the search phrase. This is by definition neither sequential nor unordered."
+        matchesAny!!.text =
+            "Return results which contain any (even one) of the shorashim in the search phrase. This is by definition neither sequential nor unordered."
 
 
         val orderRadioGroup = ButtonGroup()
@@ -60,7 +65,7 @@ class RootWordSearchSettingsJPanel(val searchableTableJPanel: SearchableTableJPa
         matchesAllRadioButton!!.addActionListener {
             rootSearchShouldMatchAll = true
             searchableTableJPanel.filterList()
-            if(buttonToReenableAfterSelectingMatchAny != null){
+            if (buttonToReenableAfterSelectingMatchAny != null) {
                 orderRadioGroup.setSelected(buttonToReenableAfterSelectingMatchAny?.model, true)
                 orderRadioGroup.elements.iterator().forEach { it.isEnabled = true }
                 buttonToReenableAfterSelectingMatchAny = null
@@ -73,11 +78,18 @@ class RootWordSearchSettingsJPanel(val searchableTableJPanel: SearchableTableJPa
             orderRadioGroup.clearSelection()
             orderRadioGroup.elements.iterator().forEach { it.isEnabled = false }
         }
-        EventQueue.invokeLater {
-            sequentialRadioButton!!.doClick()
-        }
-        EventQueue.invokeLater {
-            matchesAllRadioButton!!.doClick()
+        scope.launch(Dispatchers.Default) {
+            Catalog.isEntireProgramInitialized.collect {
+                if(it) {
+                    EventQueue.invokeLater {
+                        sequentialRadioButton!!.apply {
+                            isSelected = true
+                            rootSearchShouldMatchSequential = true
+                        }
+                        matchesAllRadioButton!!.doClick()
+                    }
+                }
+            }
         }
         val jPanel5Layout = GroupLayout(jPanel5)
         jPanel5!!.layout = jPanel5Layout
@@ -254,7 +266,8 @@ class RootWordSearchSettingsJPanel(val searchableTableJPanel: SearchableTableJPa
         )
     } // </editor-fold>
 
-    private fun ButtonGroup.selectedRadioButton(): JRadioButton = elements.asSequence().find { isSelected(it.model)  } as JRadioButton
+    private fun ButtonGroup.selectedRadioButton(): JRadioButton =
+        elements.asSequence().find { isSelected(it.model) } as JRadioButton
 
     private fun jRadioButton6ActionPerformed(evt: ActionEvent) {
         // TODO add your handling code here:

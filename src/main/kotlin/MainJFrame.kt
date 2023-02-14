@@ -1,11 +1,12 @@
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-    import org.ocpsoft.prettytime.PrettyTime
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import org.ocpsoft.prettytime.PrettyTime
 import java.awt.EventQueue
 import java.io.File
-import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.jvm.JvmStatic
 import javax.swing.*
@@ -17,9 +18,10 @@ import javax.swing.*
 lateinit var logFile: File
 lateinit var fontFile: File
 val fontFileContents by lazy { fontFile.readText().split(",") }
-val scope = CoroutineScope(SupervisorJob())
+val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 var rootSearchShouldMatchAll = true
 var rootSearchShouldMatchSequential = true
+var entireProgramIsInitialized = false //so that filterList() isn't called when all of the components are being initialized and auto-clicked
 
 class MainJFrame : JFrame() {
     /**
@@ -52,9 +54,10 @@ class MainJFrame : JFrame() {
             )
         )
         textJPanel1 = TextJPanel(TIPS)
+        val lastUpdatedDate = "02/1/2023"
         textJPanel3 = TextJPanel(
             """
-                6.0.0 - 02/1/2023
+                6.0.0 - $lastUpdatedDate
                     > Drastically increase startup time (~15 seconds to ~3 seconds)
                     > Update tips to include how to find seforim easier
                     > Add button to show/hide search mode explanation
@@ -81,11 +84,12 @@ class MainJFrame : JFrame() {
         jTabbedPane1!!.addTab("Seforim by criteria", seforimByCriteriaTabJPanel)
         jTabbedPane1!!.addTab("Criteria", criteriaTabJPanel)
         jTabbedPane1!!.addTab("Tips (7)", textJPanel1)
-        val lastUpdate = Catalog.getDateLastModifiedFromFile(
+        val (month, day, year) = lastUpdatedDate.split("/")
+        val lastUpdate = LocalDateTime.of(year.toInt(), month.toInt(), day.toInt(), 0, 0, 0)/*Catalog.getDateLastModifiedFromFile(
             catalogDirectory
             .walk()
             .find { it.extension == "jar" }!!
-        )
+        )*/
         jTabbedPane1!!.addTab(
             "Updates (updated ${
                 DateTimeFormatter.ofPattern("MM/dd/yyyy").format(lastUpdate)
@@ -107,6 +111,8 @@ class MainJFrame : JFrame() {
             (0 until jTabbedPane1!!.tabCount).map { jTabbedPane1!!.getTabComponentAt(it) }.forEach {
                 if (it is SearchableTableJPanel) {
                     try {
+                        it.originalCollection.clear()
+                        it.originalCollection.addAll(it.getOriginalList())
                         it.filterList()
                     } catch (t: Throwable) {
                         t.printStackTrace()
@@ -160,7 +166,18 @@ class MainJFrame : JFrame() {
         println("Displaying main screen.")
         pack()
         EventQueue.invokeLater {
-            println("Total startup time: ${(System.nanoTime() - startTime).div(1_000_000_000.00)} seconds")
+            println("Total startup time before sorting: ${(System.nanoTime() - startTime).div(1_000_000_000.00)} seconds")
+            scope.launch {
+                val timeBeforeSorting = System.nanoTime()
+                Catalog.isEntireProgramInitialized.emit(true)
+                Catalog.isEntireProgramInitialized.collect {
+                    if(!it) {
+                        println("Total startup time after sorting: ${(System.nanoTime() - startTime).div(1_000_000_000.00)} seconds")
+                        println("Total time to sort: ${(System.nanoTime() - timeBeforeSorting).div(1_000_000_000.00)} seconds")
+                    }
+                }
+            }
+            entireProgramIsInitialized = true
         }
     } // </editor-fold>
 

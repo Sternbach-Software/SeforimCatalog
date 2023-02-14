@@ -1,11 +1,13 @@
 import Catalog.containsEnglish
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.apache.commons.text.similarity.LevenshteinDistance
 import java.awt.*
 import java.awt.event.*
 import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
 import javax.swing.*
 import javax.swing.border.TitledBorder
 import javax.swing.event.DocumentEvent
@@ -88,15 +90,18 @@ val shelfNumComparator = kotlin.Comparator<String> { o1, o2 ->
         1 //just dump them at the end
     }
 }
+val catalogEntriesAsMutableList: MutableCollection<Any> = Catalog.entries.toMutableList()
+
+val sortedCounter = AtomicInteger(0)
 
 abstract class SearchableTableJPanel(
     private val searchPhrase: String,
     private val getLemmatizedCriteriaLambda: ((LemmatizedCatalogEntry) -> Set<Set<String>>)? = null
 ) : JPanel() {
     fun <T> MutableList<T>.toSynchronizedList(): MutableList<T> = this//Collections.synchronizedList(this)
-    open val originalCollection: Collection<Any> = emptyList()
+    open val originalCollection: MutableCollection<Any> by lazy { getOriginalList() }
     open val originalCollectionLemmatized: List<LemmatizedCatalogEntry> = emptyList()
-    open val listBeingDisplayed: MutableList<Any> = mutableListOf()
+    open val listBeingDisplayed: MutableList<Any> by lazy { originalCollection.toMutableList().toSynchronizedList() }
     open val displayingCatalogEntry: Boolean =
         false //if false, return listBeingDisplayed[rowNum] in table model, otherwise return value depending on columnNum
     open val columns = emptyList<String>()
@@ -104,6 +109,8 @@ abstract class SearchableTableJPanel(
 
     var _constraint: Regex? = null //singleton pattern
     var _searchPhrase: String? = null
+
+    open fun getOriginalList(): MutableCollection<Any> = catalogEntriesAsMutableList
 
     private fun String.addHebrewWordBoundaryIfAllowed(matchWordBoundary: Boolean): String {
         if (!matchWordBoundary) return this
@@ -121,7 +128,8 @@ abstract class SearchableTableJPanel(
         val lemmatizerRegex = "!([^!]+)!".toRegex()
         val mConstraint =
             if (!constraint.contains(lemmatizerRegex)) constraint else constraint.replace(lemmatizerRegex) {
-                lemmatizer.getLemmatizedList(it.groupValues.first()).also { if (it.size > 1) println("Error: $constraint") }.first()
+                lemmatizer.getLemmatizedList(it.groupValues.first())
+                    .also { if (it.size > 1) println("Error: $constraint") }.first()
                     .joinToString("|", "(", ")")
             }
         val replaceHashWithOr = mConstraint.replace("#", "|")
@@ -466,30 +474,64 @@ abstract class SearchableTableJPanel(
                 )
         )
         scope.launch(Dispatchers.Default) {
-            Catalog.isLemmatized.collect { //catalog done init
-                if(it) {
-                    val sortStartTime = System.nanoTime()
+            Catalog.isEntireProgramInitialized.collect {
+                if (it) {
+                    launch(Dispatchers.Default) {
+                        delay(2_000) //don't need to sort right away
+                        val sortStartTime = System.nanoTime()
 //        table.autoCreateRowSorter = true
-                    val rowSorter = TableRowSorter(table.model as AbstractTableModel)
-                    val hebrewEntriesFirstComparator = kotlin.Comparator<String> { o1, o2 ->
-                        val o1ContainsEnglish = o1.containsEnglish()
-                        val o2ContainsEnglish = o2.containsEnglish()
-                        if (o1ContainsEnglish && !o2ContainsEnglish) 1
-                        else if (!o1ContainsEnglish && o2ContainsEnglish) -1
-                        else (o1.lowercase()).compareTo(o2.lowercase())
-                    }
-                    if (this@SearchableTableJPanel is FindSeferByCriteriaJPanel) {
-                        val indexOfSeferNameColumn = columns.indexOf(seferNameColumnString)
-                        rowSorter.setComparator(indexOfSeferNameColumn, hebrewEntriesFirstComparator)
-                        rowSorter.setComparator(columns.indexOf(shelfNumColumnString), shelfNumComparator)
-                        rowSorter.sortKeys = listOf(RowSorter.SortKey(indexOfSeferNameColumn, SortOrder.ASCENDING))
-                    } else if (this@SearchableTableJPanel is ListOfShelvesJPanel) {
-                        rowSorter.setComparator(columns.indices.last, shelfNumComparator) //TODO make this index dynamic
-                    }
-//            println("Time to sort \"$searchPhrase\": ${(System.nanoTime() - sortStartTime).div(1_000_000_000.00)} seconds")
-                    EventQueue.invokeLater {
-                        table.rowSorter = rowSorter
                         exactSearchRadioButton.doClick()
+                        val rowSorter = TableRowSorter(table.model as AbstractTableModel)
+                        val hebrewEntriesFirstComparator = kotlin.Comparator<String> { o1, o2 ->
+                            val o1ContainsEnglish = o1.containsEnglish()
+                            val o2ContainsEnglish = o2.containsEnglish()
+                            if (o1ContainsEnglish && !o2ContainsEnglish) 1
+                            else if (!o1ContainsEnglish && o2ContainsEnglish) -1
+                            else (o1.lowercase()).compareTo(o2.lowercase())
+                        }
+                        if (this@SearchableTableJPanel is FindSeferByCriteriaJPanel) {
+                            val indexOfSeferNameColumn = columns.indexOf(seferNameColumnString)
+                            rowSorter.setComparator(indexOfSeferNameColumn, hebrewEntriesFirstComparator)
+                            rowSorter.setComparator(columns.indexOf(shelfNumColumnString), shelfNumComparator)
+                            rowSorter.sortKeys = listOf(RowSorter.SortKey(indexOfSeferNameColumn, SortOrder.ASCENDING))
+                        } else if (this@SearchableTableJPanel is ListOfShelvesJPanel) {
+                            rowSorter.setComparator(
+                                columns.indices.last,
+                                shelfNumComparator
+                            ) //TODO make this index dynamic
+                        }
+                        println(
+                            "Time to sort \"$searchPhrase\": ${
+                                (System.nanoTime() - sortStartTime).div(
+                                    1_000_000_000.00
+                                )
+                            } seconds"
+                        )
+                        EventQueue.invokeLater {
+                            val timeBeforeSettingRowSorter = System.nanoTime()
+                            table.rowSorter = rowSorter
+                            println(
+                                "Time to set rowSorter for \"$searchPhrase\": ${
+                                    (System.nanoTime() - timeBeforeSettingRowSorter).div(
+                                        1_000_000_000.00
+                                    )
+                                } seconds"
+                            )
+                            val now = System.nanoTime()
+                            println(
+                                "Time to click exact search \"$searchPhrase\": ${
+                                    (System.nanoTime() - now).div(
+                                        1_000_000_000.00
+                                    )
+                                } seconds"
+                            )
+                            val incrementAndGet = sortedCounter.incrementAndGet()
+                            scope.launch {
+                                if (incrementAndGet == 9) {
+                                    Catalog.isEntireProgramInitialized.emit(false)
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -503,16 +545,19 @@ abstract class SearchableTableJPanel(
         borderSearchExplanation: String,
         searchMode: Int
     ) {
+
         searchModeExplanation.removeAll()
         searchModeExplanation.add(panel)
         searchModeExplanation.revalidate()
         searchModeExplanation.repaint()
+
         explanationPanelTitledBorder.title = borderSearchExplanation
         filterList(
             searchMode,
             if (panel is PlainTextExplanationJPanel) panel.boundaryCheckBox.isSelected
             else true
         ) //update list to reflect new search mode
+
     }
 
     private fun catalogModel() = object : AbstractTableModel() {
@@ -587,6 +632,7 @@ abstract class SearchableTableJPanel(
 
     var mMode = 0
     fun filterList(mode: Int, matchWordBoundary: Boolean, ld: LevenshteinDistance? = null) {
+        if (!entireProgramIsInitialized) return
         val _constraint1 = seferNameTextField.text?.trim() //TODO consider making this a computed field
         if (_constraint1 == null || (_searchPhrase == _constraint1 && (_constraint1.isBlank() || mode == mMode) && matchWordBoundary == _previousMatchWordBoundary[mode])) return //don't do anything if the constraint is blank and the user is clicking different modes, or the constraint hasn't changed, or the "Match word boundary" setting hasn't changed
         _searchPhrase = _constraint1

@@ -33,7 +33,7 @@ object Catalog {
     private const val cachedFileColumnSeparator = "√"
     private const val lemmatizedDelimiter = "∫"
 
-    val isLemmatized = MutableStateFlow(false)
+    val isEntireProgramInitialized = MutableStateFlow(false)
     val tableSizes: List<Double> by lazy {
         File(catalogDirectory, "sizes.txt").let {
             if (it.createNewFile()) { //if file not present, use default values and write file
@@ -90,7 +90,6 @@ object Catalog {
         if (::cachedCatalogFile.isInitialized) {
             println("Cached catalog file was initialized.")
             initCatalogFromCacheOrTSVIfStale()
-            scope.launch { isLemmatized.emit(true) }
         } else {
             println("No cache, reading from TSV")
             initCatalogFromTSV()
@@ -227,7 +226,6 @@ object Catalog {
                 }
                 .forEach { synchronizedList.add(it) }
             entriesLemmatized = lemmatizedEntries
-            isLemmatized.emit(true)
             println("Done extracting shorashim.")
             println("Time to extract shorashim: ${(System.nanoTime() - lemmaStartTime).div(1_000_000_000.00)} seconds")
             println("Beginning to draw main screen.")
@@ -277,8 +275,10 @@ object Catalog {
                             ).joinToString(cachedFileColumnSeparator)
                         }
             )
-            testIfSerializedCorrectly()
-            if (System.getProperty("os.name").startsWith("win", true)) {
+//            testIfSerializedCorrectly()
+            val osname = System.getProperty("os.name")
+            println("OS name: $osname")
+            if (osname.startsWith("win", true)) {
                 Files.setAttribute(
                     cachedCatalogFile.toPath(),
                     "dos:hidden",
