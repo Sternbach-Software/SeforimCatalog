@@ -36,21 +36,105 @@ class MainJFrame : JFrame() {
         extendedState = JFrame.MAXIMIZED_BOTH;
         isUndecorated = false;
         jTabbedPane1 = JTabbedPane()
-        findSeferByNameJPanel1 = (FindSeferByCriteriaJPanel("Enter name of sefer$alternatePhrases:", { it.seferName }, { it._seferName.second })).also { println("Drawing \"Seforim by name\"") }.initComponents() as FindSeferByCriteriaJPanel
+
+        var now = System.nanoTime()
+        val seforimByName = (FindSeferByCriteriaJPanel(
+            "Enter name of sefer$alternatePhrases:",
+            { it.seferName },
+            { it._seferName.second })).also { println("Drawing \"Seforim by name\"") }
+        println("Time to construct seforim by name:                                                                     ${(System.nanoTime() - now).div(1_000_000_000.00)} seconds")
+        now = System.nanoTime()
+        seforimByName.initComponents()
+        println("Time to init seforim by name:                                                                          ${(System.nanoTime() - now).div(1_000_000_000.00)} seconds")
+
+        now = System.nanoTime()
+        val seforimByAuthor = (FindSeferByCriteriaJPanel(
+            "Enter author of sefer$alternatePhrases:",
+            { it.author },
+            { it._author.second })).also { println("Drawing \"Seforim by author\"") }
+        println("Time to construct seforim by author:                                                                   ${(System.nanoTime() - now).div(1_000_000_000.00)} seconds")
+        now = System.nanoTime()
+        seforimByAuthor.initComponents()
+        println("Time to init seforim by author:                                                                        ${(System.nanoTime() - now).div(1_000_000_000.00)} seconds")
+
+        now = System.nanoTime()
+        val seforimByCategory = (FindSeferByCriteriaJPanel(
+            "Enter category of sefer$alternatePhrases:",
+            { it.category })).also { println("Drawing \"Seforim by category\".") }
+        println("Time to construct seforim by category:                                                                 ${(System.nanoTime() - now).div(1_000_000_000.00)} seconds")
+
+        now = System.nanoTime()
+        seforimByCategory.initComponents()
+        println("Time to init seforim by category:                                                                      ${(System.nanoTime() - now).div(1_000_000_000.00)} seconds")
+
+        now = System.nanoTime()
+        val seforimByPublisher = (FindSeferByCriteriaJPanel(
+            "Enter publisher of sefer$alternatePhrases:",
+            { it.publisher })).also { println("Drawing \"Seforim by publisher\".") }
+        println("Time to construct seforim by publisher:                                                                ${(System.nanoTime() - now).div(1_000_000_000.00)} seconds")
+
+        now = System.nanoTime()
+        seforimByPublisher.initComponents()
+        println("Time to init seforim by publisher:                                                                     ${(System.nanoTime() - now).div(1_000_000_000.00)} seconds")
+
+        now = System.nanoTime()
+        val seforimByShelf = (FindSeferByCriteriaJPanel(
+            "Enter shelf of sefer$alternatePhrases:",
+            { it.shelfNum })).also { println("Drawing \"Seforim by shelf\".") }
+        println("Time to construct seforim by shelf:                                                                    ${(System.nanoTime() - now).div(1_000_000_000.00)} seconds")
+
+        now = System.nanoTime()
+        seforimByShelf.initComponents()
+        println("Time to init seforim by shelf:                                                                         ${(System.nanoTime() - now).div(1_000_000_000.00)} seconds")
+
+        findSeferByNameJPanel1 = seforimByName
+
         seforimByCriteriaTabJPanel = TabJPanel(
             listOf(
-                "Seforim by author" to (FindSeferByCriteriaJPanel("Enter author of sefer$alternatePhrases:", { it.author }, { it._author.second })).also { println("Drawing \"Seforim by author\"") }.initComponents(),
-                "Seforim by category" to (FindSeferByCriteriaJPanel("Enter category of sefer$alternatePhrases:", { it.category })).also { println("Drawing \"Seforim by category\".") }.initComponents(),
-                "Seforim by publisher" to (FindSeferByCriteriaJPanel("Enter publisher of sefer$alternatePhrases:", { it.publisher })).also { println("Drawing \"Seforim by publisher\".") }.initComponents(),
-                "Seforim by shelf" to (FindSeferByCriteriaJPanel("Enter shelf of sefer$alternatePhrases:", { it.shelfNum })).also { println("Drawing \"Seforim by shelf\".") }.initComponents(),
+                "Seforim by author" to seforimByAuthor,
+                "Seforim by category" to seforimByCategory,
+                "Seforim by publisher" to seforimByPublisher,
+                "Seforim by shelf" to seforimByShelf,
             )
         )
+        now = System.nanoTime()
+        val listOfAuthorsJPanel = ListOfAuthorsJPanel()
+        println("Time to construct listOfAuthors:                                                                       ${(System.nanoTime() - now).div(1_000_000_000.00)} seconds")
+
+        now = System.nanoTime()
+        listOfAuthorsJPanel.initComponents()
+        println("Time to init listOfAuthors:                                                                            ${(System.nanoTime() - now).div(1_000_000_000.00)} seconds")
+
+        now = System.nanoTime()
+        val listOfCategoriesJPanel = ListOfCategoriesJPanel()
+        println("Time to construct listOfCategoriesJPanel:                                                              ${(System.nanoTime() - now).div(1_000_000_000.00)} seconds")
+
+        now = System.nanoTime()
+        listOfCategoriesJPanel.initComponents()
+        println("Time to init listOfCategoriesJPanel:                                                                   ${(System.nanoTime() - now).div(1_000_000_000.00)} seconds")
+
+        now = System.nanoTime()
+        val listOfPublishersJPanel = ListOfPublishersJPanel()
+        println("Time to construct listOfPublishersJPanel:                                                              ${(System.nanoTime() - now).div(1_000_000_000.00)} seconds")
+
+        now = System.nanoTime()
+        listOfCategoriesJPanel.initComponents()
+        println("Time to init listOfPublishersJPanel:                                                                   ${(System.nanoTime() - now).div(1_000_000_000.00)} seconds")
+
+        now = System.nanoTime()
+        val listOfShelvesJPanel = ListOfShelvesJPanel()
+        println("Time to construct listOfShelvesJPanel:                                                                 ${(System.nanoTime() - now).div(1_000_000_000.00)} seconds")
+
+        now = System.nanoTime()
+        listOfCategoriesJPanel.initComponents()
+        println("Time to init listOfShelvesJPanel:                                                                      ${(System.nanoTime() - now).div(1_000_000_000.00)} seconds")
+
         criteriaTabJPanel = TabJPanel(
             listOf(
-                "Authors" to ListOfAuthorsJPanel().also { println("Drawing list of authors.") }.initComponents(),
-                "Categories" to ListOfCategoriesJPanel().also { println("Drawing list of categories.") }.initComponents(),
-                "Publishers" to ListOfPublishersJPanel().also { println("Drawing list of publishers.") }.initComponents(),
-                "Shelves" to ListOfShelvesJPanel().also { println("Drawing list of shelves.") }.initComponents()
+                "Authors" to listOfAuthorsJPanel.also { println("Drawing list of authors.") },
+                "Categories" to listOfCategoriesJPanel.also { println("Drawing list of categories.") },
+                "Publishers" to listOfPublishersJPanel.also { println("Drawing list of publishers.") },
+                "Shelves" to listOfShelvesJPanel.also { println("Drawing list of shelves.") }
             )
         )
         textJPanel1 = TextJPanel(TIPS)
@@ -120,7 +204,7 @@ class MainJFrame : JFrame() {
                 }
             }
         }
-        println("Total startup time before requesting display: ${(System.nanoTime() - startTime).div(1_000_000_000.00)} seconds")
+        println("Total startup time before requesting display:                                                          ${(System.nanoTime() - startTime).div(1_000_000_000.00)} seconds")
         val layout = GroupLayout(contentPane)
         contentPane.layout = layout
         layout.setHorizontalGroup(
@@ -166,14 +250,14 @@ class MainJFrame : JFrame() {
         println("Displaying main screen.")
         pack()
         EventQueue.invokeLater {
-            println("Total startup time before sorting: ${(System.nanoTime() - startTime).div(1_000_000_000.00)} seconds")
+            println("Total startup time before sorting:                                                                 ${(System.nanoTime() - startTime).div(1_000_000_000.00)} seconds")
             scope.launch {
                 val timeBeforeSorting = System.nanoTime()
                 Catalog.isEntireProgramInitialized.emit(true)
                 Catalog.isEntireProgramInitialized.collect {
                     if(!it) {
-                        println("Total startup time after sorting: ${(System.nanoTime() - startTime).div(1_000_000_000.00)} seconds")
-                        println("Total time to sort: ${(System.nanoTime() - timeBeforeSorting).div(1_000_000_000.00)} seconds")
+                        println("Total startup time after sorting:                                                      ${(System.nanoTime() - startTime).div(1_000_000_000.00)} seconds")
+                        println("Total time to sort:                                                                    ${(System.nanoTime() - timeBeforeSorting).div(1_000_000_000.00)} seconds")
                     }
                 }
             }

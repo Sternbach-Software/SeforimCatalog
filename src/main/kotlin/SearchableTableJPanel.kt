@@ -501,30 +501,15 @@ abstract class SearchableTableJPanel(
                             ) //TODO make this index dynamic
                         }
                         println(
-                            "Time to sort \"$searchPhrase\": ${
-                                (System.nanoTime() - sortStartTime).div(
-                                    1_000_000_000.00
-                                )
-                            } seconds"
-                        )
+                            "Time to sort \"$searchPhrase\":                                                            ${(System.nanoTime() - sortStartTime).div(1_000_000_000.00)} seconds")
                         EventQueue.invokeLater {
                             val timeBeforeSettingRowSorter = System.nanoTime()
                             table.rowSorter = rowSorter
                             println(
-                                "Time to set rowSorter for \"$searchPhrase\": ${
-                                    (System.nanoTime() - timeBeforeSettingRowSorter).div(
-                                        1_000_000_000.00
-                                    )
-                                } seconds"
-                            )
+                                "Time to set rowSorter for \"$searchPhrase\":                                           ${(System.nanoTime() - timeBeforeSettingRowSorter).div(1_000_000_000.00)} seconds")
                             val now = System.nanoTime()
                             println(
-                                "Time to click exact search \"$searchPhrase\": ${
-                                    (System.nanoTime() - now).div(
-                                        1_000_000_000.00
-                                    )
-                                } seconds"
-                            )
+                                "Time to click exact search \"$searchPhrase\":                                          ${(System.nanoTime() - now).div(1_000_000_000.00)} seconds")
                             val incrementAndGet = sortedCounter.incrementAndGet()
                             scope.launch {
                                 if (incrementAndGet == 9) {

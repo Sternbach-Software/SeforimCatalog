@@ -185,7 +185,7 @@ object Catalog {
             //            .collect(Collectors.toList())
             .toMutableList()
             .let {
-                println("Time to extract entries from file: ${(System.nanoTime() - startTime).div(1_000_000_000.00)} seconds")
+                println("Time to extract entries from file:                                                             ${(System.nanoTime() - startTime).div(1_000_000_000.00)} seconds")
                 it + listOfEnglishSeforim
             }
     }
@@ -227,7 +227,7 @@ object Catalog {
                 .forEach { synchronizedList.add(it) }
             entriesLemmatized = lemmatizedEntries
             println("Done extracting shorashim.")
-            println("Time to extract shorashim: ${(System.nanoTime() - lemmaStartTime).div(1_000_000_000.00)} seconds")
+            println("Time to extract shorashim:                                                                         ${(System.nanoTime() - lemmaStartTime).div(1_000_000_000.00)} seconds")
             println("Beginning to draw main screen.")
             writeCacheFiles(cachedFileColumnSeparator)
         }
