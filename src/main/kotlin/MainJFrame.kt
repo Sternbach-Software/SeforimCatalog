@@ -348,9 +348,9 @@ class MainJFrame : JFrame() {
                 100,
                 startupProgressObservable
             ).isVisible = true*/
-            val firstArg = args.getOrNull(0)
-            if (firstArg != null) {
-                catalogDirectory = File(firstArg)
+            val catalogDirectoryPath = args.getOrNull(0)
+            if (catalogDirectoryPath != null) {
+                catalogDirectory = File(catalogDirectoryPath)
                 fontFile = File(catalogDirectory, "table_font.txt")
                 logFile = File(catalogDirectory, "logs.txt")
             } else fontFile = File(catalogDirectory, "table_font.txt")
@@ -359,6 +359,7 @@ class MainJFrame : JFrame() {
                     title = "Seforim Finder"
                     args.getOrNull(1)?.let { iconImage = ImageIcon(it).image }
                     args.getOrNull(2)?.toBooleanStrictOrNull()?.let { logging = it }
+                    log("Args: ${args.joinToString { "\"$it\"" }}")
                     isVisible = true
                 }
             }
