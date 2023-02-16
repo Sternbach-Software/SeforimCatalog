@@ -106,8 +106,10 @@ fun log() {
 }
 fun logTime(message: String, startTime: Long = timeSincePreviousLog) {
 //    incrementStartupProgress()
-    log("$message${" ".repeat(100 - message.length)}${(System.nanoTime() - startTime).div(1_000_000_000.00)}")
-    resetTime()
+    if(logging) {
+        log("$message${" ".repeat(100 - message.length)}${"%f".format((System.nanoTime() - startTime).div(1_000_000_000.00))}")
+        resetTime()
+    }
 }
 
 abstract class SearchableTableJPanel(
