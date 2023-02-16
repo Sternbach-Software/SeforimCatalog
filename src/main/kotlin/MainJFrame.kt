@@ -356,12 +356,12 @@ class MainJFrame : JFrame() {
                 fontFile = File(catalogDirectory, "table_font.txt")
                 logFile = File(catalogDirectory, "logs.txt")
             } else fontFile = File(catalogDirectory, "table_font.txt")
+            args.getOrNull(2)?.toBooleanStrictOrNull()?.let { logging = it }
+            log("Args: ${args.joinToString { "\"$it\"" }}")
             /* Create and display the form */EventQueue.invokeLater {
                 MainJFrame().apply {
                     title = "Seforim Finder"
                     args.getOrNull(1)?.let { iconImage = ImageIcon(it).image }
-                    args.getOrNull(2)?.toBooleanStrictOrNull()?.let { logging = it }
-                    log("Args: ${args.joinToString { "\"$it\"" }}")
                     isVisible = true
                 }
             }
