@@ -112,6 +112,12 @@ fun logTime(message: String, startTime: Long = timeSincePreviousLog) {
     }
 }
 
+const val exactSearchName = "Exact search"
+const val rootSearchName = "Root word (שרש) search"
+const val similaritySearchName = "Similarity search"
+const val alternatePhraseSearchName = "Alternate phrase search"
+const val maleiChaseirSearchName = "Malei/Chaseir Insensitive search"
+
 abstract class SearchableTableJPanel(
     private val searchPhrase: String,
     private val getLemmatizedCriteriaLambda: ((LemmatizedCatalogEntry) -> Set<Set<String>>)? = null
@@ -216,27 +222,38 @@ abstract class SearchableTableJPanel(
     fun initComponents(): SearchableTableJPanel {
         resetTime()
         buttonGroup1 = ButtonGroup()
-        jLabel1 = JLabel()
+        jLabel1 = JLabel(searchPhrase)
         seferNameTextField = JTextField()
         jScrollPane1 = JScrollPane()
         val hideExplanationString = "Hide search mode explanation"
         jToggleButton1 = JToggleButton(hideExplanationString)
-        table = object : JTable() {
+        table = object : JTable(catalogModel()) {
             /*override fun getToolTipText(e: MouseEvent): String? {
                 return getValueAt(rowAtPoint(e.point), columnAtPoint(e.point))?.toString()
             }*/
         }
-        jLabel1.text = searchPhrase
-        jLabel2 = JLabel()
-        searchModeExplanation = JPanel().also { it.isVisible = true }
-        jLabel6 = JLabel()/*.also { it.isVisible = false }*/
-        exactSearchRadioButton = JRadioButton()/*.also { it.isVisible = false }*/
-        rootWordSearchRadioButton = JRadioButton().also { it.isVisible = getLemmatizedCriteriaLambda != null }
-        maleiChaseirSearchRadioButton = JRadioButton()/*.also { it.isVisible = false }*/
-        patternSearchRadioButton = JRadioButton()/*.also { it.isVisible = false }*/
+        jLabel2 = JLabel("Results: ${listBeingDisplayed.size}")
+
+        resetTime()
+        val explanationPanelTitledBorder = BorderFactory.createTitledBorder(exactSearchName/*start with exact*/)
+        logTime("Time to create border object:")
+        searchModeExplanation = JPanel().apply {
+//            isVisible = true
+            add(exactMatchJPanel)
+            resetTime()
+            border = explanationPanelTitledBorder
+            logTime("Time to set border:")
+            layout = GridLayout()
+            logTime("Time to set layout:")
+        }
+
+        jLabel6 = JLabel("Search mode:")/*.also { it.isVisible = false }*/
+        exactSearchRadioButton = JRadioButton(exactSearchName).also { it.isSelected = true }
+        rootWordSearchRadioButton = JRadioButton(rootSearchName).also { it.isVisible = getLemmatizedCriteriaLambda != null }
+        maleiChaseirSearchRadioButton = JRadioButton(maleiChaseirSearchName)/*.also { it.isVisible = false }*/
+        patternSearchRadioButton = JRadioButton(alternatePhraseSearchName).also { it.isVisible = false }
         seferNameTextField.locale = Locale("he")
         seferNameTextField.componentOrientation = ComponentOrientation.RIGHT_TO_LEFT
-        table.model = catalogModel()
         table.autoResizeMode = JTable.AUTO_RESIZE_LAST_COLUMN
         logTime("Time to init properties:")
         val rightToLeftAlignmentRenderer = DefaultTableCellRenderer()
@@ -283,23 +300,6 @@ abstract class SearchableTableJPanel(
         table.showVerticalLines = true
         jScrollPane1.setViewportView(table)
         logTime("Time to set font, vertical lines, and viewport:")
-        jLabel2.text = "Results: ${listBeingDisplayed.size}"
-        jLabel6.text = "Search mode:"
-        val exactSearchName = "Exact search"
-        val rootSearchName = "Root word (שרש) search"
-        val similaritySearchName = "Similarity search"
-        val alternatePhraseSearchName = "Alternate phrase search"
-        val maleiChaseirSearchName = "Malei/Chaseir Insensitive search"
-        val explanationPanelTitledBorder = BorderFactory.createTitledBorder(exactSearchName/*start with exact*/)
-        searchModeExplanation.border = explanationPanelTitledBorder
-        searchModeExplanation.layout = GridLayout()
-        exactSearchRadioButton.text = exactSearchName
-        rootWordSearchRadioButton.text = rootSearchName
-        patternSearchRadioButton.text = alternatePhraseSearchName
-        maleiChaseirSearchRadioButton.text = maleiChaseirSearchName
-        logTime("Time to make titled border and set layout:")
-        patternSearchRadioButton.isVisible = false
-        logTime("Time to setup explanation panels:")
         seferNameTextField.document.addDocumentListener(object : DocumentListener {
             override fun insertUpdate(e: DocumentEvent?) = updateTextFieldAndFilter()
             override fun removeUpdate(e: DocumentEvent?) = updateTextFieldAndFilter()
@@ -523,9 +523,6 @@ abstract class SearchableTableJPanel(
                             val timeBeforeSettingRowSorter = System.nanoTime()
                             table.rowSorter = rowSorter
                             logTime("Time to set rowSorter for \"$searchPhrase\":", timeBeforeSettingRowSorter)
-                            val now = System.nanoTime()
-                            exactSearchRadioButton.doClick()
-                            logTime("Time to click exact search \"$searchPhrase\":", now)
                             val incrementAndGet = sortedCounter.incrementAndGet()
                             scope.launch {
                                 if (incrementAndGet == 9) {
