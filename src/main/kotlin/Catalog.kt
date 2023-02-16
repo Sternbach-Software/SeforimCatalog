@@ -45,15 +45,20 @@ object Catalog {
     }
 
     fun initialize() {
-        println("Initializing catalog.")
+        log("Initializing catalog.")
     }
 
-    fun lastModificationDate() =
-        DateTimeFormatter
+    fun lastModificationDate(): String? {
+        resetTime()
+        return DateTimeFormatter
             .ofPattern("MM/dd/yyyy hh:mm a")
             .format(
                 getDateLastModifiedFromFile(originalCatalogTSVFile)
             )
+            .also {
+                logTime("Time to calculate last modification date:")
+            }
+    }
 
     fun getDateLastModifiedFromFile(file: File) = LocalDateTime.ofInstant(
         Instant.ofEpochMilli(file.lastModified()),
@@ -88,10 +93,10 @@ object Catalog {
     fun refreshObjects(checkCloud: Boolean = false) {
 //        val gson = Gson()
         if (::cachedCatalogFile.isInitialized) {
-            println("Cached catalog file was initialized.")
+            log("Cached catalog file was initialized.")
             initCatalogFromCacheOrTSVIfStale()
         } else {
-            println("No cache, reading from TSV")
+            log("No cache, reading from TSV")
             initCatalogFromTSV()
         }
         //for getting length stats
@@ -100,26 +105,26 @@ object Catalog {
         //entries.map { it.author.length }.let { File("author.csv").writeText(it.joinToString(",")) }
         //entries.map { it.seferName.length }.let { File("seferName.csv").writeText(it.joinToString(",")) }
         if (checkCloud) {
-            println("Checking cloud catalog for changes")
+            log("Checking cloud catalog for changes")
             scope.launch(Dispatchers.IO) {
                 if (isHostAvailable("github.com")) {
                     try {
                         Runtime.getRuntime().exec("git pull", arrayOf(), catalogDirectory).waitFor()
-                        println("Updated from cloud")
+                        log("Updated from cloud")
                     } catch (t: Throwable) {
                         t.printStackTrace()
                     }
-                } else println("Internet unavailable")
+                } else log("Internet unavailable")
                 refreshObjects(false)
             }
         }
     }
 
     private fun initCatalogFromTSV() {
-        println("Reading catalog TSV")
+        log("Reading catalog TSV")
         val lines = Files.readAllLines(originalCatalogTSVFile.toPath()).toMutableList()
-        println("Done reading catalog file.")
-        println("Extracting entries from catalog file.")
+        log("Done reading catalog file.")
+        log("Extracting entries from catalog file.")
         lines.removeAt(0) //remove line with column names
         initCatalog(lines, System.nanoTime())
         initLemmatizedCatalogAndWriteCache(lines, cachedFileColumnSeparator)
@@ -140,13 +145,13 @@ object Catalog {
             //            .parallelStream()
             .mapNotNull {
                 val percentageDone = (counter1++.toDouble() / lines.size * 100).roundToInt()
-                //                println("Progress: $percentageDone%")
+                //                log("Progress: $percentageDone%")
                 if (
                     (!printedTwenty1 && percentageDone == 20).also { if (it) printedTwenty1 = true } ||
                     (!printedFourty1 && percentageDone == 40).also { if (it) printedFourty1 = true } ||
                     (!printedSixty1 && percentageDone == 60).also { if (it) printedSixty1 = true } ||
                     (!printedEight1 && percentageDone == 80).also { if (it) printedEight1 = true }
-                ) println("Extracting entries $percentageDone% done")
+                ) log("Extracting entries $percentageDone% done")
                 val split = it.split("\t")
                 val shelf = split[12]
                 val shelfFirstChar = shelf.firstOrNull()
@@ -180,12 +185,12 @@ object Catalog {
                     }
                 }
             }
-            .also { println("Done extracting entries.") }
+            .also { log("Done extracting entries.") }
             //            .filter { it != null }
             //            .collect(Collectors.toList())
             .toMutableList()
             .let {
-                println("Time to extract entries from file:                                                             ${(System.nanoTime() - startTime).div(1_000_000_000.00)} seconds")
+                logTime("Time to extract entries from file:", startTime)
                 it + listOfEnglishSeforim
             }
     }
@@ -195,7 +200,7 @@ object Catalog {
         cachedFileColumnSeparator: String,
     ) {
         scope.launch(Dispatchers.Default) {
-            println("Extracting shorashim.")
+            log("Extracting shorashim.")
             val atomicCounter = AtomicInteger()
             var printedTwenty1 = false
             var printedFourty1 = false
@@ -214,7 +219,7 @@ object Catalog {
                         (!printedFourty1 && percentageDone == 40).also { if (it) printedFourty1 = true } ||
                         (!printedSixty1 && percentageDone == 60).also { if (it) printedSixty1 = true } ||
                         (!printedEight1 && percentageDone == 80).also { if (it) printedEight1 = true }
-                    ) println("Extracting shorashim $percentageDone% done")
+                    ) log("Extracting shorashim $percentageDone% done")
                     LemmatizedCatalogEntry(
                         it.seferName to lemmatizer.getLemmatizedList(it.seferName),
                         it.author to lemmatizer.getLemmatizedList(it.author),
@@ -226,9 +231,9 @@ object Catalog {
                 }
                 .forEach { synchronizedList.add(it) }
             entriesLemmatized = lemmatizedEntries
-            println("Done extracting shorashim.")
-            println("Time to extract shorashim:                                                                         ${(System.nanoTime() - lemmaStartTime).div(1_000_000_000.00)} seconds")
-            println("Beginning to draw main screen.")
+            log("Done extracting shorashim.")
+            logTime("Time to extract shorashim:", lemmaStartTime)
+            log("Beginning to draw main screen.")
             writeCacheFiles(cachedFileColumnSeparator)
         }
     }
@@ -277,7 +282,7 @@ object Catalog {
             )
 //            testIfSerializedCorrectly()
             val osname = System.getProperty("os.name")
-            println("OS name: $osname")
+            log("OS name: $osname")
             if (osname.startsWith("win", true)) {
                 Files.setAttribute(
                     cachedCatalogFile.toPath(),
@@ -292,11 +297,11 @@ object Catalog {
 
     private fun initCatalogFromCacheOrTSVIfStale(
     ) {
-        println("Reading catalog from cache.")
+        log("Reading catalog from cache.")
         val linesOfLemmatizedCatalog = Files.readAllLines(cachedLemmatizedCatalogFile.toPath()).toMutableList()
         val dateModifed = linesOfLemmatizedCatalog.removeFirst()
         if(dateModifed.toLong() != originalCatalogTSVFile.lastModified()) { //if the cache was based on an older version of the catalog than the .tsv present in catalogDirectory, renew the cache
-            println("Cache is stale, refreshing cache.")
+            log("Cache is stale, refreshing cache.")
             initCatalogFromTSV()
         } else {
             entries = Files.readAllLines(cachedCatalogFile.toPath()).mapTo(mutableListOf()) {
@@ -328,7 +333,7 @@ object Catalog {
                     split.next(),
                 )
             }
-            println("Done reading catalog from cache")
+            log("Done reading catalog from cache")
         }
     }
 
@@ -373,21 +378,21 @@ object Catalog {
         val lemmasFromCache = entriesLemmatized.sortedBy { it._seferName.first }
         var catalogMatches = true
         var lemmaMatches = true
-        println("Testing catalog")
+        log("Testing catalog")
         for ((i, j) in entriesCopy.zip(entriesFromCache)) if (i != j) {
-            println("Not equal")
-            println(i)
-            println(j)
+            log("Not equal")
+            log(i)
+            log(j)
             catalogMatches = false
         }
-        println("Testing lemmas")
+        log("Testing lemmas")
         for ((i, j) in lemmasCopy.zip(lemmasFromCache)) if (i != j) {
-            println("Not equal")
-            println(i)
-            println(j)
+            log("Not equal")
+            log(i)
+            log(j)
             lemmaMatches = false
         }
-        println("Serialized correctly: $catalogMatches && $lemmaMatches")
+        log("Serialized correctly: $catalogMatches && $lemmaMatches")
         if (!catalogMatches) {
             File("entries.txt").writeText(entriesCopy.toString())
             File("entries_cache.txt").writeText(entriesFromCache.toString())

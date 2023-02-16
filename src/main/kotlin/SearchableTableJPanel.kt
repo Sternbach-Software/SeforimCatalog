@@ -1,6 +1,5 @@
 import Catalog.containsEnglish
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.apache.commons.text.similarity.LevenshteinDistance
@@ -86,7 +85,7 @@ val shelfNumComparator = kotlin.Comparator<String> { o1, o2 ->
             else compareShelf(o1, o2, false) //they are both from the main beis
         }
     } catch (t: Throwable) {
-        println("Sorting encountered an error on \"$o1\" and \"$o2\": ${t.stackTraceToString()}")
+        log("Sorting encountered an error on \"$o1\" and \"$o2\": ${t.stackTraceToString()}")
         1 //just dump them at the end
     }
 }
@@ -94,14 +93,42 @@ val catalogEntriesAsMutableList: MutableCollection<Any> = Catalog.entries.toMuta
 
 val sortedCounter = AtomicInteger(0)
 
+var timeSincePreviousLog = System.nanoTime()
+fun resetTime() {
+    timeSincePreviousLog = System.nanoTime()
+}
+var logging = true
+fun <T> log(message: T) {
+    if(logging) println(message)
+}
+fun log() {
+    if(logging) println()
+}
+fun logTime(message: String, startTime: Long = timeSincePreviousLog) {
+//    incrementStartupProgress()
+    log("$message${" ".repeat(100 - message.length)}${(System.nanoTime() - startTime).div(1_000_000_000.00)}")
+    resetTime()
+}
+
 abstract class SearchableTableJPanel(
     private val searchPhrase: String,
     private val getLemmatizedCriteriaLambda: ((LemmatizedCatalogEntry) -> Set<Set<String>>)? = null
 ) : JPanel() {
-    fun <T> MutableList<T>.toSynchronizedList(): MutableList<T> = this//Collections.synchronizedList(this)
-    open val originalCollection: MutableCollection<Any> by lazy { getOriginalList() }
+    //    fun <T> MutableList<T>.toSynchronizedList(): MutableList<T> = this//Collections.synchronizedList(this)
+    open val originalCollection: MutableCollection<Any> by lazy {
+        resetTime()
+        getOriginalList().also {
+            logTime("Time to call getOriginalList():")
+        }
+    }
     open val originalCollectionLemmatized: List<LemmatizedCatalogEntry> = emptyList()
-    open val listBeingDisplayed: MutableList<Any> by lazy { originalCollection.toMutableList().toSynchronizedList() }
+    open val listBeingDisplayed: MutableList<Any> by lazy {
+        resetTime()
+        originalCollection.toMutableList()/*.toSynchronizedList()*/.also {
+            logTime("Time to call originalCollection.toMutableList():")
+
+        }
+    }
     open val displayingCatalogEntry: Boolean =
         false //if false, return listBeingDisplayed[rowNum] in table model, otherwise return value depending on columnNum
     open val columns = emptyList<String>()
@@ -121,7 +148,7 @@ abstract class SearchableTableJPanel(
 
     /*only gets regex when the constraint hasn't changed, so that it doesn't create a new regex for every list item*/
     private fun getConstraintRegex(constraint: String, matchWordBoundary: Boolean): Regex {
-        //println("getConstraintRegex(constraint=$constraint), _searchPhrase=$_searchPhrase, _constraint=$_constraint")
+        //log("getConstraintRegex(constraint=$constraint), _searchPhrase=$_searchPhrase, _constraint=$_constraint")
         if ((/*constraint == _constraint?.toString()*/ /*already got regex*/ /*||*/ constraint.lastOrNull() == '#'/*user has not typed alternate phrase, so don't search for whitespace (i.e. every entry)*/) && _constraint != null) return _constraint!! /*use "old" regex*/
         /*get new regex*/
         lateinit var regex: Regex
@@ -129,15 +156,15 @@ abstract class SearchableTableJPanel(
         val mConstraint =
             if (!constraint.contains(lemmatizerRegex)) constraint else constraint.replace(lemmatizerRegex) {
                 lemmatizer.getLemmatizedList(it.groupValues.first())
-                    .also { if (it.size > 1) println("Error: $constraint") }.first()
+                    .also { if (it.size > 1) log("Error: $constraint") }.first()
                     .joinToString("|", "(", ")")
             }
         val replaceHashWithOr = mConstraint.replace("#", "|")
         regex = replaceHashWithOr.tryRegexOrEscape().pattern.addHebrewWordBoundaryIfAllowed(matchWordBoundary)
             .toRegex(RegexOption.IGNORE_CASE)
         _constraint = regex
-        //println("Pattern of constraint: $regex")
-        //println("Searching for: $regex")
+        //log("Pattern of constraint: $regex")
+        //log("Searching for: $regex")
         return regex
     }
 
@@ -185,6 +212,7 @@ abstract class SearchableTableJPanel(
      */
     // <editor-fold defaultstate="expanded" desc="Generated Code">
     fun initComponents(): SearchableTableJPanel {
+        resetTime()
         buttonGroup1 = ButtonGroup()
         jLabel1 = JLabel()
         seferNameTextField = JTextField()
@@ -208,10 +236,14 @@ abstract class SearchableTableJPanel(
         seferNameTextField.componentOrientation = ComponentOrientation.RIGHT_TO_LEFT
         table.model = catalogModel()
         table.autoResizeMode = JTable.AUTO_RESIZE_LAST_COLUMN
+        logTime("Time to init properties:")
         val rightToLeftAlignmentRenderer = DefaultTableCellRenderer()
         rightToLeftAlignmentRenderer.horizontalAlignment = JLabel.RIGHT
         table.columnModel.columns.asIterator().forEach { it.cellRenderer = rightToLeftAlignmentRenderer }
+        logTime("Time to set right to left:")
+        resetTime()
         table.tableHeader.reorderingAllowed = false
+        logTime("Time to allow reordering:")
         /*
         Category: 40 chars
         Author: 50 chars
@@ -226,6 +258,7 @@ abstract class SearchableTableJPanel(
                 table.setJTableColumnsWidth(sizes)
             }
         })
+        logTime("Time to add table bounds listener:")
         table.tableHeader.defaultRenderer = object : TableCellRenderer {
             var renderer: DefaultTableCellRenderer = table.tableHeader.defaultRenderer as DefaultTableCellRenderer
             override fun getTableCellRendererComponent(
@@ -241,11 +274,30 @@ abstract class SearchableTableJPanel(
                 renderer.horizontalAlignment = JLabel.RIGHT
             }
         }
+        logTime("Time to set default renderer:")
         val (globalTableFont, globalTableFontSize) = fontFileContents
         table.font = Font(globalTableFont, 0, globalTableFontSize.toInt())
 //        table.showHorizontalLines = true
         table.showVerticalLines = true
         jScrollPane1.setViewportView(table)
+        logTime("Time to set font, vertical lines, and viewport:")
+        jLabel2.text = "Results: ${listBeingDisplayed.size}"
+        jLabel6.text = "Search mode:"
+        val exactSearchName = "Exact search"
+        val rootSearchName = "Root word (שרש) search"
+        val similaritySearchName = "Similarity search"
+        val alternatePhraseSearchName = "Alternate phrase search"
+        val maleiChaseirSearchName = "Malei/Chaseir Insensitive search"
+        val explanationPanelTitledBorder = BorderFactory.createTitledBorder(exactSearchName/*start with exact*/)
+        searchModeExplanation.border = explanationPanelTitledBorder
+        searchModeExplanation.layout = GridLayout()
+        exactSearchRadioButton.text = exactSearchName
+        rootWordSearchRadioButton.text = rootSearchName
+        patternSearchRadioButton.text = alternatePhraseSearchName
+        maleiChaseirSearchRadioButton.text = maleiChaseirSearchName
+        logTime("Time to make titled border and set layout:")
+        patternSearchRadioButton.isVisible = false
+        logTime("Time to setup explanation panels:")
         seferNameTextField.document.addDocumentListener(object : DocumentListener {
             override fun insertUpdate(e: DocumentEvent?) = updateTextFieldAndFilter()
             override fun removeUpdate(e: DocumentEvent?) = updateTextFieldAndFilter()
@@ -293,44 +345,6 @@ abstract class SearchableTableJPanel(
             }
         }
         )
-        jLabel2.text = "Results: ${listBeingDisplayed.size}"
-
-        jLabel6.text = "Search mode:"
-        val exactSearchName = "Exact search"
-        val rootSearchName = "Root word (שרש) search"
-        val similaritySearchName = "Similarity search"
-        val alternatePhraseSearchName = "Alternate phrase search"
-        val maleiChaseirSearchName = "Malei/Chaseir Insensitive search"
-        rootWordSearchJPanel = RootWordSearchExplanationJPanel(this)
-        similaritySearchJPanel = SimilaritySearchJPanel()
-        exactMatchJPanel = PlainTextExplanationJPanel(
-            "Exact search determines matching entries based on whether the entry contains the exact search phrase entered."
-        ) {
-            _previousMatchWordBoundary[FILTER_EXACT] = !it
-            filterList()
-        }
-        alternatePhrasesJPanel = PlainTextExplanationJPanel(
-            "Alternate phrase search determines matches based on whether the entry contains any of the phrases separated by \"#\", e.g. \"fire#אור#אש\" or \"עשר(ת#ה) (מאמר#הדיבר)ות\" (i.e. show results for either עשרת הדיברות or עשרה מאמרות). Surround words with an exclamation mark to have the program turn the word into its shoresh/shorashim. See tip #5 for more information."
-        ) {
-            _previousMatchWordBoundary[FILTER_ALTERNATE_PHRASE] = !it
-            filterList()
-        }
-        maleiChaseirSearchJPanel = PlainTextExplanationJPanel(
-            "Malei/Chaseir Insensitive search determines matches based on whether the entry contains the exact search phrase entered, while allowing a vav or yud to appear anywhere in middle of any of the words in the search phrase or entry text. This means that searching for חמש will show results for חומש, and vice versa."
-        ) {
-            _previousMatchWordBoundary[FILTER_INSENSITIVE] = !it
-            filterList()
-        }
-        val explanationPanelTitledBorder = BorderFactory.createTitledBorder(exactSearchName/*start with exact*/)
-        searchModeExplanation.border = explanationPanelTitledBorder
-        searchModeExplanation.layout = GridLayout()
-        exactSearchRadioButton.text = exactSearchName
-        rootWordSearchRadioButton.text = rootSearchName
-        patternSearchRadioButton.text = alternatePhraseSearchName
-        maleiChaseirSearchRadioButton.text = maleiChaseirSearchName
-
-        patternSearchRadioButton.isVisible = false
-
         exactSearchRadioButton.addActionListener {
             setExplanationJPanel(exactMatchJPanel, explanationPanelTitledBorder, exactSearchName, FILTER_EXACT)
         }
@@ -362,18 +376,20 @@ abstract class SearchableTableJPanel(
                 jToggleButton1.text = hideExplanationString
             }
         }
+        logTime("Time to add listeners:")
+
         buttonGroup1.add(exactSearchRadioButton)
         buttonGroup1.add(rootWordSearchRadioButton)
         buttonGroup1.add(patternSearchRadioButton)
         buttonGroup1.add(maleiChaseirSearchRadioButton)
 
-        similaritySearchJPanel.filterCallback = object : Function1<LevenshteinDistance, Unit> {
+        /*similaritySearchJPanel = SimilaritySearchJPanel()*/
+        similaritySearchJPanel?.filterCallback = object : Function1<LevenshteinDistance, Unit> {
             override fun invoke(p1: LevenshteinDistance) {
-                println("Edit distance updated: ${p1.threshold}")
+                log("Edit distance updated: ${p1.threshold}")
                 filterList(FILTER_SIMILARITY, true, p1)
             }
         }
-
         val layout = GroupLayout(this)
         setLayout(layout)
         layout.setHorizontalGroup(
@@ -473,14 +489,14 @@ abstract class SearchableTableJPanel(
                         .addContainerGap()
                 )
         )
+        logTime("Time to layout:")
         scope.launch(Dispatchers.Default) {
             Catalog.isEntireProgramInitialized.collect {
                 if (it) {
                     launch(Dispatchers.Default) {
-                        delay(2_000) //don't need to sort right away
+//                        delay(2_000) //don't need to sort right away
                         val sortStartTime = System.nanoTime()
 //        table.autoCreateRowSorter = true
-                        exactSearchRadioButton.doClick()
                         val rowSorter = TableRowSorter(table.model as AbstractTableModel)
                         val hebrewEntriesFirstComparator = kotlin.Comparator<String> { o1, o2 ->
                             val o1ContainsEnglish = o1.containsEnglish()
@@ -500,16 +516,14 @@ abstract class SearchableTableJPanel(
                                 shelfNumComparator
                             ) //TODO make this index dynamic
                         }
-                        println(
-                            "Time to sort \"$searchPhrase\":                                                            ${(System.nanoTime() - sortStartTime).div(1_000_000_000.00)} seconds")
+                        logTime("Time to sort \"$searchPhrase\":", sortStartTime)
                         EventQueue.invokeLater {
                             val timeBeforeSettingRowSorter = System.nanoTime()
                             table.rowSorter = rowSorter
-                            println(
-                                "Time to set rowSorter for \"$searchPhrase\":                                           ${(System.nanoTime() - timeBeforeSettingRowSorter).div(1_000_000_000.00)} seconds")
+                            logTime("Time to set rowSorter for \"$searchPhrase\":", timeBeforeSettingRowSorter)
                             val now = System.nanoTime()
-                            println(
-                                "Time to click exact search \"$searchPhrase\":                                          ${(System.nanoTime() - now).div(1_000_000_000.00)} seconds")
+                            exactSearchRadioButton.doClick()
+                            logTime("Time to click exact search \"$searchPhrase\":", now)
                             val incrementAndGet = sortedCounter.incrementAndGet()
                             scope.launch {
                                 if (incrementAndGet == 9) {
@@ -597,11 +611,36 @@ abstract class SearchableTableJPanel(
     lateinit var buttonGroup1: ButtonGroup
     lateinit var exactSearchRadioButton: JRadioButton
     lateinit var jLabel6: JLabel
-    lateinit var rootWordSearchJPanel: RootWordSearchExplanationJPanel
-    lateinit var similaritySearchJPanel: SimilaritySearchJPanel
-    lateinit var exactMatchJPanel: PlainTextExplanationJPanel
-    lateinit var alternatePhrasesJPanel: PlainTextExplanationJPanel
-    lateinit var maleiChaseirSearchJPanel: PlainTextExplanationJPanel
+    var rootWordSearchInitialized = false
+    val rootWordSearchJPanel: RootWordSearchExplanationJPanel by lazy {
+        rootWordSearchInitialized = true
+        RootWordSearchExplanationJPanel(this)
+    }
+    val similaritySearchJPanel: SimilaritySearchJPanel? = null
+    private val exactMatchJPanel: PlainTextExplanationJPanel by lazy {
+        PlainTextExplanationJPanel(
+            "Exact search determines matching entries based on whether the entry contains the exact search phrase entered."
+        ) {
+            _previousMatchWordBoundary[FILTER_EXACT] = !it
+            filterList()
+        }
+    }
+    private val alternatePhrasesJPanel: PlainTextExplanationJPanel by lazy {
+        PlainTextExplanationJPanel(
+            "Alternate phrase search determines matches based on whether the entry contains any of the phrases separated by \"#\", e.g. \"fire#אור#אש\" or \"עשר(ת#ה) (מאמר#הדיבר)ות\" (i.e. show results for either עשרת הדיברות or עשרה מאמרות). Surround words with an exclamation mark to have the program turn the word into its shoresh/shorashim. See tip #5 for more information."
+        ) {
+            _previousMatchWordBoundary[FILTER_ALTERNATE_PHRASE] = !it
+            filterList()
+        }
+    }
+    private val maleiChaseirSearchJPanel: PlainTextExplanationJPanel by lazy {
+        PlainTextExplanationJPanel(
+            "Malei/Chaseir Insensitive search determines matches based on whether the entry contains the exact search phrase entered, while allowing a vav or yud to appear anywhere in middle of any of the words in the search phrase or entry text. This means that searching for חמש will show results for חומש, and vice versa."
+        ) {
+            _previousMatchWordBoundary[FILTER_INSENSITIVE] = !it
+            filterList()
+        }
+    }
 
     fun filterList() {
         val (mode, matchWordBoundary) = if (exactSearchRadioButton.isSelected) FILTER_EXACT to exactMatchJPanel.boundaryCheckBox.isSelected
@@ -615,16 +654,19 @@ abstract class SearchableTableJPanel(
         )
     }
 
-    var mMode = 0
+    var mMode = FILTER_EXACT
     fun filterList(mode: Int, matchWordBoundary: Boolean, ld: LevenshteinDistance? = null) {
         if (!entireProgramIsInitialized) return
         val _constraint1 = seferNameTextField.text?.trim() //TODO consider making this a computed field
-        if (_constraint1 == null || (_searchPhrase == _constraint1 && (_constraint1.isBlank() || mode == mMode) && matchWordBoundary == _previousMatchWordBoundary[mode])) return //don't do anything if the constraint is blank and the user is clicking different modes, or the constraint hasn't changed, or the "Match word boundary" setting hasn't changed
+        if (_constraint1 == null || (_searchPhrase == _constraint1 && (_constraint1.isBlank() || mode == mMode) && matchWordBoundary == _previousMatchWordBoundary[mode])) {
+            log("Returning early from filterList() - nothing changed")
+            return
+        } //don't do anything if the constraint is blank and the user is clicking different modes, or the constraint hasn't changed, or the "Match word boundary" setting hasn't changed
         _searchPhrase = _constraint1
         mMode = mode
         if (_constraint1.isBlank()) {
             updateList(originalCollection)
-            rootWordSearchJPanel.setShorashim(listOf())
+            if (rootWordSearchInitialized) rootWordSearchJPanel.setShorashim(listOf())
             return
         }
         when (mode) {
@@ -643,8 +685,8 @@ abstract class SearchableTableJPanel(
         val queryShorashim = lemmatizer.getLemmatizedList/*Debug*/(constraint)
 //            .reversed()//the text field puts the words backwards
             .toList()
-        rootWordSearchJPanel.setShorashim(queryShorashim.flatten())
-//        println("Query shorashim: $queryShorashim")
+        if (rootWordSearchInitialized) rootWordSearchJPanel.setShorashim(queryShorashim.flatten())
+//        log("Query shorashim: $queryShorashim")
         val listOfChecks = mutableListOf<Pair<String, String>>()
         filterWithPredicate(true, {
             false //root search not available on columns whose lemmas weren't indexed
@@ -661,7 +703,7 @@ abstract class SearchableTableJPanel(
                     else matchesAny(queryShorashim, entryShorashim, listOfChecks)
                     )
 //                .also {
-            //if(it) println("Sefer: ${entry.seferName}, Entry shorashim: $entryShorashim, checks: $listOfChecks")
+            //if(it) log("Sefer: ${entry.seferName}, Entry shorashim: $entryShorashim, checks: $listOfChecks")
 //                }
 //            }
         }
@@ -670,12 +712,12 @@ abstract class SearchableTableJPanel(
     fun filterListSimilaritySearch(constraint: String, levenshteinDistance: LevenshteinDistance) {
         filterWithPredicate(false, {
             val distance = levenshteinDistance.apply(constraint, it)
-            println("Distance between $constraint and $it: $distance")
+            log("Distance between $constraint and $it: $distance")
             distance != -1 && distance <= levenshteinDistance.threshold
         }) {
             val criteria = getCriteria(it)
             val distance = levenshteinDistance.apply(constraint, criteria)
-            println("Distance between $constraint and $criteria: $distance")
+            log("Distance between $constraint and $criteria: $distance")
             distance != -1 && distance <= levenshteinDistance.threshold
         }
     }
@@ -694,7 +736,7 @@ abstract class SearchableTableJPanel(
                         predicateIfCatalogEntry(it)
                     } catch (t: Throwable) {
                         t.printStackTrace()
-                        println("filterWithPredicate threw error, entry=\"$it\"")
+                        log("filterWithPredicate threw error, entry=\"$it\"")
                         false
                     }
                 }
@@ -730,7 +772,7 @@ abstract class SearchableTableJPanel(
                                 predicateIfCatalogEntry(it)
                             } catch (t: Throwable) {
                                 t.printStackTrace()
-                                println("filterWithPredicate threw error, entry=\"$it\"")
+                                log("filterWithPredicate threw error, entry=\"$it\"")
                                 false
                             }
                         }
@@ -747,7 +789,7 @@ abstract class SearchableTableJPanel(
         useAlternatePhraseSearch: Boolean = false,
         useMaleiChaseirInsensitive: Boolean = false,
     ) {
-        println("filterListExactMatch($_constraint, $useAlternatePhraseSearch, $useMaleiChaseirInsensitive)")
+        log("filterListExactMatch($_constraint, $useAlternatePhraseSearch, $useMaleiChaseirInsensitive)")
         var constraint = _constraint
         if (constraint.isBlank()) {
             updateList(originalCollection)
@@ -762,13 +804,13 @@ abstract class SearchableTableJPanel(
                 .also { if (it) constraint = constraint.removePrefix("~") }
         val regex =
             if (useMaleiChaseirInsensitive) {
-                println("Using malei chaseir insensitivity")
+                log("Using malei chaseir insensitivity")
                 constraint = constraint.replace(yudOrVavInWordRegex, "")
                 val placesToInsert = letterBoundariesRegex
                     .findAll(constraint)
                     .map { it.range.first }
                     .toList()
-                println("Places to insert: $placesToInsert")
+                log("Places to insert: $placesToInsert")
                 val maleiInsensitive = StringBuilder(constraint)
                 for (index in placesToInsert.asReversed()) maleiInsensitive.insert(index, "[יו]{0,3}")
                 maleiInsensitive
@@ -777,7 +819,7 @@ abstract class SearchableTableJPanel(
                     .pattern
                     .addHebrewWordBoundaryIfAllowed(matchWordBoundary)
                     .tryRegexOrEscape()
-                    .also { println("Searching for: $it") }
+                    .also { log("Searching for: $it") }
             } else if (needsRegex) getConstraintRegex(constraint, matchWordBoundary)
             else null
         val predicate: (Any) -> Boolean =
@@ -806,12 +848,12 @@ abstract class SearchableTableJPanel(
                     predicate(it)
                 } catch (t: Throwable) {
                     t.printStackTrace()
-                    println("Threw error, entry=\"$it\", constraint=\"$constraint\"")
+                    log("Threw error, entry=\"$it\", constraint=\"$constraint\"")
                     false
                 }
             }
             .forEach {
-//                println("Item being added: $it")
+//                log("Item being added: $it")
                 newList.add(it)
             }
         updateList(newList)

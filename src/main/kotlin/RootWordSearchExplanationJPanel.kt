@@ -94,7 +94,7 @@ class RootWordSearchExplanationJPanel(private val searchableTableJPanel: Searcha
     } // </editor-fold>
 
     fun setShorashim(flatten: List<String>) {
-//        println("Set: $flatten")
+//        log("Set: $flatten")
         jLabel6!!.text = "<html><body style='width: 1%spx'>Search phrase shorashim: ${flatten.joinToString()}"
     }
 

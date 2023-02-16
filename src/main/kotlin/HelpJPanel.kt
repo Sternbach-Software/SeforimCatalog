@@ -1,3 +1,4 @@
+import java.awt.Color
 import java.awt.event.ActionEvent
 import java.lang.Exception
 import java.util.Locale
@@ -16,14 +17,19 @@ class HelpJPanel : JPanel() {
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
     private fun initComponents() {
-        jLabel1 = JLabel()
-        jButton1 = JButton()
-        jButton2 = JButton()
-        jLabel1!!.text =
-            "If you need help regarding the structure or content of the catalog, please click \"Catalog inquiry\". Otherwise, click \"Tech support inquiry\"."
-        jButton1!!.text = "Catalog inquiry"
+
+        /*val jTextArea = JTextArea(TIPS).apply {
+            isEditable = false
+            lineWrap = true
+            background = Color(215, 217, 223)
+            border = null
+            wrapStyleWord = true
+            highlighter = null
+        }*/
+        jLabel1 = JLabel("If you need help regarding the structure or content of the catalog, please click \"Catalog inquiry\". Otherwise, click \"Tech support inquiry\".")
+        jButton1 = JButton("Catalog inquiry")
+        jButton2 = JButton("Tech support inquiry")
         jButton1!!.addActionListener { evt -> jButton1ActionPerformed(evt) }
-        jButton2!!.text = "Tech support inquiry"
         jButton2!!.addActionListener { evt -> jButton2ActionPerformed(evt) }
         val layout = GroupLayout(this)
         this.layout = layout
@@ -37,6 +43,7 @@ class HelpJPanel : JPanel() {
                                 .addComponent(jButton2)
                                 .addComponent(jButton1)
                                 .addComponent(jLabel1)
+//                                .addComponent(jTextArea)
                         )
                 )
         )
@@ -46,6 +53,7 @@ class HelpJPanel : JPanel() {
                     layout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(jLabel1)
+//                        .addComponent(jTextArea, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
                         .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jButton1)
                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)

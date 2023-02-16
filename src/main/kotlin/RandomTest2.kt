@@ -16,13 +16,13 @@ fun main() = runBlocking {
     list1.add(foo1)
     list1.add(foo2)
     for(item in list1) list2.add(item)
-    println(list2[0].a)
+    log(list2[0].a)
     list2[0].a = 0
-    println(list1[0].a == 0)
-    println(list2[0] === foo1)
-    println(list2[1] === foo2)
-    println(list2[0] === foo2)
-    println(list2[1] === foo1)
+    log(list1[0].a == 0)
+    log(list2[0] === foo1)
+    log(list2[1] === foo2)
+    log(list2[0] === foo2)
+    log(list2[1] === foo1)
     val flow = flow {
         val int = AtomicInteger()
 //        while(true) {
@@ -32,8 +32,8 @@ fun main() = runBlocking {
     }
     launch {
         flow.collect {
-            println(it)
+            log(it)
         }
     }
-    println("Got here")
+    log("Got here")
 }
