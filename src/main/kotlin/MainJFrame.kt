@@ -56,7 +56,9 @@ class MainJFrame : JFrame() {
         log("Initializing program.")
         val startTime = System.nanoTime()
         extendedState = JFrame.MAXIMIZED_BOTH;
+        logTime("Time to set extended state:", startTime)
         isUndecorated = false;
+        logTime("Time to set undecorated:")
         jTabbedPane1 = JTabbedPane()
 
         log()
