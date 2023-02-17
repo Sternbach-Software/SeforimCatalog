@@ -97,7 +97,7 @@ var timeSincePreviousLog = System.nanoTime()
 fun resetTime() {
     timeSincePreviousLog = System.nanoTime()
 }
-var logging = true
+var logging = false
 fun <T> log(message: T) {
     if(logging) println(message)
 }
