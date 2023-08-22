@@ -9,7 +9,7 @@ This is a fast, beautiful, and powerful program for searching a catalog of sefor
 This repository contains the source code for the program. A more user-friendly installation repository is available at https://github.com/Sternbach-Software/YGW-Seforim-Catalog. Installation instructions are available there.
 
 # License 
-This software uses [HebMorph](https://github.com/synhershko/HebMorph) for the Shoresh search, which is licensed under the GNU Affero General Public License version 3.
+The shoresh search is partially based on [HebMorph](https://github.com/synhershko/HebMorph) (this software adds נפעל support and reduces lemmas to roots), which is licensed under the GNU Affero General Public License version 3.
 
 # Screenshots
 
